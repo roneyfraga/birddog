@@ -1,0 +1,11 @@
+cran-comments.md
+.Rproj
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+inst/doc
+datatest
+doc
+Meta
+support.R
