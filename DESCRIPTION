@@ -1,6 +1,6 @@
 Package: caiporar
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     person(given = "Roney",
            family = "Souza",
@@ -13,3 +13,14 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Imports: 
+    dplyr,
+    igraph,
+    rlang,
+    stringr,
+    tibble,
+    tidygraph,
+    tidyr,
+    tidytext
+Depends: 
+    R (>= 2.10)
