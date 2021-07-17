@@ -6,7 +6,7 @@
 #' @details DETAILS
 #' @examples 
 #' \dontrun{
-#' if(interactive()) {
+#' if (interactive()) {
 #'  #EXAMPLE1
 #'  }
 #' }

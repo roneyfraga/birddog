@@ -2,20 +2,32 @@
 % Please edit documentation in R/get_tfidf.R
 \name{get_tfidf}
 \alias{get_tfidf}
-\title{get_tfidf}
+\title{get_terms}
 \usage{
-get_tfidf(data, groups, keywords, sep = ";", n_keywords = 15)
+get_tfidf(
+  data,
+  group,
+  term,
+  frequency,
+  separate_rows = FALSE,
+  sep = ";",
+  n_terms = 15
+)
 }
 \arguments{
 \item{data}{PARAM_DESCRIPTION}
 
-\item{groups}{PARAM_DESCRIPTION}
+\item{group}{PARAM_DESCRIPTION}
 
-\item{keywords}{PARAM_DESCRIPTION}
+\item{term}{PARAM_DESCRIPTION}
+
+\item{frequency}{PARAM_DESCRIPTION}
+
+\item{separate_rows}{PARAM_DESCRIPTION, Default: FALSE}
 
 \item{sep}{PARAM_DESCRIPTION, Default: ';'}
 
-\item{n_keywords}{PARAM_DESCRIPTION, Default: 15}
+\item{n_terms}{PARAM_DESCRIPTION, Default: 15}
 }
 \value{
 OUTPUT_DESCRIPTION
@@ -28,7 +40,7 @@ DETAILS
 }
 \examples{
 \dontrun{
-if(interactive()) {
+if (interactive()) {
  #EXAMPLE1
  }
 }

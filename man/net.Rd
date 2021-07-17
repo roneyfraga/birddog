@@ -3,7 +3,7 @@
 \docType{data}
 \name{net}
 \alias{net}
-\title{igraph network}
+\title{Rede de artigos científicos com exemplos.}
 \format{
 A igraph network:
 \describe{

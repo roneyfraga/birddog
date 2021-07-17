@@ -21,6 +21,7 @@ Imports:
     tibble,
     tidygraph,
     tidyr,
-    tidytext
+    tidytext,
+    udpipe
 Depends: 
     R (>= 2.10)

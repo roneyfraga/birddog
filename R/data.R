@@ -1,4 +1,3 @@
-#' igraph network 
 #'
 #' Rede de artigos científicos com exemplos.
 #'

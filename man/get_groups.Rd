@@ -34,13 +34,15 @@ DETAILS
 }
 \examples{
 \dontrun{
-if(interactive()) {
+if (interactive()) {
  #EXAMPLE1
  }
 }
 }
 \seealso{
-\code{\link[igraph]{c("subgraph", "subgraph")}},\code{\link[igraph]{V}},\code{\link[igraph]{cluster_louvain}},\code{\link[igraph]{cluster_walktrap}},\code{\link[igraph]{cluster_edge_betweenness}},\code{\link[igraph]{cluster_fast_greedy}},\code{\link[igraph]{as_data_frame}}
+\code{\link[igraph]{cluster_louvain}},\code{\link[igraph]{cluster_walktrap}},
+\code{\link[igraph]{cluster_edge_betweenness}},\code{\link[igraph]{cluster_fast_greedy}},
+\code{\link[igraph]{as_data_frame}}
 \code{\link[tibble]{as_tibble}}
 \code{\link[dplyr]{group_by}},\code{\link[dplyr]{summarise}},\code{\link[dplyr]{context}},\code{\link[dplyr]{arrange}},\code{\link[dplyr]{desc}},\code{\link[dplyr]{mutate}},\code{\link[dplyr]{select}},\code{\link[dplyr]{filter}},\code{\link[dplyr]{mutate-joins}},\code{\link[dplyr]{bind}}
 \code{\link[stringr]{str_pad}}
