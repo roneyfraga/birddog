@@ -1,5 +1,5 @@
-Package: caiporar
-Title: What the Package Does (One Line, Title Case)
+Package: birddog
+Title: To sniff patterns in academic papers and patent data
 Version: 0.0.0.9001
 Authors@R: 
     person(given = "Roney",
@@ -14,6 +14,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports: 
+    bibliometrix,
     dplyr,
     igraph,
     rlang,
@@ -24,4 +25,8 @@ Imports:
     tidytext,
     udpipe
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

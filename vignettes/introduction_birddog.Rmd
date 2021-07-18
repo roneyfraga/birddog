@@ -1,0 +1,167 @@
+---
+title: "Introduction to BirdDog"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{introduction_birddog}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Load packages.
+
+```{r setup, warning = F, error = F, message = F}
+library(birddog)
+library(bibliometrix)
+library(igraph)
+library(tidygraph)
+library(tibble)
+library(dplyr)
+```
+
+##  How to use
+
+```{r eval = T, warning = F, error = F, message = F}
+
+# import data
+bib <- system.file('extdata/scopus.bib', package = 'birddog')
+M <- bibliometrix::convert2df(file = bib, dbsource = "scopus", format = "bibtex")
+glimpse(M)
+
+# build network: bibliographic coupling 
+M |> 
+    bibliometrix::biblioNetwork(analysis = "coupling", network = "references", sep = ";") |> 
+    igraph::graph_from_adjacency_matrix(mode = "undirected", weighted = NULL, diag = FALSE) |> 
+    igraph::simplify() |>
+    tidygraph::as_tbl_graph() -> 
+    net
+
+net |>
+    tidygraph::activate(nodes) |>
+    dplyr::left_join(M |> 
+                     dplyr::mutate(name = paste(SR, PY, sep = '. ')) |> 
+                     dplyr::select(name, PY, AB, DE, TI, DI, SO, TC, AU, SR) |> 
+                     tibble::as_tibble()) ->
+    net
+
+net
+
+# components
+comp <- birddog::sniff_components(net)
+
+comp
+
+net2 <- comp$network
+
+# groups and components
+gru <- birddog::sniff_groups(net2, 
+                             min_group_size = 15, 
+                             keep_component = c('component01'), 
+                             cluster_component = 'component01', 
+                             algorithm = 'louvain') 
+
+gru
+
+# M + groups 
+tidygraph::as_tbl_graph(gru$network) |>
+    tidygraph::activate(nodes) |>
+    tibble::as_tibble() |>
+    dplyr::left_join(M |> select(SR, CR)) ->
+    m_groups
+
+glimpse(m_groups)
+
+# keywords: frequency and tfidf per group
+m_groups |> 
+    dplyr::select(.data$group, .data$DE) |> 
+    dplyr::filter(!is.na(.data$group)) |> 
+    dplyr::filter(!is.na(.data$DE)) -> 
+    groups_keywords
+
+keywords_freq_tfidf <- birddog::sniff_tfidf(groups_keywords, 
+                                            group, 
+                                            DE,
+                                            separate_rows = T, 
+                                            sep = ';', 
+                                            n_terms = 15)
+
+keywords_freq_tfidf |>
+        DT::datatable(extensions = 'Buttons', rownames = F, 
+                      options = list(
+                                     dom = 'Bfrtip', pageLength = 10, 
+                                     buttons = list(list( extend = 'collection', 
+                                                         buttons = list( list(extend = 'csv', filename = 'data'), 
+                                                        list(extend = 'excel', filename = 'data')), 
+                                                        text = 'Download'))))
+```
+
+
+```{r eval = T, warning = F, error = F, message = F}
+# terms via NLP
+m_groups |>
+    dplyr::filter(!is.na(.data$group)) |> 
+    dplyr::group_by(.data$group) |>
+    dplyr::summarise(text = paste(.data$TI, collapse = '. ')) |>
+    dplyr::mutate(text = tolower(.data$text)) ->
+    groups_texts
+
+# time consuming
+groups_texts |>
+    {\(x) split(x, x$group)}() |>
+    purrr::map(~ birddog::sniff_terms(data = ., 
+                                      groups = group, 
+                                      text = text)) |>
+    purrr::map(~ tibble::as_tibble(.)) ->
+    group_term_occorrence
+
+group_term_occorrence[1:2]
+
+# tfidf and frequency for NLP terms 
+dplyr::bind_rows(group_term_occorrence, .id = 'group') |>
+    dplyr::filter(.data$ngram > 1 & .data$freq > 2) |>
+    dplyr::select(group, keyword, freq) |>
+    {\(x) birddog::sniff_tfidf(x, group = group, term = keyword, frequency = freq)}() ->
+    terms_freq_tfidf
+
+terms_freq_tfidf |>
+        DT::datatable(extensions = 'Buttons', rownames = F, 
+                      options = list(
+                                     dom = 'Bfrtip', pageLength = 10, 
+                                     buttons = list(list( extend = 'collection', 
+                                                         buttons = list( list(extend = 'csv', filename = 'data'), 
+                                                        list(extend = 'excel', filename = 'data')), 
+                                                        text = 'Download'))))
+```
+
+```{r eval = T, warning = F, error = F, message = F}
+# rake top 15 NLP terms
+group_term_occorrence |>
+    purrr::map(~ dplyr::slice(., 1:15)) |>
+    dplyr::bind_rows(.id = 'group') |>
+    dplyr::group_by(group) |>
+    dplyr::summarise(keywords_rake = paste0(keyword, ' (', round(rake, 2), ')')) |> 
+    dplyr::ungroup() |>
+    dplyr::group_by(group) |> 
+    dplyr::summarise(keywords_rake = paste(keywords_rake, collapse = '; ')) -> 
+    terms_freq_rake
+
+terms_freq_rake
+
+# Zi Pi topological positions
+birddog::sniff_topological_positions(m_groups, 
+                                     id = SR, 
+                                     group = group, 
+                                     PY = PY, 
+                                     TI = TI, 
+                                     CR = CR, 
+                                     min.citations = 3) ->
+    hubs
+
+head(hubs)
+```

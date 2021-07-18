@@ -1,27 +1,30 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# caiporar
+# birddog
 
-<!-- 
-badges: start 
-badges: end 
--->
+<!-- badges: start -->
+<!-- badges: end -->
 
-The `caiporar` `R` package, written by [Roney Fraga
-Souza](http://roneyfraga.com), has general-purpose functions and was
-built to help friends.
+The goal of `birddog` is sniffing out new patterns in scientific and
+patent literature.
 
 ## Installation
 
-To install the released version:
+You can install the development version of `birddog` from
+[GitHub](https://github.com/roneyfraga/birddog) with:
 
 ``` r
-# install and load devtools from CRAN
-install.packages("devtools")
+# install.packages("devtools")
 library(devtools)
 
-# install and load caiporar
-devtools::install_github("roneyfraga/caiporar")
-library(caiporar)
+# install and load getLattes
+devtools::install_github("roneyfraga/birddog")
+library(birddog)
+```
+
+To more details see:
+
+``` r
+vignette("introduction_birddog", package = "birddog")
 ```
