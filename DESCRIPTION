@@ -1,8 +1,8 @@
 Package: birddog
-Title: To sniff patterns in academic papers and patent data
-Version: 0.0.0.9001
+Title: birddog: sniffing emergence and trajectories in academic papers and patents
+Version: 0.0.1.0000
 Authors@R: 
-    person(given = "Roney",
+    person(given = c("Roney", "Fraga"),
            family = "Souza",
            role = c("aut", "cre"),
            email = "roneyfraga@gmail.com",
@@ -10,23 +10,39 @@ Authors@R:
 Description: What the package does (one paragraph).
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.1
 Imports: 
-    bibliometrix,
     dplyr,
+    ggraph,
+    ggplot2,
+    plotly,
     igraph,
-    rlang,
-    stringr,
-    tibble,
     tidygraph,
     tidyr,
+    tibble,
+    Matrix,
+    purrr,
+    readr,
+    rlang,
+    stringr
+Suggests: 
+    rmarkdown,
+    knitr,
+    cli,
+    ggHoriPlot,
+    ggrepel,
+    ggthemes,
+    janitor,
+    gt,
+    viridis,
+    zoo,
+    scales,
+    stm,
     tidytext,
     udpipe
 Depends: 
     R (>= 4.1.0)
-Suggests: 
-    rmarkdown,
-    knitr
-VignetteBuilder: knitr
+URL: https://roneyfraga.com/birddog, https://github.com/roneyfraga/birddog
+BugReports: https://github.com/roneyfraga/birddog/issues

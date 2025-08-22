@@ -1,8 +1,8 @@
 ---
-title: "Introduction to BirdDog"
+title: "Introduction to birddog"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{introduction_birddog}
+  %\VignetteIndexEntry{Introduction to birddog}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,158 +10,369 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  tidy = FALSE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+set.seed(1) # for reproducibility in stochastic steps
+```
+
+## Overview
+
+`birddog` helps you detect emergence and trace trajectories in scientific literature and patents.
+It reads datasets from OpenAlex and Web of Science (WoS), builds citation-based networks, identifies groups, and summarizes their dynamics.
+
+A stable release is planned for CRAN. The development version is available on GitHub: <https://github.com/roneyfraga/birddog>.
+
+## Installation
+
+```{r eval = T}
+# install.packages("devtools")
+# devtools::install_github("roneyfraga/birddog")
+
+library(birddog)
+```
+
+## Data sources
+
+- `birddog` supports:
+  - [OpenAlex](https://openalex.org/): browser search with CSV export, or API via `{openalexR}`.
+  - [Web of Science](https://www.webofscience.com/wos/woscc/smart-search): multiple export formats (`.bib`, `.ris`, plain-text `.txt`, tab-delimited `.txt`).
+
+### OpenAlex via API or CSV
+
+You can paste a URL from openalex.org and prefix it with `https://api.` to obtain the API endpoint.
+
+```{r eval = FALSE}
+
+# install.packages("openalexR")
+library(openalexR)
+
+# Example: all publications in the Journal of Evolutionary Economics
+url_web <- "https://openalex.org/works?page=1&filter=primary_location.source.id:s121026525"
+url_api <- "https://api.openalex.org/works?page=1&filter=primary_location.source.id:s121026525"
+
+openalexR::oa_request(query_url = url_api) |>
+  openalexR::oa2df(entity = "works") |>
+  birddog::read_openalex(format = "api") ->
+  file
+
+M <- birddog::read_openalex(file, format = "api")
+```
+
+### Web of Science (WoS)
+
+WoS allows exporting in several formats. `birddog` can read:
+
+```{r eval = FALSE}
+
+# openalex: csv
+M <- birddog::read_openalex('http://roneyfraga.com/volume/keep_it/birddog-data/openalex-works-2025-05-28T23-12-11.csv', format = "csv")
+
+# wos: txt-plain-text
+M <- birddog::read_wos('http://roneyfraga.com/volume/keep_it/birddog-data/wos-savedrecs-plain-text.txt', format = "txt-plain-text")
+
+# wos: txt-tab-delimited
+M <- birddog::read_wos('http://roneyfraga.com/volume/keep_it/birddog-data/wos-savedrecs-tab-delimited.txt', format = "txt-tab-delimited")
+
+# wos: ris
+M <- birddog::read_wos('http://roneyfraga.com/volume/keep_it/birddog-data/wos-savedrecs.ris', format = "ris")
+
+# wos: bib
+M <- birddog::read_wos('http://roneyfraga.com/volume/keep_it/birddog-data/wos-savedrecs.bib', format = "bib", normalized_names = TRUE)
+```
+
+## Example dataset
+
+To save processing time, we’ll use a pre-saved WoS sample available in <https://roneyfraga.com/volume/keep_it/birddog-data/wos-sugarcane-m.rds>.
+
+```
+12,689 results from Web of Science Core Collection for:
+
+"sugarcane" AND ("straw" OR "bagasse" OR "filter cake" OR "press mud" OR "pressmud cake" OR "molasses" OR "vinasse" OR "dried yeast" OR "fusel oil")
+```
+
+Download with the query above in 2023-09-27. Full query here: <https://www.webofscience.com/wos/woscc/summary/0fa06733-b4aa-4348-854d-a799cdad2c68-a711a88c/relevance/1>.
+
+```{r eval = TRUE}
+
+# bibs <- fs::dir_ls('~/Sync/birddog-data/bibs-sugarcane/', glob = '*.bib$')
+#
+# tictoc::tic()
+# bibs |>
+#   purrr::map(\(x) birddog::read_wos(x, format = "bib")) |>
+#   dplyr::bind_rows() |>
+#   dplyr::distinct(DI2, .keep_all = T) ->
+#   M
+# tictoc::toc()
+# 62 sec
+
+url_m <- 'https://roneyfraga.com/volume/keep_it/birddog-data/wos-sugarcane-m.rds'
+M <- readRDS(url(url_m))
+
+dplyr::glimpse(M)
+```
+
+## Build a citation network
+
+You can build either a direct citation network or use bibliographic coupling.
+
+Direct citation highlights time-ordered influence; bibliographic coupling captures proximity in topics via shared references.
+
+```{r eval = TRUE}
+# Direct citation
+# net <- birddog::sniff_network(M, type = "direct citation")
+
+# Bibliographic coupling
+net <- birddog::sniff_network(M, type = "bibliographic coupling")
+
+net |>
+  tidygraph::activate(nodes) |>
+  dplyr::select(name, AU, PY, TI, TC) |>
+  dplyr::arrange(dplyr::desc(TC))
+```
+
+## Components
+
+The analysis of components is important to eliminate disconnected documents that do not share the same bibliographic references. However, if more than one component with a high number of documents exists, it may indicate the presence of two disconnected scientific literatures.
+
+```{r eval = TRUE}
+
+comps <- birddog::sniff_components(net)
+
+names(comps)
+
+comps$components |>
+  dplyr::slice_head(n = 5) |>
+  gt::gt()
+```
+
+## Groups (community detection)
+
+```{r eval = T}
+
+birddog::sniff_groups(
+  comps,
+  algorithm = 'fast_greedy',
+  min_group_size = 30,
+  groups_short_name = TRUE) ->
+  groups
+
+names(groups)
+
+groups$aggregate |>
+  gt::gt()
+```
+
+### Group attributes
+
+It helps to understand the structure of the groups.
+
+```{r eval = T}
+
+birddog::sniff_groups_attributes(
+  groups,
+  growth_rate_period = 2010:2022,
+  show_results = FALSE) ->
+  groups_attributes
+
+names(groups_attributes)
+
+groups_attributes$attributes_table
+```
+
+### Group content: keywords
+
+It contributes to understanding the content of each group.
+
+```{r eval = T}
+
+groups_keywords <- birddog::sniff_groups_keywords(groups)
+
+groups_keywords |>
+  DT::datatable(
+    rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+    escape = FALSE,
+    options = list(dom = 'Blfrtip', pageLength = 5)
+  )
+```
+
+### Group content: NLP
+
+This step can be time-consuming. Consider precomputing and saving results.
+
+```{r eval = T}
+
+# tictoc::tic()
+# groups_terms <- sniff_groups_terms(groups, algorithm = 'phrase')
+# tictoc::toc()
+# 34 min
+
+groups_terms <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-terms.rds')
+
+names(groups_terms)
+
+groups_terms$terms_table |>
+  DT::datatable(
+    rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+    escape = FALSE,
+    options = list(dom = 'Blfrtip', pageLength = 5)
+  )
+```
+
+### Prestige: hubs
+
+The calculation is slow. Be patient.
+
+```{r eval = T}
+
+# tictoc::tic()
+# groups_hubs <- sniff_groups_hubs(groups)
+# tictoc::toc()
+# 19 min
+
+groups_hubs <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-hubs.rds')
+
+groups_hubs |>
+  dplyr::filter(zone != 'noHub') |>
+  dplyr::left_join(groups$network |> tidygraph::activate(nodes) |> tibble::as_tibble() |> dplyr::select(SR, PY), by = 'SR') |>
+  dplyr::mutate(Zi = round(Zi, digits = 2), Pi = round(Pi, digits = 2)) |>
+  dplyr::mutate(SR = paste0('<a href="https://www.webofscience.com/wos/alldb/full-record/', SR, '">', SR, '</a>')) |>
+  DT::datatable(
+    rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+    escape = FALSE,
+    options = list(dom = 'Blfrtip', pageLength = 10)
+  )
+```
+
+### Group evolution (trajectories)
+
+```{r eval = T, fig.width=10, fig.height=7}
+
+# tictoc::tic()
+# groups_cumulative <- sniff_groups_cumulative(groups)
+# tictoc::toc()
+# 2 min
+
+groups_cumulative <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-cumulative.rds')
+
+suppressMessages({
+  groups_cumulative_trajectories <- birddog::sniff_groups_trajectories(groups_cumulative)
+})
+
+plot_group_trajectories_2d(
+  groups_cumulative_trajectories,
+  group = 'component1_g03',
+  label_vertical_position = -2
+)
+
+plot_group_trajectories_3d(
+  groups_cumulative_trajectories,
+  group = 'component1_g03'
 )
 ```
 
-Load packages.
+### Citation growth per document
 
-```{r setup, warning = F, error = F, message = F}
-library(birddog)
-library(bibliometrix)
-library(igraph)
-library(tidygraph)
-library(tibble)
-library(dplyr)
+```{r eval = T}
+
+# tictoc::tic()
+# groups_cumulative_citations <- sniff_groups_cumulative_citations(groups, min_citations = 2)
+# tictoc::toc()
+# 11 min
+
+groups_cumulative_citations <- rio::import('~/Sync/birddog-data/wos-sugarcane-groups-cumulative-citations.rds')
+
+groups_cumulative_citations |>
+  purrr::map(\(x)
+    x |>
+      dplyr::select(- citations_by_year) |>
+      dplyr::arrange(dplyr::desc(growth_power)) |>
+      dplyr::slice_head(n = 50)) |>
+  dplyr::bind_rows() |>
+  dplyr::mutate(SR = paste0('<a href="https://www.webofscience.com/wos/alldb/full-record/', SR, '">', SR, '</a>')) |>
+  DT::datatable(
+    rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+    escape = FALSE,
+    options = list(dom = 'Blfrtip', pageLength = 10)
+  )
 ```
 
-##  How to use
+### Topic modeling (STM)
 
-```{r eval = T, warning = F, error = F, message = F}
+Detect topics within a group with Structural Topic Modeling. Here, we create topics (sub-groups) based on linguistic similarities.
 
-# import data
-bib <- system.file('extdata/scopus.bib', package = 'birddog')
-M <- bibliometrix::convert2df(file = bib, dbsource = "scopus", format = "bibtex")
-glimpse(M)
+```{r eval = T}
 
-# build network: bibliographic coupling 
-M |> 
-    bibliometrix::biblioNetwork(analysis = "coupling", network = "references", sep = ";") |> 
-    igraph::graph_from_adjacency_matrix(mode = "undirected", weighted = NULL, diag = FALSE) |> 
-    igraph::simplify() |>
-    tidygraph::as_tbl_graph() -> 
-    net
+# g01
 
-net |>
-    tidygraph::activate(nodes) |>
-    dplyr::left_join(M |> 
-                     dplyr::mutate(name = paste(SR, PY, sep = '. ')) |> 
-                     dplyr::select(name, PY, AB, DE, TI, DI, SO, TC, AU, SR) |> 
-                     tibble::as_tibble()) ->
-    net
+# tictoc::tic()
+# groups_stm_prepare_g01 <- sniff_groups_stm_prepare(groups, group_to_stm = 'g01')
+# tictoc::toc()
+# 21 min
 
-net
+groups_stm_prepare <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-stm-prepare-g01.rds')
+names(groups_stm_prepare)
 
-# components
-comp <- birddog::sniff_components(net)
+groups_stm_prepare$plots
 
-comp
+# tictoc::tic()
+# groups_stm_run <- sniff_groups_stm_run(groups_stm_prepare, k_topics = 18, n_top_documents = 20)
+# tictoc::toc()
+# 35 sec
 
-net2 <- comp$network
+groups_stm_run <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-stm-run-g01.rds')
 
-# groups and components
-gru <- birddog::sniff_groups(net2, 
-                             min_group_size = 15, 
-                             keep_component = c('component01'), 
-                             cluster_component = 'component01', 
-                             algorithm = 'louvain') 
+groups_stm_run$topic_proportion |>
+  dplyr::mutate(topic_proportion = round(topic_proportion, 3)) |>
+  DT::datatable(
+    caption = 'g01',
+    rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+    escape = FALSE,
+    options = list(dom = 'Blfrtip', pageLength = 10)
+  )
 
-gru
-
-# M + groups 
-tidygraph::as_tbl_graph(gru$network) |>
-    tidygraph::activate(nodes) |>
-    tibble::as_tibble() |>
-    dplyr::left_join(M |> select(SR, CR)) ->
-    m_groups
-
-glimpse(m_groups)
-
-# keywords: frequency and tfidf per group
-m_groups |> 
-    dplyr::select(.data$group, .data$DE) |> 
-    dplyr::filter(!is.na(.data$group)) |> 
-    dplyr::filter(!is.na(.data$DE)) -> 
-    groups_keywords
-
-keywords_freq_tfidf <- birddog::sniff_tfidf(groups_keywords, 
-                                            group, 
-                                            DE,
-                                            separate_rows = T, 
-                                            sep = ';', 
-                                            n_terms = 15)
-
-keywords_freq_tfidf |>
-        DT::datatable(extensions = 'Buttons', rownames = F, 
-                      options = list(
-                                     dom = 'Bfrtip', pageLength = 10, 
-                                     buttons = list(list( extend = 'collection', 
-                                                         buttons = list( list(extend = 'csv', filename = 'data'), 
-                                                        list(extend = 'excel', filename = 'data')), 
-                                                        text = 'Download'))))
+groups_stm_run$top_documents |>
+  dplyr::left_join(M |> dplyr::select(document = DI2, SR), by = dplyr::join_by(document)) |>
+  dplyr::mutate(SR = paste0('<a href="https://www.webofscience.com/wos/alldb/full-record/', SR, '">', SR, '</a>')) |>
+  dplyr::select(SR, topic, gamma, title) |>
+  DT::datatable(
+    caption = 'g01',
+    rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+    escape = FALSE,
+    options = list(dom = 'Blfrtip', pageLength = 10)
+  )
 ```
 
+## Session info
 
-```{r eval = T, warning = F, error = F, message = F}
-# terms via NLP
-m_groups |>
-    dplyr::filter(!is.na(.data$group)) |> 
-    dplyr::group_by(.data$group) |>
-    dplyr::summarise(text = paste(.data$TI, collapse = '. ')) |>
-    dplyr::mutate(text = tolower(.data$text)) ->
-    groups_texts
+```{r eval = T}
 
-# time consuming
-groups_texts |>
-    {\(x) split(x, x$group)}() |>
-    purrr::map(~ birddog::sniff_terms(data = ., 
-                                      groups = group, 
-                                      text = text)) |>
-    purrr::map(~ tibble::as_tibble(.)) ->
-    group_term_occorrence
-
-group_term_occorrence[1:2]
-
-# tfidf and frequency for NLP terms 
-dplyr::bind_rows(group_term_occorrence, .id = 'group') |>
-    dplyr::filter(.data$ngram > 1 & .data$freq > 2) |>
-    dplyr::select(group, keyword, freq) |>
-    {\(x) birddog::sniff_tfidf(x, group = group, term = keyword, frequency = freq)}() ->
-    terms_freq_tfidf
-
-terms_freq_tfidf |>
-        DT::datatable(extensions = 'Buttons', rownames = F, 
-                      options = list(
-                                     dom = 'Bfrtip', pageLength = 10, 
-                                     buttons = list(list( extend = 'collection', 
-                                                         buttons = list( list(extend = 'csv', filename = 'data'), 
-                                                        list(extend = 'excel', filename = 'data')), 
-                                                        text = 'Download'))))
+sessioninfo::session_info()$platform |>
+  unlist() |>
+  as.data.frame() |>
+  tibble::rownames_to_column() |>
+  setNames(c("Setting", "Value")) |>
+  gt::gt()
 ```
 
-```{r eval = T, warning = F, error = F, message = F}
-# rake top 15 NLP terms
-group_term_occorrence |>
-    purrr::map(~ dplyr::slice(., 1:15)) |>
-    dplyr::bind_rows(.id = 'group') |>
-    dplyr::group_by(group) |>
-    dplyr::summarise(keywords_rake = paste0(keyword, ' (', round(rake, 2), ')')) |> 
-    dplyr::ungroup() |>
-    dplyr::group_by(group) |> 
-    dplyr::summarise(keywords_rake = paste(keywords_rake, collapse = '; ')) -> 
-    terms_freq_rake
+## Hardware
 
-terms_freq_rake
+- Hostname: `r Sys.info() |> data.frame() |> janitor::clean_names() |> tibble::rownames_to_column('var') |> dplyr::filter(var == 'nodename') |> dplyr::pull(sys_info)`
+- Processor: `r benchmarkme::get_cpu()[[2]]`.
+- RAM: `r round(as.numeric(benchmarkme::get_ram()) / 1073741824, digits = 1)` Gigabit.
+- Storage: 2 SSD's in `raid0` for data and 1 SSD for the OS.
 
-# Zi Pi topological positions
-birddog::sniff_topological_positions(m_groups, 
-                                     id = SR, 
-                                     group = group, 
-                                     PY = PY, 
-                                     TI = TI, 
-                                     CR = CR, 
-                                     min.citations = 3) ->
-    hubs
-
-head(hubs)
-```

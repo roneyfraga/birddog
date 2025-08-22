@@ -6,8 +6,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of `birddog` is sniffing out new patterns in scientific and
-patent literature.
+The goal of `birddog` is sniffing out emergence and trajectories in
+scientific and patent literature.
 
 ## Installation
 
@@ -23,8 +23,18 @@ devtools::install_github("roneyfraga/birddog")
 library(birddog)
 ```
 
+## Vignettes
+
 To more details see:
 
 ``` r
 vignette("introduction_birddog", package = "birddog")
 ```
+
+The vignettes are available online here:
+
+- <http://roneyfraga.com/birddog/articles/introduction_birddog.html>
+
+## Methodological workflow
+
+![](http://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg)
