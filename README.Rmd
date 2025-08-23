@@ -1,4 +1,3 @@
-
 ---
 output: github_document
 ---
@@ -35,12 +34,6 @@ library(birddog)
 ```
 
 ## Vignettes
-
-To more details see:
-
-```{r eval = F}
-vignette("introduction_birddog", package = "birddog")
-```
 
 The vignettes are available online here:
 

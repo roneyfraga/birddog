@@ -25,12 +25,6 @@ library(birddog)
 
 ## Vignettes
 
-To more details see:
-
-``` r
-vignette("introduction_birddog", package = "birddog")
-```
-
 The vignettes are available online here:
 
 - <http://roneyfraga.com/birddog/articles/introduction_birddog.html>
