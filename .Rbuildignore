@@ -9,6 +9,8 @@
 ^\.gitignore$
 ^README\.Rmd$
 ^LICENSE\.md$
+^pkgdown$
+^pkgdown/_pkgdown.yml$
 ^vignettes/.*\.Rmd$
 ^vignettes/.*\.html$
 ^vignettes/.*\.pdf$

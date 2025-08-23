@@ -1,5 +1,5 @@
 Package: birddog
-Title: birddog: sniffing emergence and trajectories in academic papers and patents
+Title: sniffing emergence and trajectories in academic papers and patents
 Version: 0.0.1.0000
 Authors@R: 
     person(given = c("Roney", "Fraga"),

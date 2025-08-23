@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# birddog
+# birddog <a href="https://roneyfaga.com/birddog/"><img src="man/figures/logo.png" align="right" alt="birddog logo" style="height: 180px;"></a>
 
 <!-- badges: start -->
 <!-- badges: end -->

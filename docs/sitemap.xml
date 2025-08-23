@@ -1,41 +1,117 @@
-<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
-<url><loc>/404.html</loc></url>
-<url><loc>/LICENSE.html</loc></url>
-<url><loc>/articles/index.html</loc></url>
-<url><loc>/articles/introduction_birddog.html</loc></url>
-<url><loc>/authors.html</loc></url>
-<url><loc>/index.html</loc></url>
-<url><loc>/reference/bib_splited_to_tibble.html</loc></url>
-<url><loc>/reference/birddog-package.html</loc></url>
-<url><loc>/reference/calculate_growth_power.html</loc></url>
-<url><loc>/reference/cgn.html</loc></url>
-<url><loc>/reference/index.html</loc></url>
-<url><loc>/reference/jaccard.html</loc></url>
-<url><loc>/reference/load_udpipe_model.html</loc></url>
-<url><loc>/reference/normalize_column_names.html</loc></url>
-<url><loc>/reference/parse_plain_record.html</loc></url>
-<url><loc>/reference/plot_group_trajectories_2d.html</loc></url>
-<url><loc>/reference/plot_group_trajectories_3d.html</loc></url>
-<url><loc>/reference/read_lines_multiple.html</loc></url>
-<url><loc>/reference/read_openalex.html</loc></url>
-<url><loc>/reference/read_wos.html</loc></url>
-<url><loc>/reference/read_wos_bib.html</loc></url>
-<url><loc>/reference/read_wos_plain.html</loc></url>
-<url><loc>/reference/read_wos_ris.html</loc></url>
-<url><loc>/reference/read_wos_tab.html</loc></url>
-<url><loc>/reference/sniff_components.html</loc></url>
-<url><loc>/reference/sniff_groups.html</loc></url>
-<url><loc>/reference/sniff_groups_attributes.html</loc></url>
-<url><loc>/reference/sniff_groups_cumulative.html</loc></url>
-<url><loc>/reference/sniff_groups_cumulative_attributes.html</loc></url>
-<url><loc>/reference/sniff_groups_cumulative_citations.html</loc></url>
-<url><loc>/reference/sniff_groups_hubs.html</loc></url>
-<url><loc>/reference/sniff_groups_keywords.html</loc></url>
-<url><loc>/reference/sniff_groups_stm_prepare.html</loc></url>
-<url><loc>/reference/sniff_groups_stm_run.html</loc></url>
-<url><loc>/reference/sniff_groups_terms.html</loc></url>
-<url><loc>/reference/sniff_groups_trajectories.html</loc></url>
-<url><loc>/reference/sniff_network.html</loc></url>
-<url><loc>/reference/split_wos_records.html</loc></url>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>/404.html</loc>
+  </url>
+  <url>
+    <loc>/LICENSE.html</loc>
+  </url>
+  <url>
+    <loc>/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>/articles/introduction_birddog.html</loc>
+  </url>
+  <url>
+    <loc>/authors.html</loc>
+  </url>
+  <url>
+    <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/bib_splited_to_tibble.html</loc>
+  </url>
+  <url>
+    <loc>/reference/birddog-package.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calculate_growth_power.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cgn.html</loc>
+  </url>
+  <url>
+    <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/jaccard.html</loc>
+  </url>
+  <url>
+    <loc>/reference/load_udpipe_model.html</loc>
+  </url>
+  <url>
+    <loc>/reference/normalize_column_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/parse_plain_record.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_group_trajectories_2d.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_group_trajectories_3d.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_lines_multiple.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_openalex.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_wos.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_wos_bib.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_wos_plain.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_wos_ris.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_wos_tab.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_components.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_attributes.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_cumulative.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_cumulative_attributes.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_cumulative_citations.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_hubs.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_keywords.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_stm_prepare.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_stm_run.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_terms.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_groups_trajectories.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sniff_network.html</loc>
+  </url>
+  <url>
+    <loc>/reference/split_wos_records.html</loc>
+  </url>
 </urlset>
-
