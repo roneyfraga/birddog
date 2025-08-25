@@ -42,3 +42,13 @@ The vignettes are available online here:
 ## Methodological workflow
 
 ![](http://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg)
+
+## Main publications
+
+* [Miranda et al. (2025)](https://doi.org/10.1016/j.ijhydene.2025.01.089) The Landscape of Green and Biohydrogen Technology: A Data-Driven Exploration Using Non-Supervised Methods
+* [Felizardo et al. (2025)](https://link.springer.com/article/10.1007/s12649-025-03136-z) Transforming Wastes into Resources: Innovations in Cotton Biorefineries for a Sustainable Future
+* [Biazatti et al. (2024)](https://www.sciencedirect.com/science/article/pii/S221146452400112X) Soybean biorefinery and technological forecasts based on a bibliometric analysis and network mapping
+* [Maria et al. (2023)](https://doi.org/10.3390/su15020967) Evolution of Green Finance: A Bibliometric Analysis through Complex Networks and Machine Learning
+* [Matos et al. (2023)](https://doi.org/10.1007/s43938-023-00036-3) Building and evaluating prospective scenarios for corn-based biorefineries
+* [Souza et al. (2022)](https://doi.org/10.14211/ibjesb.e1742) Is entrepreneurship an emerging area of research? A computational response
+* [Souza et al. (2022)](https://doi.org/10.1002/bbb.2441) Bioenergy research in Brazil: A bibliometric evaluation of the BIOEN Research Program

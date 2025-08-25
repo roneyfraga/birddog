@@ -1,7 +1,9 @@
 pandoc: 3.1.12.1
-pkgdown: 2.0.9
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   introduction_birddog: introduction_birddog.html
-last_built: 2025-08-23T22:29Z
-
+last_built: 2025-08-25T14:19Z
+urls:
+  reference: https://roneyfraga.com/birddog/reference
+  article: https://roneyfraga.com/birddog/articles

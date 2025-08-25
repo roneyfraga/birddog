@@ -1,9 +1,12 @@
+
+url: https://roneyfraga.com/birddog
+
 template:
   favicon: favicon
   bootstrap: 5
-  light-switch: true
+  light-switch: false
   bslib:
-    primary: "#163D4E"   # brand
+    primary: "#163D4E" # solarized dark
     success: "#2e7d32"
     info:    "#246A7A"
     warning: "#C79E42"
@@ -16,3 +19,4 @@ template:
 
 navbar:
   title: "<img src='logo.png' alt='birddog' style='height:24px;vertical-align:middle;margin-right:.4rem'> birddog"
+
