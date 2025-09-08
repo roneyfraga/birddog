@@ -9,7 +9,9 @@
 <url><loc>https://roneyfraga.com/birddog/reference/birddog-package.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/calculate_growth_power.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/cgn.html</loc></url>
+<url><loc>https://roneyfraga.com/birddog/reference/fetch_publication_years.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/index.html</loc></url>
+<url><loc>https://roneyfraga.com/birddog/reference/indexes_plots.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/jaccard.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/load_udpipe_model.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/normalize_column_names.html</loc></url>
@@ -23,7 +25,9 @@
 <url><loc>https://roneyfraga.com/birddog/reference/read_wos_plain.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/read_wos_ris.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/read_wos_tab.html</loc></url>
+<url><loc>https://roneyfraga.com/birddog/reference/sniff_citations_cycle_time.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/sniff_components.html</loc></url>
+<url><loc>https://roneyfraga.com/birddog/reference/sniff_entropy.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/sniff_groups.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/sniff_groups_attributes.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/sniff_groups_cumulative.html</loc></url>
@@ -37,5 +41,6 @@
 <url><loc>https://roneyfraga.com/birddog/reference/sniff_groups_trajectories.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/sniff_network.html</loc></url>
 <url><loc>https://roneyfraga.com/birddog/reference/split_wos_records.html</loc></url>
+<url><loc>https://roneyfraga.com/birddog/reference/track_publications_year_from_references.html</loc></url>
 </urlset>
 

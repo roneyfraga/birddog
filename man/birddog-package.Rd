@@ -26,5 +26,10 @@ citation-based networks, identifies groups, and summarizes their dynamics.
 \author{
 \strong{Maintainer}: Roney Fraga Souza \email{roneyfraga@gmail.com} (\href{https://orcid.org/orcid.org/0000-0001-5750-489X}{ORCID})
 
+Other contributors:
+\itemize{
+  \item Luis Felipe de Souza Rodrigues \email{lfsouza25@gmail.com} [contributor]
+}
+
 }
 \keyword{package}
