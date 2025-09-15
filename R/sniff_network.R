@@ -369,6 +369,9 @@ sniff_network <- function(dataframe, type = "direct citation", external_referenc
       }
     }
 
+    # network type
+    igraph::V(net)$NT <- gsub(' ', '-', type)
+
     return(net)
   }
 }

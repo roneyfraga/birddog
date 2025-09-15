@@ -424,7 +424,46 @@ groups_entropy$plots[['g02']]
 
 ## Main Path Analysis
 
-Under development. 🏗️
+**Key Route Algorithm.**
+
+All network.
+
+```{r eval = T, fig.width = 9, fig.height = 12}
+
+net_dc <- sniff_network(M, type = "direct citation")
+
+igraph::V(net_dc)$deg <- igraph::degree(net_dc)
+
+net_dc |>
+  tidygraph::activate(nodes) |>
+  dplyr::filter(deg >= 50) ->
+  net_dc_topn
+
+net_key_route <- sniff_key_route(net_dc_topn, scope = 'network')
+
+net_key_route[['full_network']]$plot
+
+net_key_route[['full_network']]$data |>
+  dplyr::select(- name) |>
+  DT::datatable(
+    rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+    escape = FALSE,
+    options = list(dom = 'Blfrtip', pageLength = 5)
+  )
+
+```
+
+Groups.
+
+```{r eval = F}
+
+comps_dc <- birddog::sniff_components(net_dc)
+groups_dc <- birddog::sniff_groups(comps_dc, algorithm = 'fast_greedy', min_group_size = 30, groups_short_name = TRUE)
+
+groups_key_route <- sniff_key_route(groups_dc, scope = 'groups')
+```
 
 ## Session info
 
