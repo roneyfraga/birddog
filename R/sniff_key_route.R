@@ -103,6 +103,11 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
       net_data
   }
 
+  network_type <- igraph::V(net_data)$NT[[1]]
+  if (network_type != 'direct-citation') {
+    stop("Input (network) must be direct citation network", call. = FALSE)
+  }
+
   if (!is.numeric(citations_percentage)) {
     stop("Input (citations_percentage) must be a numeric vector", call. = FALSE)
   }
