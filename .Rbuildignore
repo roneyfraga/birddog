@@ -1,0 +1,13 @@
+^\.github$
+^docs$
+^pkgdown$
+^README\.Rmd$
+^LICENSE\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
+^doc$
+^Meta$
+^cran-comments\.md$
+^support\.R$
+^vignettes/
+^vignettes/introduction_birddog\.Rmd$
