@@ -17,3 +17,5 @@ english-ewt-ud-2.5-191206.udpipe
 .quarto
 .Rbuildignore
 birddog.Rproj
+/doc/
+/Meta/
