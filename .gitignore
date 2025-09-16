@@ -12,3 +12,6 @@ Meta
 support.R
 .DS_Store
 english-ewt-ud-2.5-191206.udpipe
+.Rdata
+.httr-oauth
+.quarto
