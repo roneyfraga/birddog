@@ -23,6 +23,14 @@ devtools::install_github("roneyfraga/birddog")
 library(birddog)
 ```
 
+or the stable version from
+[CRAN](https://cran.r-project.org/web/packages/getLattes/index.html):
+
+``` r
+install.packages("birddog")
+library(birddog)
+```
+
 ## Vignettes
 
 The vignettes are available online here:

@@ -45,8 +45,6 @@ Imports:
     openalexR,
     stringr
 Suggests: 
-    rmarkdown,
-    knitr,
     cli,
     ggHoriPlot,
     ggrepel,
@@ -58,10 +56,7 @@ Suggests:
     scales,
     stm,
     tidytext,  
-    udpipe,
-    DT,
-    sessioninfo,
-    tictoc
+    udpipe
 Depends: 
     R (>= 4.1.0)
 URL: https://roneyfraga.com/birddog, https://github.com/roneyfraga/birddog

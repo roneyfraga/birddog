@@ -30,8 +30,13 @@ A stable release is planned for CRAN. The development version is available on Gi
 ## Installation
 
 ```{r eval = T}
+# development version
 # install.packages("remotes")
 # remotes::install_github("roneyfraga/birddog")
+#
+# or
+# stable version
+# install.packages("birddog")
 
 library(birddog)
 ```
