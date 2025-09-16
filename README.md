@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# birddog <a href="https://roneyfaga.com/birddog/"><img src="man/figures/logo.png" align="right" alt="birddog logo" style="height: 180px;"></a>
+# birddog <a href="https://roneyfraga.com/birddog/"><img src="man/figures/logo.png" align="right" alt="birddog logo" style="height: 180px;"></a>
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -12,7 +12,7 @@ scientific and patent literature.
 ## Installation
 
 You can install the development version of `birddog` from
-[GitHub](https://github.com/roneyfraga/birddog) with:
+[GitHub](https://github.com/roneyfraga/birddog/) with:
 
 ``` r
 # install.packages("devtools")
@@ -24,7 +24,7 @@ library(birddog)
 ```
 
 or the stable version from
-[CRAN](https://cran.r-project.org/web/packages/getLattes/index.html):
+[CRAN](https://cran.r-project.org/package=getLattes):
 
 ``` r
 install.packages("birddog")
@@ -35,11 +35,11 @@ library(birddog)
 
 The vignettes are available online here:
 
-- <http://roneyfraga.com/birddog/articles/introduction_birddog.html>
+- <https://roneyfraga.com/birddog/articles/introduction_birddog.html>
 
 ## Methodological workflow
 
-![](http://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg)
+![](https://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg)
 
 ## Main publications
 

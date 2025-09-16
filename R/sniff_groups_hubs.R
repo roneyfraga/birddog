@@ -27,9 +27,9 @@
 #' @details
 #' The function classifies papers into hub categories based on:
 #' \itemize{
-#'   \item{R5: Knowledge hubs (Zi ≥ 2.5 and Pi ≤ 0.3)}
-#'   \item{R6: Bridging hubs (Zi ≥ 2.5 and 0.3 < Pi ≤ 0.75)}
-#'   \item{R7: Boundary-spanning hubs (Zi ≥ 2.5 and Pi > 0.75)}
+#'   \item{R5: Knowledge hubs (Zi >= 2.5 and Pi <= 0.3)}
+#'   \item{R6: Bridging hubs (Zi >= 2.5 and 0.3 < Pi <= 0.75)}
+#'   \item{R7: Boundary-spanning hubs (Zi >= 2.5 and Pi > 0.75)}
 #' }
 #'
 #' @examples

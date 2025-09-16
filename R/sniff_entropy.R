@@ -37,7 +37,7 @@
 #'
 #' @references
 #' Shannon, C. E. (1948). A mathematical theory of communication. \emph{Bell System
-#' Technical Journal}, 27(3), 379-423. doi: \url{https://doi.org/10.1002/j.1538-7305.1948.tb01338.x}
+#' Technical Journal}, 27(3), 379-423. doi: \doi{https://doi.org/10.1002/j.1538-7305.1948.tb01338.x}
 #'
 #' The concept of entropy measures the randomness or disorder in the group and provides
 #' insights into the diversity of research topics and thematic concentration within

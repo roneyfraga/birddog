@@ -1,4 +1,3 @@
-
 #' birddog: sniffing emergence and trajectories in academic papers and patents
 #'
 #' Tools to detect emergence and trace technological/scientific trajectories
@@ -6,13 +5,14 @@
 #' citation-based networks, identifies groups, and summarizes their dynamics.
 #'
 #' @section Links:
-#' - Website: <https://roneyfraga.com/birddog>
+#' - Website: <http://roneyfraga.com/birddog/>
 #' - GitHub: <https://github.com/roneyfraga/birddog>
 #' - Issues: <https://github.com/roneyfraga/birddog/issues>
 #'
-#' @seealso \url{https://roneyfraga.com/birddog},
-#'   \url{https://github.com/roneyfraga/birddog}
+#' @seealso Useful links:
+#' \itemize{
+#'   \item Report bugs at \url{https://github.com/roneyfraga/birddog/issues}
+#' }
 #'
 #' @keywords package
 "_PACKAGE"
-

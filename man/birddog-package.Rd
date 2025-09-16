@@ -13,18 +13,20 @@ citation-based networks, identifies groups, and summarizes their dynamics.
 \section{Links}{
 
 \itemize{
-\item Website: \url{https://roneyfraga.com/birddog}
+\item Website: \url{http://roneyfraga.com/birddog/}
 \item GitHub: \url{https://github.com/roneyfraga/birddog}
 \item Issues: \url{https://github.com/roneyfraga/birddog/issues}
 }
 }
 
 \seealso{
-\url{https://roneyfraga.com/birddog},
-\url{https://github.com/roneyfraga/birddog}
+Useful links:
+\itemize{
+\item Report bugs at \url{https://github.com/roneyfraga/birddog/issues}
+}
 }
 \author{
-\strong{Maintainer}: Roney Fraga Souza \email{roneyfraga@gmail.com} (\href{https://orcid.org/orcid.org/0000-0001-5750-489X}{ORCID})
+\strong{Maintainer}: Roney Fraga Souza \email{roneyfraga@gmail.com} (\href{https://orcid.org/orcid.org/0000-0001-5750-489X}{ORCID}) [copyright holder]
 
 Other contributors:
 \itemize{

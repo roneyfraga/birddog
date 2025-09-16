@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# birddog <a href="https://roneyfaga.com/birddog/"><img src="man/figures/logo.png" align="right" alt="birddog logo" style="height: 180px;"></a>
+# birddog <a href="https://roneyfraga.com/birddog/"><img src="man/figures/logo.png" align="right" alt="birddog logo" style="height: 180px;"></a>
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -22,7 +22,7 @@ The goal of `birddog` is sniffing out emergence and trajectories in scientific a
 
 ## Installation
 
-You can install the development version of `birddog` from [GitHub](https://github.com/roneyfraga/birddog) with:
+You can install the development version of `birddog` from [GitHub](https://github.com/roneyfraga/birddog/) with:
 
 ```{r eval = F}
 # install.packages("devtools")
@@ -33,23 +33,22 @@ devtools::install_github("roneyfraga/birddog")
 library(birddog)
 ```
 
-or the stable version from [CRAN](https://cran.r-project.org/web/packages/getLattes/index.html):
+or the stable version from [CRAN](https://cran.r-project.org/package=getLattes):
 
 ```{r eval = F}
 install.packages("birddog")
 library(birddog)
 ```
 
-
 ## Vignettes
 
 The vignettes are available online here:
 
-- <http://roneyfraga.com/birddog/articles/introduction_birddog.html>
+- <https://roneyfraga.com/birddog/articles/introduction_birddog.html>
 
 ## Methodological workflow
 
-![](http://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg)
+![](https://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg)
 
 ## Main publications
 
@@ -60,3 +59,4 @@ The vignettes are available online here:
 * [Matos et al. (2023)](https://doi.org/10.1007/s43938-023-00036-3) Building and evaluating prospective scenarios for corn-based biorefineries
 * [Souza et al. (2022)](https://doi.org/10.14211/ibjesb.e1742) Is entrepreneurship an emerging area of research? A computational response
 * [Souza et al. (2022)](https://doi.org/10.1002/bbb.2441) Bioenergy research in Brazil: A bibliometric evaluation of the BIOEN Research Program
+
