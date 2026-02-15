@@ -9,7 +9,8 @@ sniff_citations_cycle_time(
   scope = "groups",
   start_year = NULL,
   end_year = NULL,
-  tracked_cr_py = NULL
+  tracked_cr_py = NULL,
+  batch_size = 50
 )
 }
 \arguments{
@@ -23,15 +24,23 @@ or \code{"network"} for complete network analysis.}
 \item{start_year, end_year}{Start and end years for temporal analysis. If not specified,
 uses minimum and maximum years found in the data.}
 
-\item{tracked_cr_py}{Pre-processed citation year data (optional). If provided,
-avoids recalculating this step.}
+\item{tracked_cr_py}{Pre-processed citation year data (optional). A tibble with columns
+\code{CR} (OpenAlex work ID) and \code{CR_PY} (publication year). If provided, skips fetching
+data from OpenAlex API. Useful for avoiding repeated API calls.}
+
+\item{batch_size}{For OpenAlex data: number of IDs to process per API call (default: 50).
+Smaller batches help avoid API rate limits, larger batches process data faster
+but may trigger rate limiting.}
 }
 \value{
 A list with the following components:
 \item{data}{Tibble with CCT data containing columns: group, year, index}
-\item{plots}{List of ggplot2 plots showing temporal evolution of CCT for each group}
-\item{years_range}{Vector with start and end years used in the analysis}
-\item{tracked_cr_py}{Complete citation year data used in calculations}
+\item{plots}{Named list of plotly objects showing temporal evolution of CCT for each group.
+Each plot shows both absolute CCT values and year-over-year differences.}
+\item{years_range}{Named vector with start_year and end_year used in the analysis}
+\item{tracked_cr_py}{Complete citation year data fetched from OpenAlex, with columns
+CR (OpenAlex ID) and CR_PY (publication year). Can be saved and reused in subsequent
+analyses to avoid repeated API calls.}
 }
 \description{
 Calculates the Citation Cycle Time (CCT) - the average citation cycle time -
@@ -42,6 +51,8 @@ publications, where lower values indicate faster technological replacement cycle
 \details{
 The Citation Cycle Time (CCT) is calculated as:
 \enumerate{
+\item Extract citation IDs from the network's CR column
+\item Fetch publication years for cited works from OpenAlex API using \code{get_openalex_fields()}
 \item For each publication, calculate the year difference between the publication and its references
 \item Calculate the median of these differences for each publication
 \item Calculate the mean of the medians for the group/network + 0.5 (Kayal adjustment)
@@ -49,6 +60,14 @@ The Citation Cycle Time (CCT) is calculated as:
 
 Lower CCT values indicate that publications are citing more recent work, suggesting
 a faster pace of technological/scientific replacement.
+
+The function automatically handles:
+\itemize{
+\item Splitting semicolon-separated citation IDs
+\item Batch processing of OpenAlex API requests
+\item Filtering invalid citations (where cited work was published after citing work)
+\item Creating temporal plots for each group
+}
 }
 \examples{
 \dontrun{
@@ -61,12 +80,21 @@ results_network <- sniff_citations_cycle_time(complete_network, scope = "network
 # Accessing results
 cct_data <- results$data
 plots <- results$plots
+plots$c1g1  # View plot for specific group
 
-# Specifying time period
+# Specifying time period and batch size
 results_period <- sniff_citations_cycle_time(
   network_groups,
   start_year = 2010,
-  end_year = 2020
+  end_year = 2020,
+  batch_size = 50
+)
+
+# Reuse citation data to avoid repeated API calls
+saved_citations <- results$tracked_cr_py
+results2 <- sniff_citations_cycle_time(
+  network_groups,
+  tracked_cr_py = saved_citations
 )
 }
 
@@ -77,5 +105,5 @@ as a measure of the pace of technological progress in superconductor technology.
 IEEE Transactions on Engineering Management. 1999;46(2):127–31. doi:10.1109/17.759138
 }
 \seealso{
-\code{\link[=sniff_groups]{sniff_groups()}}, \code{\link[=track_publications_year_from_references]{track_publications_year_from_references()}}, \code{\link[=indexes_plots]{indexes_plots()}}
+\code{\link[=sniff_groups]{sniff_groups()}}, \code{\link[=get_openalex_fields]{get_openalex_fields()}}, \code{\link[=indexes_plots]{indexes_plots()}}
 }

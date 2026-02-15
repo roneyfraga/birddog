@@ -44,14 +44,13 @@
 #' \code{\link{read_wos_plain}}, \code{\link{read_wos_tab}}.
 #'
 #' @examples
+#' bib_file <- system.file("extdata", "sample_wos.bib", package = "birddog")
+#' M <- read_wos(bib_file, format = "bib", normalized_names = TRUE)
+#' head(M)
+#'
 #' \dontrun{
-#'
-#' # load data from websites
-#' # M <- birddog::read_wos('http://yoursite/wos-savedrecs-plain-text.txt', format = "txt-plain-text")
-#'
-#'  # load from local files
-#'   M <- read_wos('~/Downloads/savedrecs.bib', format = "bib", normalized_names = TRUE)
-#'
+#' # load data from a URL
+#' M <- read_wos("https://example.com/savedrecs.bib", format = "bib")
 #' }
 #'
 #' @export
@@ -60,10 +59,6 @@ read_wos <- function(file, format = "bib", normalized_names = TRUE) {
   # Validate inputs
   allowed_formats <- c("bib", "ris", "txt-plain-text", "txt-tab-delimited")
   format <- rlang::arg_match(format, allowed_formats)
-
-  # file <- "inst/extdata/skg-example-data/wos-technological-trajectories/savedrecs-tab-delimited.txt"
-  # file <- "inst/extdata/skg-example-data/wos-technological-trajectories/savedrecs.ris"
-  # file <- "inst/extdata/skg-example-data/wos-technological-trajectories/savedrecs.bib"
 
   is_url <- grepl("^http?://", file)
 

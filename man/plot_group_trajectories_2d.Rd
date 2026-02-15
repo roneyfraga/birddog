@@ -6,8 +6,8 @@
 \usage{
 plot_group_trajectories_2d(
   groups_cumulative_trajectories,
-  group = "component1_g01",
-  jaccard_similarity = 0.1,
+  group = "c1g1",
+  jaccard_similarity = 0.01,
   prop_tracked_intra_group_treshold = 0.2,
   label_type = "size",
   label_vertical_position = 0,
@@ -25,7 +25,7 @@ a named list of edge tables (one per group) with at least \code{from}, \code{to}
 the \code{groups_attributes} element must be a named list of node tables containing, among others,
 \code{network_until}, \code{quantity_papers}, \code{prop_tracked_intra_group}, \code{tracked_documents}, and \code{PY.sd}.}
 
-\item{group}{The specific group to visualize (default: "component1_g01").}
+\item{group}{The specific group to visualize (default: "c1g1").}
 
 \item{jaccard_similarity}{Minimum Jaccard similarity threshold for connections (default: 0.1).}
 
@@ -60,7 +60,7 @@ traj_data <- plot_groups_trajectories(groups_cumulative)
 # Visualize a specific group (pass the whole object; the function extracts what it needs internally)
 plot_group_trajectories_2d(
   groups_cumulative_trajectories = traj_data,
-  group = "component1_g05",
+  group = "c1g5",
   jaccard_similarity = 0.3
 )
 }

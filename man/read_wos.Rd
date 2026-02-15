@@ -58,14 +58,13 @@ followed by other columns, and \code{DI2} is relocated just after \code{DI}.
 }
 
 \examples{
+bib_file <- system.file("extdata", "sample_wos.bib", package = "birddog")
+M <- read_wos(bib_file, format = "bib", normalized_names = TRUE)
+head(M)
+
 \dontrun{
-
-# load data from websites
-# M <- birddog::read_wos('http://yoursite/wos-savedrecs-plain-text.txt', format = "txt-plain-text")
-
- # load from local files
-  M <- read_wos('~/Downloads/savedrecs.bib', format = "bib", normalized_names = TRUE)
-
+# load data from a URL
+M <- read_wos("https://example.com/savedrecs.bib", format = "bib")
 }
 
 }

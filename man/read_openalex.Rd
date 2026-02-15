@@ -76,19 +76,14 @@ such as \code{keywords}, \code{authorships}, and \code{referenced_works}).
 \examples{
 \dontrun{
 ## CSV export (local path)
-x <- read_openalex("~/Downloads/openalex-works.csv", format = "csv")
-
-## CSV export (URL)
-x <- read_openalex("http://yoursite/openalex-works-2025-05-28T23-12-11.csv", format = "csv")
+x <- read_openalex("openalex-works.csv", format = "csv")
 
 ## Using the API with openalexR
-# install.packages("openalexR")
 library(openalexR)
 url_api <- "https://api.openalex.org/works?page=1&filter=primary_location.source.id:s121026525"
 df_api  <- openalexR::oa_request(query_url = url_api) |>
   openalexR::oa2df(entity = "works")
 y <- read_openalex(df_api, format = "api")
-
 }
 
 }

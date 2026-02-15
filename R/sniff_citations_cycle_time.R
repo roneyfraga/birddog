@@ -13,12 +13,18 @@
 #'   or `"network"` for complete network analysis.
 #' @param start_year,end_year Start and end years for temporal analysis. If not specified,
 #'   uses minimum and maximum years found in the data.
-#' @param tracked_cr_py Pre-processed citation year data (optional). If provided,
-#'   avoids recalculating this step.
+#' @param tracked_cr_py Pre-processed citation year data (optional). A tibble with columns
+#'   `CR` (OpenAlex work ID) and `CR_PY` (publication year). If provided, skips fetching
+#'   data from OpenAlex API. Useful for avoiding repeated API calls.
+#' @param batch_size For OpenAlex data: number of IDs to process per API call (default: 50).
+#'   Smaller batches help avoid API rate limits, larger batches process data faster
+#'   but may trigger rate limiting.
 #'
 #' @details
 #' The Citation Cycle Time (CCT) is calculated as:
 #' \enumerate{
+#'   \item Extract citation IDs from the network's CR column
+#'   \item Fetch publication years for cited works from OpenAlex API using `get_openalex_fields()`
 #'   \item For each publication, calculate the year difference between the publication and its references
 #'   \item Calculate the median of these differences for each publication
 #'   \item Calculate the mean of the medians for the group/network + 0.5 (Kayal adjustment)
@@ -27,12 +33,23 @@
 #' Lower CCT values indicate that publications are citing more recent work, suggesting
 #' a faster pace of technological/scientific replacement.
 #'
+#' The function automatically handles:
+#' \itemize{
+#'   \item Splitting semicolon-separated citation IDs
+#'   \item Batch processing of OpenAlex API requests
+#'   \item Filtering invalid citations (where cited work was published after citing work)
+#'   \item Creating temporal plots for each group
+#' }
+#'
 #' @return
 #' A list with the following components:
 #' \item{data}{Tibble with CCT data containing columns: group, year, index}
-#' \item{plots}{List of ggplot2 plots showing temporal evolution of CCT for each group}
-#' \item{years_range}{Vector with start and end years used in the analysis}
-#' \item{tracked_cr_py}{Complete citation year data used in calculations}
+#' \item{plots}{Named list of plotly objects showing temporal evolution of CCT for each group.
+#'   Each plot shows both absolute CCT values and year-over-year differences.}
+#' \item{years_range}{Named vector with start_year and end_year used in the analysis}
+#' \item{tracked_cr_py}{Complete citation year data fetched from OpenAlex, with columns
+#'   CR (OpenAlex ID) and CR_PY (publication year). Can be saved and reused in subsequent
+#'   analyses to avoid repeated API calls.}
 #'
 #' @references
 #' Kayal AA, Waters RC. An empirical evaluation of the technology cycle time indicator
@@ -50,25 +67,43 @@
 #' # Accessing results
 #' cct_data <- results$data
 #' plots <- results$plots
+#' plots$c1g1  # View plot for specific group
 #'
-#' # Specifying time period
+#' # Specifying time period and batch size
 #' results_period <- sniff_citations_cycle_time(
 #'   network_groups,
 #'   start_year = 2010,
-#'   end_year = 2020
+#'   end_year = 2020,
+#'   batch_size = 50
+#' )
+#'
+#' # Reuse citation data to avoid repeated API calls
+#' saved_citations <- results$tracked_cr_py
+#' results2 <- sniff_citations_cycle_time(
+#'   network_groups,
+#'   tracked_cr_py = saved_citations
 #' )
 #' }
 #'
 #' @seealso
-#' [sniff_groups()], [track_publications_year_from_references()], [indexes_plots()]
+#' [sniff_groups()], [get_openalex_fields()], [indexes_plots()]
 #'
+#' @importFrom tidygraph activate
+#' @importFrom tibble as_tibble rownames_to_column
+#' @importFrom dplyr select filter mutate left_join group_by group_map summarise pull
+#' @importFrom tidyr separate_rows
+#' @importFrom stringr str_trim
+#' @importFrom purrr map map_dfr
+#' @importFrom igraph V
+#' @importFrom glue glue
 #' @export
 sniff_citations_cycle_time <- function(
   network,
   scope = "groups",
   start_year = NULL,
   end_year = NULL,
-  tracked_cr_py = NULL) {
+  tracked_cr_py = NULL,
+  batch_size = 50) {
   # checks
   if (is.null(network)) {
     stop("Network data not found in groups object", call. = FALSE)
@@ -150,17 +185,50 @@ sniff_citations_cycle_time <- function(
   }
 
   if (is.null(tracked_cr_py)) {
-    track_publications_year_from_references(net_data) ->
+    # Extract citation IDs from network
+    net_data |>
+      tidygraph::activate(nodes) |>
+      tibble::as_tibble() |>
+      dplyr::select(.data$name, .data$PY, .data$CR) |>
+      dplyr::filter(!is.na(.data$CR) & .data$CR != "") ->
+      citation_data
+
+    # Get publication years from OpenAlex
+    citation_data |>
+      tidyr::separate_rows(.data$CR, sep = ";") |>
+      dplyr::mutate(CR = stringr::str_trim(.data$CR)) |>
+      dplyr::filter(.data$CR != "") ->
+      citation_data_split
+
+    # Fetch years using get_openalex_fields()
+    get_openalex_fields(
+      citation_data_split$CR,
+      variables = "publication_year",
+      batch_size = batch_size
+    ) ->
+      openalex_years
+
+    # Join back and filter
+    citation_data_split |>
+      dplyr::left_join(openalex_years, by = c("CR" = "id")) |>
+      dplyr::rename(CR_PY = .data$publication_year) |>
+      dplyr::filter(!is.na(.data$CR_PY)) |>
+      dplyr::filter(.data$PY > .data$CR_PY) ->
       tracked_publications_year_from_references
   } else {
-    tracked_cr_py ->
-      tracked_publications_year_from_references
+    tracked_cr_py -> tracked_publications_year_from_references
   }
 
   years_seq <- start_year:end_year
 
-  tracked_publications_year_from_references |>
-    dplyr::left_join(net_data |> tidygraph::activate(nodes) |> tibble::as_tibble() |> dplyr::select(.data$name, .data$group), by = "name") |>
+  net_data |>
+    tidygraph::activate(nodes) |>
+    tibble::as_tibble() |>
+    dplyr::select(.data$name, .data$group, .data$PY, .data$CR) |>
+    tidyr::separate_rows(.data$CR, sep = ";") |>
+    dplyr::mutate(CR = stringr::str_trim(.data$CR)) |>
+    dplyr::filter(.data$CR != "") |>
+    dplyr::left_join(tracked_publications_year_from_references, by = "CR") |>
     tibble::rownames_to_column(var = "node") |>
     dplyr::filter(.data$group %in% !!group) |>
     dplyr::group_by(.data$group) |>
@@ -190,7 +258,28 @@ sniff_citations_cycle_time <- function(
   names(cct_list) <- group
 
   # Create plots for each group
-  plots_list <- purrr::map2(cct_list, group, \(x, y) indexes_plots(x, group_name = y, start_year, end_year, method = "cct"))
+  plots_list <- purrr::map(group, function(group_name) {
+    group_data <- cct_list[[group_name]]
+    if (all(is.na(group_data$index))) {
+      warning("No data available for group: ", group_name, " - skipping plot")
+      return(NULL)
+    }
+    tryCatch(
+      {
+        # Pass the full group_data (includes year, index, and group columns)
+        indexes_plots(group_data, group_name = group_name, start_year, end_year, method = "cct")
+      },
+      error = function(e) {
+        warning("Error creating plot for group ", group_name, ": ", e$message)
+        return(NULL)
+      }
+    )
+  })
+
+  # Remove NULL plots and update names
+  valid_plots <- !sapply(plots_list, is.null)
+  plots_list <- plots_list[valid_plots]
+  names(plots_list) <- group[valid_plots]
 
   dplyr::bind_rows(cct_list) |>
     dplyr::select("group", "year", "index") ->

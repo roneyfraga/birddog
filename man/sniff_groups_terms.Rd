@@ -8,6 +8,7 @@ sniff_groups_terms(
   net_groups,
   algorithm = "rake",
   phrase_pattern = "(A|N)*N(P+D*(A|N)*N)*",
+  model_dir = tempdir(),
   n_cores = 1,
   show_progress = TRUE,
   n_terms = 15,
@@ -29,6 +30,8 @@ Must include elements: \code{network} (with vertex attributes 'group', 'TI', 'AB
 
 \item{phrase_pattern}{Regular expression pattern for phrase extraction when
 algorithm = "phrase" (default: "(A|N)\emph{N(P+D}(A|N)\emph{N)}")}
+
+\item{model_dir}{Directory where UDPipe models are stored (default: tempdir())}
 
 \item{n_cores}{Number of CPU cores to use for parallel processing (default: 1)}
 
@@ -56,7 +59,7 @@ including TF-IDF scores.
 This function performs the following steps:
 \enumerate{
 \item Validates input structure and parameters
-\item Loads the UDPipe language model from package extdata
+\item Loads the UDPipe language model from the specified directory
 \item Processes text data (titles and abstracts) for each group
 \item Applies the selected term extraction algorithm (RAKE, PMI, or phrase patterns)
 \item Computes term frequencies and TF-IDF scores
@@ -77,9 +80,10 @@ head(terms$terms_by_group[[1]])
 # View summary table
 print(terms$terms_table)
 
-# Customized extraction
+# Customized extraction with custom model directory
 net_groups_terms <- sniff_groups_terms(net_groups,
   algorithm = "phrase",
+  model_dir = tempdir(),
   n_terms = 10,
   min_freq = 3,
   n_cores = 4

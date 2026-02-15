@@ -1,6 +1,8 @@
 #' Create CCT or Entropy Visualization Plots
 #'
-#' @param data Data from calculate_cct or calculate_entropy function
+#' @param data Data from calculate_cct or calculate_entropy function. Can be either:
+#'   - A single data frame/tibble with columns: year, index, group
+#'   - A named list where each element is a data frame with columns: year, index, group
 #' @param group_name Specific group to visualize
 #' @param start_year Starting year for x-axis
 #' @param end_year Ending year for x-axis
@@ -11,14 +13,30 @@
 indexes_plots <- function(data, group_name, start_year, end_year, method = "cct") {
   
   tryCatch({
-    # Filter data for specific group
-    data |>
-      dplyr::filter(.data$group == group_name) |>
-      dplyr::arrange(.data$year) ->
-      group_data
+    # Handle list input - extract the specific group's data
+    if (is.list(data) && !is.data.frame(data)) {
+      if (!group_name %in% names(data)) {
+        stop("Group '", group_name, "' not found in data list", call. = FALSE)
+      }
+      group_data <- data[[group_name]]
+    } else {
+      # Handle data frame input - filter by group
+      data |>
+        dplyr::filter(.data$group == group_name) |>
+        dplyr::arrange(.data$year) ->
+        group_data
+    }
     
     if (nrow(group_data) == 0) {
       stop("No data available for group: ", group_name, call. = FALSE)
+    }
+    
+    # Remove rows with NA index values for plotting
+    group_data <- group_data |>
+      dplyr::filter(!is.na(.data$index))
+    
+    if (nrow(group_data) == 0) {
+      stop("No non-NA data available for group: ", group_name, call. = FALSE)
     }
     
     # Calculate appropriate number of breaks for x-axis
@@ -62,6 +80,12 @@ indexes_plots <- function(data, group_name, start_year, end_year, method = "cct"
       stats::na.omit() |>
       dplyr::mutate(color_flag = ifelse(.data$diff < 0, "blue", "red")) ->
       diff_data
+    
+    if (nrow(diff_data) == 0) {
+      warning("Not enough data points to calculate differences for group: ", group_name)
+      # Return only the absolute value plot
+      return(plotly::ggplotly(p1))
+    }
     
     p2 <- ggplot2::ggplot(
       diff_data,

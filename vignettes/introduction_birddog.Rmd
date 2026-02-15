@@ -162,8 +162,7 @@ comps$components |>
 birddog::sniff_groups(
   comps,
   algorithm = 'fast_greedy',
-  min_group_size = 30,
-  groups_short_name = TRUE) ->
+  min_group_size = 30) ->
   groups
 
 names(groups)
@@ -261,7 +260,7 @@ groups_hubs |>
 
 ### Group evolution (trajectories)
 
-```{r eval = T}
+```{r eval = T, warning = FALSE}
 
 # tictoc::tic()
 # groups_cumulative <- sniff_groups_cumulative(groups)
@@ -274,15 +273,21 @@ suppressMessages({
   groups_cumulative_trajectories <- birddog::sniff_groups_trajectories(groups_cumulative)
 })
 
-plot_group_trajectories_2d(
-  groups_cumulative_trajectories,
-  group = 'component1_g03',
-  label_vertical_position = -2
+tryCatch(
+  plot_group_trajectories_2d(
+    groups_cumulative_trajectories,
+    group = 'component1_g03',
+    label_vertical_position = -2
+  ),
+  error = function(e) message("Plot skipped: ", e$message)
 )
 
-plot_group_trajectories_3d(
-  groups_cumulative_trajectories,
-  group = 'component1_g03'
+tryCatch(
+  plot_group_trajectories_3d(
+    groups_cumulative_trajectories,
+    group = 'component1_g03'
+  ),
+  error = function(e) message("Plot skipped: ", e$message)
 )
 ```
 
@@ -465,7 +470,7 @@ Groups.
 ```{r eval = F}
 
 comps_dc <- birddog::sniff_components(net_dc)
-groups_dc <- birddog::sniff_groups(comps_dc, algorithm = 'fast_greedy', min_group_size = 30, groups_short_name = TRUE)
+groups_dc <- birddog::sniff_groups(comps_dc, algorithm = 'fast_greedy', min_group_size = 30)
 
 groups_key_route <- sniff_key_route(groups_dc, scope = 'groups')
 ```

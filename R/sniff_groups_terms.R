@@ -15,6 +15,7 @@
 #'        }
 #' @param phrase_pattern Regular expression pattern for phrase extraction when
 #'        algorithm = "phrase" (default: "(A|N)*N(P+D*(A|N)*N)*")
+#' @param model_dir Directory where UDPipe models are stored (default: tempdir())
 #' @param n_cores Number of CPU cores to use for parallel processing (default: 1)
 #' @param show_progress Logical indicating whether to show progress bar (default: TRUE)
 #' @param n_terms Number of top terms to return in summary table (default: 15)
@@ -31,7 +32,7 @@
 #' This function performs the following steps:
 #' \enumerate{
 #'   \item Validates input structure and parameters
-#'   \item Loads the UDPipe language model from package extdata
+#'   \item Loads the UDPipe language model from the specified directory
 #'   \item Processes text data (titles and abstracts) for each group
 #'   \item Applies the selected term extraction algorithm (RAKE, PMI, or phrase patterns)
 #'   \item Computes term frequencies and TF-IDF scores
@@ -52,9 +53,10 @@
 #' # View summary table
 #' print(terms$terms_table)
 #'
-#' # Customized extraction
+#' # Customized extraction with custom model directory
 #' net_groups_terms <- sniff_groups_terms(net_groups,
 #'   algorithm = "phrase",
+#'   model_dir = tempdir(),
 #'   n_terms = 10,
 #'   min_freq = 3,
 #'   n_cores = 4
@@ -71,6 +73,7 @@
 sniff_groups_terms <- function(net_groups,
                                algorithm = "rake",
                                phrase_pattern = "(A|N)*N(P+D*(A|N)*N)*",
+                               model_dir = tempdir(),
                                n_cores = 1,
                                show_progress = TRUE,
                                n_terms = 15,
@@ -102,10 +105,11 @@ sniff_groups_terms <- function(net_groups,
     stop("n_cores must be a number greater than 0", call. = FALSE)
   }
 
+  # Load model from specified directory
   ud_model <- tryCatch(
-    load_udpipe_model(model_name = "english", model_dir = "."),
+    load_udpipe_model(model_name = "english", model_dir = model_dir),
     error = function(e) {
-      stop("Failed to load language model: ", e$message, call. = FALSE)
+      stop("Failed to load language model from '", model_dir, "': ", e$message, call. = FALSE)
     }
   )
 
@@ -297,10 +301,10 @@ sniff_groups_terms <- function(net_groups,
 #' Load UDPipe model with on-demand downloading
 #'
 #' @param model_name Name of the model to load (default: "english")
-#' @param model_dir Directory where models are stored (default: current directory)
+#' @param model_dir Directory where models are stored (default: tempdir())
 #' @return A UDPipe model object
 #' @keywords internal
-load_udpipe_model <- function(model_name = "english", model_dir = ".") {
+load_udpipe_model <- function(model_name = "english", model_dir = tempdir()) {
   
   if (!dir.exists(model_dir)) {
     dir.create(model_dir, recursive = TRUE)
@@ -310,22 +314,22 @@ load_udpipe_model <- function(model_name = "english", model_dir = ".") {
   pattern <- paste0("^", model_name, ".*\\.udpipe$")
   udpipe_files <- list.files(path = model_dir, pattern = pattern, full.names = TRUE)
   
-  # Se encontrou arquivo(s), carregar o primeiro
+  # If found existing file(s), load the first one and RETURN it
   if (length(udpipe_files) > 0) {
     message("Loading existing model: ", basename(udpipe_files[1]))
-    udpipe::udpipe_load_model(udpipe_files[1])
+    return(udpipe::udpipe_load_model(udpipe_files[1]))
   }
   
   message("Model not found locally. Downloading UDPipe model for '", model_name, "'...")
   
   tryCatch({
-    # Baixar o modelo
+    # Download the model
     model_info <- udpipe::udpipe_download_model(
       language = model_name,
       model_dir = model_dir
     )
     
-    # Carregar o modelo baixado
+    # Load and return the downloaded model
     message("Successfully downloaded and loading model: ", basename(model_info$file_model))
     udpipe::udpipe_load_model(model_info$file_model)
     
@@ -333,4 +337,3 @@ load_udpipe_model <- function(model_name = "english", model_dir = ".") {
     stop("Failed to download or load UDPipe model: ", e$message)
   })
 }
-

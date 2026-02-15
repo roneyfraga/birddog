@@ -4,12 +4,12 @@
 \alias{load_udpipe_model}
 \title{Load UDPipe model with on-demand downloading}
 \usage{
-load_udpipe_model(model_name = "english", model_dir = ".")
+load_udpipe_model(model_name = "english", model_dir = tempdir())
 }
 \arguments{
 \item{model_name}{Name of the model to load (default: "english")}
 
-\item{model_dir}{Directory where models are stored (default: current directory)}
+\item{model_dir}{Directory where models are stored (default: tempdir())}
 }
 \value{
 A UDPipe model object

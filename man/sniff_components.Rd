@@ -14,7 +14,7 @@ A list with two elements:
 \describe{
 \item{components}{A tibble with component statistics containing:
 \itemize{
-\item \code{component}: Component identifier (e.g., "component01")
+\item \code{component}: Component identifier (e.g., "c1")
 \item \code{quantity_publications}: Number of publications in component
 \item \code{average_age}: Mean publication year of component
 }

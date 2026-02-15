@@ -204,6 +204,7 @@ sniff_groups_hubs <- function(groups, min_citations = 1) {
     ) |>
     dplyr::arrange(group, dplyr::desc(Ki)) |>
     dplyr::select(group, SR, TC, Ki, ki, Zi, Pi) |>
+    dplyr::rename(name = SR) |>
     dplyr::mutate(
       zone = dplyr::case_when(
         Zi >= 2.5 & Pi <= 0.3 ~ "R5",

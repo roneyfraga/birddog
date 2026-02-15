@@ -22,10 +22,11 @@ and groups data.}
 (default: 3).}
 }
 \value{
-A list with two components:
+A list with three components:
 \itemize{
 \item groups_attributes: A list of data frames containing attributes for each tracked group
 \item groups_similarity: A list of data frames containing Jaccard similarity measures between groups across time periods
+\item docs_per_group: A data frame containing document IDs for all groups across time periods
 }
 }
 \description{

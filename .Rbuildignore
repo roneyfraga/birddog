@@ -11,3 +11,7 @@
 ^support\.R$
 ^vignettes/
 ^vignettes/introduction_birddog\.Rmd$
+^CRAN-SUBMISSION$
+^nlp-udpipe-model$
+^\.chat$
+^\.claude$

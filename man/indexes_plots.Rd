@@ -7,7 +7,11 @@
 indexes_plots(data, group_name, start_year, end_year, method = "cct")
 }
 \arguments{
-\item{data}{Data from calculate_cct or calculate_entropy function}
+\item{data}{Data from calculate_cct or calculate_entropy function. Can be either:
+\itemize{
+\item A single data frame/tibble with columns: year, index, group
+\item A named list where each element is a data frame with columns: year, index, group
+}}
 
 \item{group_name}{Specific group to visualize}
 

@@ -41,7 +41,8 @@ sniff_network <- function(dataframe, type = "direct citation", external_referenc
 
   dataframe |>
     tibble::as_tibble() |>
-    dplyr::distinct(.data$SR, .keep_all = TRUE) ->
+    dplyr::distinct(.data$SR, .keep_all = TRUE) |>
+    dplyr::filter(!is.na(.data$PY), .data$PY >= 1000, .data$PY <= 9999) ->
     M
 
   data_source_format <- M$DB[1]

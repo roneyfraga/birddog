@@ -1,6 +1,6 @@
 utils::globalVariables(c(
   "PY", "component", "qtde_publi", "componente_name", "idade_media",
-  "net3", "nodes", "group", "SR", "TI", "TC", "DI", "CR", "AU", "ref", "PY_og",
+  "net3", "nodes", "group", "group_old", "SR", "TI", "TC", "DI", "CR", "AU", "ref", "PY_og",
   "to_cluster", "quantity_papers", "group_new", "average_age", "name",
   "DE", "qtde", "keywords_freq", "keywords", "network_until",
   "tracked_document", "tracked_documents", "prop_tracked_documents", "prop_tracked_intra_group",
@@ -12,5 +12,7 @@ utils::globalVariables(c(
   "doubling_time_years", "m", "doubling_time", "horizon", "to_search",
   "citations_by_year", "q3", "median", "growth_metrics", "DB", "DI2", "K",
   "metric", "value", "semcoh", "exclus", "topic", "term", "terms",
-  "document", "AB"
-))
+  "document", "AB", "from", "to", "weight", "documents", "network_until",
+  "quantity_papers", "prop_tracked_intra_group", "tracked_documents",
+  "PY.sd", "traj_id", "traj_width", "y_from", "y_to",  "group_id", "document_id", "label", 
+  "score", "in_any_traj"))

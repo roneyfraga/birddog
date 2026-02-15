@@ -12,10 +12,11 @@
 #' @param top_n_keywords Number of top keywords to consider when analyzing group characteristics
 #'        (default: 3).
 #'
-#' @return A list with two components:
+#' @return A list with three components:
 #' \itemize{
 #'   \item groups_attributes: A list of data frames containing attributes for each tracked group
 #'   \item groups_similarity: A list of data frames containing Jaccard similarity measures between groups across time periods
+#'   \item docs_per_group: A data frame containing document IDs for all groups across time periods
 #' }
 #'
 #' @examples
@@ -60,35 +61,41 @@ sniff_groups_trajectories <- function(groups_cumulative, min_group_size = 10, to
       message("Processing group: ", grupos[[i]])
 
       # Get documents in the current group
-      tracked_documents <- groups_cumulative[[last_year_position]]$documents |>
+      groups_cumulative[[last_year_position]]$documents |>
         dplyr::filter(group == grupos[i]) |>
-        dplyr::pull(name)
+        dplyr::pull(name) ->
+        tracked_documents
 
       # Track documents over time
-      tr_docs <- sniff_groups_cumulative_attributes(
+      sniff_groups_cumulative_attributes(
         groups_cumulative,
         min_group_size = min_group_size,
         top_n_keywords = top_n_keywords,
         group_to_track = grupos[[i]],
         attributes = "documents"
-      ) |> purrr::keep(\(x) nrow(x) > 1)
+      ) |>
+        purrr::keep(\(x) nrow(x) > 1) ->
+        tr_docs
 
       # Track groups over time
-      tr_groups <- sniff_groups_cumulative_attributes(
+      sniff_groups_cumulative_attributes(
         groups_cumulative,
         min_group_size = min_group_size,
         top_n_keywords = top_n_keywords,
         group_to_track = grupos[[i]],
         attributes = "groups"
-      ) |> purrr::keep(\(x) nrow(x) > 1)
+      ) |>
+        purrr::keep(\(x) nrow(x) > 1) ->
+        tr_groups
 
       # Prepare tracked group data
-      tracked_group <- groups_cumulative[[last_year_position]]$documents |>
+      groups_cumulative[[last_year_position]]$documents |>
         dplyr::filter(group == grupos[i]) |>
         dplyr::mutate(
           network_until = last_year,
           tracked_document = 1
-        )
+        ) ->
+        tracked_group
 
       # Calculate Jaccard similarities between time periods
       jaccard_weight <- vector(mode = "list", length = length(tr_docs))
@@ -104,26 +111,37 @@ sniff_groups_trajectories <- function(groups_cumulative, min_group_size = 10, to
         t2 <- tr_docs[[k + 1]]$network_until[1]
 
         # Calculate Jaccard similarity and document overlap
-        similarity_weight <- purrr::map(
+        purrr::map(
           groups_t1,
           \(x) purrr::map(groups_t2, \(y) jaccard(x$name, y$name))
-        ) |> purrr::list_flatten() |> purrr::keep(\(x) x > 0)
+        ) |>
+          purrr::list_flatten() |>
+          purrr::keep(\(x) x > 0) ->
+          similarity_weight
 
-        documents_weigth <- purrr::map(
+        purrr::map(
           groups_t1,
           \(x) purrr::map(groups_t2, \(y) sum(x$name %in% y$name))
-        ) |> purrr::list_flatten() |> purrr::keep(\(x) x > 0)
+        ) |>
+          purrr::list_flatten() |>
+          purrr::keep(\(x) x > 0) ->
+          documents_weigth
 
         # Prepare edge data for network
-        a <- strsplit(names(similarity_weight), "_") |> purrr::list_flatten()
-        arestas <- purrr::map(seq_along(a), function(l) {
-          tibble::tibble(
-            from = paste0("y", t1, a[[l]][2]),
-            to = paste0("y", t2, a[[l]][4]),
-            weight = similarity_weight[[l]],
-            documents = documents_weigth[[l]]
-          )
-        })
+        strsplit(names(similarity_weight), "_") |>
+          purrr::list_flatten() ->
+          a
+
+        purrr::map(seq_along(a), function(l)
+          {
+            tibble::tibble(
+              from = paste0("y", t1, a[[l]][1]),
+              to = paste0("y", t2, a[[l]][2]),
+              weight = similarity_weight[[l]],
+              documents = documents_weigth[[l]]
+            )
+          }) ->
+          arestas
 
         jaccard_weight[[k]] <- dplyr::bind_rows(arestas)
       }
@@ -132,16 +150,18 @@ sniff_groups_trajectories <- function(groups_cumulative, min_group_size = 10, to
 
       # Prepare network attributes
       dados <- tr_groups |>
-        purrr::map(\(x) x |> dplyr::mutate(id = paste0("y", network_until, gsub("^.*_", "", group)))) |>
+        purrr::map(\(x) x |> dplyr::mutate(id = paste0("y", network_until, group))) |>
         dplyr::bind_rows() |>
         dplyr::mutate(PY.sd = network_until - average_age_group) |>
         dplyr::filter(id %in% unique(c(groups_similarity[[i]]$from, groups_similarity[[i]]$to)))
+
+      max_network_until <- if (nrow(dados) > 0) max(dados$network_until, na.rm = TRUE) + 1 else last_year
 
       group_tracked_complete <- groups_cumulative[[last_year_position]]$groups |>
         dplyr::rename(average_age_group = average_age) |>
         dplyr::filter(group == grupos[i]) |>
         dplyr::mutate(
-          network_until = max(dados$network_until, na.rm = TRUE) + 1,
+          network_until = max_network_until,
           tracked_documents = quantity_papers,
           prop_tracked_intra_group = 1,
           prop_tracked_documents = 1,
@@ -152,13 +172,45 @@ sniff_groups_trajectories <- function(groups_cumulative, min_group_size = 10, to
       groups_attributes[[i]] <- dplyr::bind_rows(group_tracked_complete, dados)
     }
 
-    return(list(groups_attributes = groups_attributes, groups_similarity = groups_similarity))
+    # Extract documents for all groups (once, not per group)
+    docs_per_group <- extract_docs_for_all_groups(groups_cumulative, min_group_size)
+
+    return(list(
+      groups_attributes = groups_attributes,
+      groups_similarity = groups_similarity,
+      docs_per_group = docs_per_group
+    ))
 
   }, error = function(e) {
     stop("Error in sniff_groups_trajectories: ", e$message)
   })
 }
 
+#' Extract documents for all groups across all time periods
+#'
+#' @param groups_cumulative List of cumulative group data
+#' @param min_group_size Minimum group size filter
+#' @return Data frame with document information for all groups
+#' @keywords internal
+extract_docs_for_all_groups <- function(groups_cumulative, min_group_size = 10) {
+  purrr::map_dfr(groups_cumulative, function(period_data) {
+    # Filter groups by size
+    valid_groups <- period_data$groups |>
+      dplyr::filter(.data$quantity_papers >= min_group_size)
+    
+    # Get documents for all valid groups
+    period_data$documents |>
+      dplyr::filter(.data$group %in% valid_groups$group) |>
+      dplyr::mutate(
+        group_id = paste0("y", .data$network_until, 
+                         gsub("^.*_", "", .data$group))
+      ) |>
+      dplyr::select(.data$group_id, document_id = .data$name, 
+                   .data$network_until, .data$group)
+  })
+}
+
+# Keep the existing jaccard and sniff_groups_cumulative_attributes functions unchanged
 #' Calculate Jaccard Similarity Between Two Vectors
 #'
 #' @param a First vector

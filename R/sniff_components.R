@@ -10,7 +10,7 @@
 #' \describe{
 #'   \item{components}{A tibble with component statistics containing:
 #'     \itemize{
-#'       \item \code{component}: Component identifier (e.g., "component01")
+#'       \item \code{component}: Component identifier (e.g., "c1")
 #'       \item \code{quantity_publications}: Number of publications in component
 #'       \item \code{average_age}: Mean publication year of component
 #'     }
@@ -54,7 +54,6 @@ sniff_components <- function(net) {
   # Calculate components
   cfg <- igraph::components(net)
   igraph::V(net)$component <- cfg$membership
-  comps_nchar <- 1
 
   tryCatch(
     {
@@ -70,16 +69,7 @@ sniff_components <- function(net) {
         ) |>
         dplyr::arrange(dplyr::desc(.data$qtde_publi)) |>
         dplyr::mutate(
-          component_name = paste(
-            "component",
-            stringr::str_pad(
-              1:dplyr::n(),
-              width = comps_nchar,
-              pad = "0",
-              side = "left"
-            ),
-            sep = ""
-          )
+          component_name = paste0("c", 1:dplyr::n())
         ) ->
         componentes
 

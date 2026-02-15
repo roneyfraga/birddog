@@ -60,19 +60,14 @@
 #' @examples
 #' \dontrun{
 #' ## CSV export (local path)
-#' x <- read_openalex("~/Downloads/openalex-works.csv", format = "csv")
-#'
-#' ## CSV export (URL)
-#' x <- read_openalex("http://yoursite/openalex-works-2025-05-28T23-12-11.csv", format = "csv")
+#' x <- read_openalex("openalex-works.csv", format = "csv")
 #'
 #' ## Using the API with openalexR
-#' # install.packages("openalexR")
 #' library(openalexR)
 #' url_api <- "https://api.openalex.org/works?page=1&filter=primary_location.source.id:s121026525"
 #' df_api  <- openalexR::oa_request(query_url = url_api) |>
 #'   openalexR::oa2df(entity = "works")
 #' y <- read_openalex(df_api, format = "api")
-#'
 #' }
 #'
 #' @export
@@ -210,9 +205,15 @@ read_openalex <- function(file, format = "csv") {
         dplyr::left_join(papers_keyw, by = 'id') |>
         dplyr::left_join(papers_auth, by = 'id') |>
         dplyr::mutate(DB = paste('openalex', format, sep = '_')) |>
-        dplyr::relocate(.data$DB, .after = .data$AU) |>
-        dplyr::right_join(file, by = 'id') |>
-        dplyr::distinct(.data$id, .keep_all = TRUE) ->
+        dplyr::relocate(.data$DB, .after = .data$AU) ->
+        papers_core
+
+      # Bring in extra columns from original data that aren't already present
+      extra_cols <- setdiff(names(file), names(papers_core))
+      papers_core |>
+        dplyr::left_join(file[, c("id", extra_cols)], by = 'id') |>
+        dplyr::distinct(.data$id, .keep_all = TRUE) |>
+        tibble::as_tibble() ->
         papers_full
       
       return(papers_full)

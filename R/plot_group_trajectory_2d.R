@@ -10,7 +10,7 @@
 #'   a named list of edge tables (one per group) with at least \code{from}, \code{to}, and \code{weight};
 #'   the `groups_attributes` element must be a named list of node tables containing, among others,
 #'   \code{network_until}, \code{quantity_papers}, \code{prop_tracked_intra_group}, \code{tracked_documents}, and \code{PY.sd}.
-#' @param group The specific group to visualize (default: "component1_g01").
+#' @param group The specific group to visualize (default: "c1g1").
 #' @param jaccard_similarity Minimum Jaccard similarity threshold for connections (default: 0.1).
 #' @param prop_tracked_intra_group_treshold Minimum proportion of tracked intra-group documents
 #'   for nodes to be included (default: 0.2).
@@ -31,7 +31,7 @@
 #' # Visualize a specific group (pass the whole object; the function extracts what it needs internally)
 #' plot_group_trajectories_2d(
 #'   groups_cumulative_trajectories = traj_data,
-#'   group = "component1_g05",
+#'   group = "c1g5",
 #'   jaccard_similarity = 0.3
 #' )
 #' }
@@ -47,8 +47,8 @@
 #' @export
 plot_group_trajectories_2d <- function(
   groups_cumulative_trajectories,
-  group = "component1_g01",
-  jaccard_similarity = 0.1,
+  group = "c1g1",
+  jaccard_similarity = 0.01,
   prop_tracked_intra_group_treshold = 0.2,
   label_type = "size",
   label_vertical_position = 0,
@@ -99,7 +99,7 @@ plot_group_trajectories_2d <- function(
 
     # Prepare node attributes
     groups_attributes[[group]] |>
-      dplyr::mutate(name = paste0("y", network_until, gsub("^.*_", "", group))) |>
+      dplyr::mutate(name = paste0("y", network_until, group)) |>
       dplyr::relocate(name) ->
       dados3
 
@@ -108,16 +108,14 @@ plot_group_trajectories_2d <- function(
       tidygraph::activate(nodes) |>
       dplyr::left_join(dados3, by = dplyr::join_by(name)) |>
       dplyr::mutate(size = quantity_papers * prop_tracked_intra_group) |>
-      dplyr::filter(
-        prop_tracked_intra_group >= prop_tracked_intra_group_treshold,
-        tracked_documents > 1
-      ) |>
+      dplyr::filter(prop_tracked_intra_group >= prop_tracked_intra_group_treshold, tracked_documents > 1) |>
       dplyr::arrange(dplyr::desc(network_until)) ->
       net2
 
     # Prepare layout data
-    dt <- igraph::as_data_frame(net2, what = "vertices") |>
-      tibble::as_tibble()
+    igraph::as_data_frame(net2, what = "vertices") |>
+      tibble::as_tibble() ->
+      dt
 
     # Handle time span
     if (any(is.na(time_span))) {
@@ -225,7 +223,7 @@ plot_group_trajectories_2d <- function(
         axis.text.y = NULL,
         axis.ticks.length = ggplot2::unit(.001, "cm")
       ) +
-      ggplot2::labs(title = gsub("component01_", "", group))
+      ggplot2::labs(title = group)
     
   }, error = function(e) {
     stop("Error in plot_group_trajectories_2d: ", e$message)

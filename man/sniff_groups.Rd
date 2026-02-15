@@ -7,10 +7,10 @@
 sniff_groups(
   comps,
   min_group_size = 10,
-  keep_component = c("component1"),
-  cluster_component = c("component1"),
+  keep_component = c("c1"),
+  cluster_component = c("c1"),
   algorithm = "fast_greedy",
-  groups_short_name = FALSE
+  seed = 888L
 )
 }
 \arguments{
@@ -22,18 +22,18 @@ sniff_groups(
 (default = 10). Groups with fewer members will be filtered out.}
 
 \item{keep_component}{Character vector specifying which network components to
-process (default = "component1"). Can include multiple components.}
+process (default = "c1"). Can include multiple components.}
 
 \item{cluster_component}{Character vector specifying which components should be
-clustered (default = "component1"). Components not listed here will be treated
+clustered (default = "c1"). Components not listed here will be treated
 as single groups.}
 
 \item{algorithm}{Community detection algorithm to use (default = "fast_greedy").
 Options include: "louvain", "walktrap", "edge_betweenness", "fast_greedy",
 or "leiden".}
 
-\item{groups_short_name}{Logical indicating whether to use short group names
-(default = FALSE). If TRUE, removes component prefixes from group names.}
+\item{seed}{Random seed for reproducible results (default = 888L). Only applies
+to algorithms that use random initialization like Louvain.}
 }
 \value{
 A list with three elements:
@@ -62,7 +62,7 @@ simultaneously, applying clustering only to specified components.
 groups <- sniff_groups(comps,
   min_group_size = 15,
   algorithm = "leiden",
-  groups_short_name = TRUE
+  seed = 888L
 )
 
 # Access group statistics
