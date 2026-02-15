@@ -4,6 +4,7 @@
 # birddog <a href="https://roneyfraga.com/birddog/"><img src="man/figures/logo.png" align="right" alt="birddog logo" style="height: 180px;"></a>
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of `birddog` is sniffing out emergence and trajectories in

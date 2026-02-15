@@ -17,4 +17,7 @@ english-ewt-ud-2.5-191206.udpipe
 .quarto
 birddog.Rproj
 /doc/
+/nlp-udpipe-model/
 /Meta/
+.chat
+.claude
