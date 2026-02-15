@@ -118,6 +118,7 @@ read_wos_bib <- function(file, normalized_names = TRUE) {
   }
 
   lines |>
+    {\(x) gsub("\r\n", "\n", x)}() |>
     {
       \(x) strsplit(x, "\n\n")[[1]]
     }() |>
