@@ -10,7 +10,9 @@ sniff_citations_cycle_time(
   start_year = NULL,
   end_year = NULL,
   tracked_cr_py = NULL,
-  batch_size = 50
+  batch_size = 50,
+  min_papers_per_year = 3,
+  rolling_window = NULL
 )
 }
 \arguments{
@@ -31,6 +33,13 @@ data from OpenAlex API. Useful for avoiding repeated API calls.}
 \item{batch_size}{For OpenAlex data: number of IDs to process per API call (default: 50).
 Smaller batches help avoid API rate limits, larger batches process data faster
 but may trigger rate limiting.}
+
+\item{min_papers_per_year}{Minimum number of papers required in a given year
+to compute CCT. Years with fewer papers are reported as NA (default: 3).}
+
+\item{rolling_window}{Optional integer for rolling window smoothing.
+If provided, CCT values are smoothed using a centered moving average of the
+specified width (e.g., 3 for a 3-year window). Default is NULL (no smoothing).}
 }
 \value{
 A list with the following components:
@@ -38,34 +47,37 @@ A list with the following components:
 \item{plots}{Named list of plotly objects showing temporal evolution of CCT for each group.
 Each plot shows both absolute CCT values and year-over-year differences.}
 \item{years_range}{Named vector with start_year and end_year used in the analysis}
-\item{tracked_cr_py}{Complete citation year data fetched from OpenAlex, with columns
-CR (OpenAlex ID) and CR_PY (publication year). Can be saved and reused in subsequent
-analyses to avoid repeated API calls.}
+\item{tracked_cr_py}{Citation year data with columns CR and CR_PY.
+Can be saved and reused in subsequent analyses to avoid repeated API calls.}
 }
 \description{
-Calculates the Citation Cycle Time (CCT) - the average citation cycle time -
-to measure the pace of technological or scientific progress in a publication network.
-Based on Kayal (1999) methodology, the indicator measures the median age of cited
-publications, where lower values indicate faster technological replacement cycles.
+Calculates the Citation Cycle Time (CCT) to measure the pace of scientific
+or technological progress in a publication network. Based on Kayal (1999),
+the indicator measures the median age of cited publications, where lower
+values indicate faster knowledge replacement cycles.
 }
 \details{
-The Citation Cycle Time (CCT) is calculated as:
+The Citation Cycle Time (CCT) is calculated following Kayal (1999):
 \enumerate{
 \item Extract citation IDs from the network's CR column
 \item Fetch publication years for cited works from OpenAlex API using \code{get_openalex_fields()}
-\item For each publication, calculate the year difference between the publication and its references
-\item Calculate the median of these differences for each publication
-\item Calculate the mean of the medians for the group/network + 0.5 (Kayal adjustment)
+\item For each publication, calculate the age of each cited reference (PY - CR_PY)
+\item Calculate the median citation age per publication
+\item For each year, calculate the median of per-publication medians across
+all publications in that year (annual mode)
 }
 
 Lower CCT values indicate that publications are citing more recent work, suggesting
-a faster pace of technological/scientific replacement.
+a faster pace of knowledge replacement. A sudden drop in CCT within a group signals
+potential scientific emergence.
 
 The function automatically handles:
 \itemize{
 \item Splitting semicolon-separated citation IDs
 \item Batch processing of OpenAlex API requests
 \item Filtering invalid citations (where cited work was published after citing work)
+\item Skipping years with too few papers (\code{min_papers_per_year})
+\item Optional rolling window smoothing for noisy time series
 \item Creating temporal plots for each group
 }
 }
@@ -77,18 +89,17 @@ results <- sniff_citations_cycle_time(network_groups, scope = "groups")
 # Network analysis
 results_network <- sniff_citations_cycle_time(complete_network, scope = "network")
 
+# With rolling window smoothing
+results_smooth <- sniff_citations_cycle_time(
+  network_groups,
+  scope = "groups",
+  rolling_window = 3
+)
+
 # Accessing results
 cct_data <- results$data
 plots <- results$plots
 plots$c1g1  # View plot for specific group
-
-# Specifying time period and batch size
-results_period <- sniff_citations_cycle_time(
-  network_groups,
-  start_year = 2010,
-  end_year = 2020,
-  batch_size = 50
-)
 
 # Reuse citation data to avoid repeated API calls
 saved_citations <- results$tracked_cr_py
@@ -102,7 +113,8 @@ results2 <- sniff_citations_cycle_time(
 \references{
 Kayal AA, Waters RC. An empirical evaluation of the technology cycle time indicator
 as a measure of the pace of technological progress in superconductor technology.
-IEEE Transactions on Engineering Management. 1999;46(2):127–31. doi:10.1109/17.759138
+IEEE Transactions on Engineering Management. 1999;46(2):127-31.
+\doi{10.1109/17.759138}
 }
 \seealso{
 \code{\link[=sniff_groups]{sniff_groups()}}, \code{\link[=get_openalex_fields]{get_openalex_fields()}}, \code{\link[=indexes_plots]{indexes_plots()}}

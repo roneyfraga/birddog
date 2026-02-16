@@ -385,9 +385,9 @@ All network.
 
 ```{r eval = T}
 
-# tictoc::tic()
-# net_cct <- sniff_citations_cycle_time(net, scope = 'network', start_year = 1990, end_year = 2024)
-# tictoc::toc()
+tictoc::tic()
+net_cct <- sniff_citations_cycle_time(net, scope = 'network', start_year = 1990, end_year = 2024)
+tictoc::toc()
 # 1.3 min
 
 net_cct <- readRDS('~/Sync/birddog-data/wos-sugarcane-net-cct.rds')
@@ -444,12 +444,7 @@ net_dc <- sniff_network(M, type = "direct citation")
 
 igraph::V(net_dc)$deg <- igraph::degree(net_dc)
 
-net_dc |>
-  tidygraph::activate(nodes) |>
-  dplyr::filter(deg >= 50) ->
-  net_dc_topn
-
-net_key_route <- sniff_key_route(net_dc_topn, scope = 'network')
+net_key_route <- sniff_key_route(net_dc, scope = 'network')
 
 net_key_route[['full_network']]$plot
 

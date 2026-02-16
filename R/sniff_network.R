@@ -142,6 +142,7 @@ sniff_network <- function(dataframe, type = "direct citation", external_referenc
       }
     }
 
+    igraph::V(net)$NT <- gsub(" ", "-", type)
     return(net)
   }
 
@@ -244,6 +245,7 @@ sniff_network <- function(dataframe, type = "direct citation", external_referenc
       }
     }
 
+    igraph::V(net)$NT <- gsub(" ", "-", type)
     return(net)
   }
 
