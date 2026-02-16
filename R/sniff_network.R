@@ -16,7 +16,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Using OpenAlex data
 #' oa_data <- read_openalex("works.csv", format = "csv")
 #' net <- sniff_network(oa_data, type = "direct citation")

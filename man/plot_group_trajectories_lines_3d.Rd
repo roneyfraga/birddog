@@ -103,7 +103,7 @@ are assigned using RColorBrewer's Set2 palette (for ≤8 trajectories) or a
 hue-based palette (for more trajectories).
 }
 \examples{
-\dontrun{
+\donttest{
 # Detect main trajectories first
 traj_data <- detect_main_trajectories(your_graph_data)
 

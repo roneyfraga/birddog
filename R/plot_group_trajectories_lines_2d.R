@@ -50,7 +50,7 @@
 #' highlighted set. Otherwise, it shows the entire graph minus highlighted edges.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Detect main trajectories first
 #' traj_data <- detect_main_trajectories(your_graph_data)
 #' 

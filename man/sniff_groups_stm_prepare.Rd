@@ -38,7 +38,7 @@ Processes text data for structural topic modeling and performs topic number sele
 returning both the processed data and diagnostic plots.
 }
 \examples{
-\dontrun{
+\donttest{
 output <- sniff_groups_stm_prepare(network_data)
 output$plots$p1 # View first plot
 output$result # Access search results

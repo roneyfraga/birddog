@@ -70,7 +70,7 @@ The function uses UDPipe for tokenization, lemmatization and POS tagging before 
 For phrase extraction, the default pattern finds noun phrases.
 }
 \examples{
-\dontrun{
+\donttest{
 # Assuming groups is output from sniff_groups()
 terms <- sniff_groups_terms(groups, algorithm = "rake")
 

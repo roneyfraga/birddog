@@ -28,7 +28,7 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Typical pipeline:
 #' data <- read_wos("savedrecs.txt")
 #' net <- sniff_network(data)

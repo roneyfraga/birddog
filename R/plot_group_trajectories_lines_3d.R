@@ -60,7 +60,7 @@
 #' hue-based palette (for more trajectories).
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Detect main trajectories first
 #' traj_data <- detect_main_trajectories(your_graph_data)
 #' 

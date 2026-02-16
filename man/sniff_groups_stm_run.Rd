@@ -34,7 +34,7 @@ This function:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Prepare data first
 stm_data <- sniff_groups_stm_prepare(network_data)
 

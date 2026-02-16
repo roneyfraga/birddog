@@ -24,7 +24,7 @@
 #' @return A plotly 3D visualization object
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # First get trajectory data
 #' traj_data <- sniff_groups_trajectories(groups_cumulative)
 #'

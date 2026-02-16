@@ -28,7 +28,7 @@ for each component. Returns both the component information and an updated networ
 with component labels.
 }
 \examples{
-\dontrun{
+\donttest{
 # Create a network first
 data <- read_wos("savedrecs.txt")
 net <- sniff_network(data)

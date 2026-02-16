@@ -55,7 +55,7 @@ most significant paths
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Get trajectories first
 traj_data <- detect_main_trajectories(
   groups_cumulative_trajectories = my_data,

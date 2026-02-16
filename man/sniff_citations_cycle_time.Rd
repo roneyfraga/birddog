@@ -82,7 +82,7 @@ The function automatically handles:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Group analysis
 results <- sniff_citations_cycle_time(network_groups, scope = "groups")
 

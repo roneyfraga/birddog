@@ -550,7 +550,7 @@ mk_layout_and_year_scale <- function(g) {
 #' - For **exact document counts**: Ensure `use_docs_per_group = TRUE` and provide `docs_per_group` data
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic usage with default parameters
 #' trajectories <- detect_main_trajectories(
 #'   groups_cumulative_trajectories = my_data,
@@ -697,7 +697,7 @@ detect_main_trajectories <- function(
 #' - **Progressive refinement**: Chain multiple calls with different criteria
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Get trajectories first
 #' traj_data <- detect_main_trajectories(
 #'   groups_cumulative_trajectories = my_data,

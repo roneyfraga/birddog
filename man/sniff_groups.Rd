@@ -57,7 +57,7 @@ augmented network. The function can handle multiple network components
 simultaneously, applying clustering only to specified components.
 }
 \examples{
-\dontrun{
+\donttest{
 # Assuming 'comps' is output from sniff_components()
 groups <- sniff_groups(comps,
   min_group_size = 15,

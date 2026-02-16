@@ -62,7 +62,7 @@ bib_file <- system.file("extdata", "sample_wos.bib", package = "birddog")
 M <- read_wos(bib_file, format = "bib", normalized_names = TRUE)
 head(M)
 
-\dontrun{
+\donttest{
 # load data from a URL
 M <- read_wos("https://example.com/savedrecs.bib", format = "bib")
 }

@@ -29,7 +29,7 @@ and extracts the most frequent and the most distinctive keywords (using TF-IDF) 
 a descriptor field such as keywords or subject terms.
 }
 \examples{
-\dontrun{
+\donttest{
 # Assuming 'groups' is output from sniff_groups()
 groups_keywords <- sniff_groups_keywords(groups)
 }

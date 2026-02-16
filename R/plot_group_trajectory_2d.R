@@ -24,7 +24,7 @@
 #' @return A \code{ggplot2} object visualizing the technological trajectories.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Compute trajectories first
 #' traj_data <- plot_groups_trajectories(groups_cumulative)
 #'

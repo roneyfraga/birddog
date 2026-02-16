@@ -43,7 +43,7 @@ The function classifies papers into hub categories based on:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 
 # Assuming 'groups' is output from sniff_groups()
 

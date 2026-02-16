@@ -47,7 +47,7 @@
 #' implementing longer delays.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # From a character vector
 #' ids <- c("W2261389918", "W1548650423", "W1504492735")
 #' result <- get_openalex_fields(ids)

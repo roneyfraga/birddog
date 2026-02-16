@@ -55,7 +55,7 @@ of research groups over time with node size representing group importance and co
 representing publication year deviation.
 }
 \examples{
-\dontrun{
+\donttest{
 # First get trajectory data
 traj_data <- sniff_groups_trajectories(groups_cumulative)
 

@@ -35,7 +35,7 @@ and scientific emergence patterns. It computes similarity measures between group
 and tracks their attributes.
 }
 \examples{
-\dontrun{
+\donttest{
 # Assuming you have cumulative group data:
 trajectories <- sniff_groups_trajectories(groups_cumulative, min_group_size = 15)
 }

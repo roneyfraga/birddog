@@ -118,7 +118,7 @@ temporal trajectories in research group evolution:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic usage with default parameters
 trajectories <- detect_main_trajectories(
   groups_cumulative_trajectories = my_data,
