@@ -41,18 +41,20 @@ Imports:
     RColorBrewer,
     scales,
     stringr
-Suggests: 
+Suggests:
     cli,
     ggHoriPlot,
     ggrepel,
     ggthemes,
     janitor,
     gt,
+    testthat (>= 3.0.0),
     viridis,
     zoo,
     stm,
-    tidytext,  
+    tidytext,
     udpipe
+Config/testthat/edition: 3
 Depends: 
     R (>= 4.1.0)
 URL: http://roneyfraga.com/birddog/, https://github.com/roneyfraga/birddog
