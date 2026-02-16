@@ -116,9 +116,13 @@ Download with the query above in 2023-09-27. Full query here: <https://www.webof
 # 62 sec
 
 url_m <- 'https://roneyfraga.com/volume/keep_it/birddog-data/wos-sugarcane-m.rds'
-M <- readRDS(url(url_m))
+M <- tryCatch(readRDS(url(url_m)), error = function(e) {
+  message("Could not download data: ", e$message)
+  NULL
+})
+run_pipeline <- !is.null(M)
 
-dplyr::glimpse(M)
+if (run_pipeline) dplyr::glimpse(M)
 ```
 
 ## Build a citation network
@@ -127,7 +131,7 @@ You can build either a direct citation network or use bibliographic coupling.
 
 Direct citation highlights time-ordered influence; bibliographic coupling captures proximity in topics via shared references.
 
-```{r eval = TRUE}
+```{r eval = run_pipeline}
 # Direct citation
 # net <- birddog::sniff_network(M, type = "direct citation")
 
@@ -144,7 +148,7 @@ net |>
 
 The analysis of components is important to eliminate disconnected documents that do not share the same bibliographic references. However, if more than one component with a high number of documents exists, it may indicate the presence of two disconnected scientific literatures.
 
-```{r eval = TRUE}
+```{r eval = run_pipeline}
 
 comps <- birddog::sniff_components(net)
 
@@ -157,7 +161,7 @@ comps$components |>
 
 ## Groups (community detection)
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
 birddog::sniff_groups(
   comps,
@@ -175,7 +179,7 @@ groups$aggregate |>
 
 It helps to understand the structure of the groups.
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
 birddog::sniff_groups_attributes(
   groups,
@@ -192,7 +196,7 @@ groups_attributes$attributes_table
 
 It contributes to understanding the content of each group.
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
 groups_keywords <- birddog::sniff_groups_keywords(groups)
 
@@ -210,130 +214,142 @@ groups_keywords |>
 
 This step can be time-consuming. Consider precomputing and saving results.
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
 # tictoc::tic()
 # groups_terms <- sniff_groups_terms(groups, algorithm = 'phrase')
 # tictoc::toc()
 # 34 min
 
-groups_terms <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-terms.rds')
+rds_path <- '~/Sync/birddog-data/wos-sugarcane-groups-terms.rds'
+if (file.exists(rds_path)) {
+  groups_terms <- readRDS(rds_path)
 
-names(groups_terms)
+  names(groups_terms)
 
-groups_terms$terms_table |>
-  DT::datatable(
-    rownames = FALSE,
-    filter = 'bottom',
-    extensions = 'Buttons',
-    escape = FALSE,
-    options = list(dom = 'Blfrtip', pageLength = 5)
-  )
+  groups_terms$terms_table |>
+    DT::datatable(
+      rownames = FALSE,
+      filter = 'bottom',
+      extensions = 'Buttons',
+      escape = FALSE,
+      options = list(dom = 'Blfrtip', pageLength = 5)
+    )
+}
 ```
 
 ### Prestige: hubs
 
 The calculation is slow. Be patient.
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
 # tictoc::tic()
 # groups_hubs <- sniff_groups_hubs(groups)
 # tictoc::toc()
 # 19 min
 
-groups_hubs <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-hubs.rds')
+rds_path <- '~/Sync/birddog-data/wos-sugarcane-groups-hubs.rds'
+if (file.exists(rds_path)) {
+  groups_hubs <- readRDS(rds_path)
 
-groups_hubs |>
-  dplyr::filter(zone != 'noHub') |>
-  dplyr::left_join(groups$network |> tidygraph::activate(nodes) |> tibble::as_tibble() |> dplyr::select(SR, PY), by = 'SR') |>
-  dplyr::mutate(Zi = round(Zi, digits = 2), Pi = round(Pi, digits = 2)) |>
-  dplyr::mutate(SR = paste0('<a href="https://www.webofscience.com/wos/alldb/full-record/', SR, '">', SR, '</a>')) |>
-  DT::datatable(
-    rownames = FALSE,
-    filter = 'bottom',
-    extensions = 'Buttons',
-    escape = FALSE,
-    options = list(dom = 'Blfrtip', pageLength = 10)
-  )
+  groups_hubs |>
+    dplyr::filter(zone != 'noHub') |>
+    dplyr::left_join(groups$network |> tidygraph::activate(nodes) |> tibble::as_tibble() |> dplyr::select(SR, PY), by = 'SR') |>
+    dplyr::mutate(Zi = round(Zi, digits = 2), Pi = round(Pi, digits = 2)) |>
+    dplyr::mutate(SR = paste0('<a href="https://www.webofscience.com/wos/alldb/full-record/', SR, '">', SR, '</a>')) |>
+    DT::datatable(
+      rownames = FALSE,
+      filter = 'bottom',
+      extensions = 'Buttons',
+      escape = FALSE,
+      options = list(dom = 'Blfrtip', pageLength = 10)
+    )
+}
 ```
 
 ### Group evolution (trajectories)
 
-```{r eval = T, warning = FALSE}
+```{r eval = run_pipeline, warning = FALSE}
 
 # tictoc::tic()
 # groups_cumulative <- sniff_groups_cumulative(groups)
 # tictoc::toc()
 # 2 min
 
-groups_cumulative <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-cumulative.rds')
+rds_path <- '~/Sync/birddog-data/wos-sugarcane-groups-cumulative.rds'
+if (file.exists(rds_path)) {
+  groups_cumulative <- readRDS(rds_path)
 
-suppressMessages({
-  groups_cumulative_trajectories <- birddog::sniff_groups_trajectories(groups_cumulative)
-})
+  suppressMessages({
+    groups_cumulative_trajectories <- birddog::sniff_groups_trajectories(groups_cumulative)
+  })
 
-tryCatch(
-  plot_group_trajectories_2d(
-    groups_cumulative_trajectories,
-    group = 'component1_g03',
-    label_vertical_position = -2
-  ),
-  error = function(e) message("Plot skipped: ", e$message)
-)
+  tryCatch(
+    plot_group_trajectories_2d(
+      groups_cumulative_trajectories,
+      group = 'component1_g01',
+      label_vertical_position = -2
+    ),
+    error = function(e) message("Plot skipped: ", e$message)
+  )
 
-tryCatch(
-  plot_group_trajectories_3d(
-    groups_cumulative_trajectories,
-    group = 'component1_g03'
-  ),
-  error = function(e) message("Plot skipped: ", e$message)
-)
+  tryCatch(
+    plot_group_trajectories_3d(
+      groups_cumulative_trajectories,
+      group = 'component1_g03'
+    ),
+    error = function(e) message("Plot skipped: ", e$message)
+  )
+}
 ```
 
 ### Citation growth per document
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
 # tictoc::tic()
 # groups_cumulative_citations <- sniff_groups_cumulative_citations(groups, min_citations = 2)
 # tictoc::toc()
 # 11 min
 
-groups_cumulative_citations <- readRDS('~/Sync/birddog-data/wos-sugarcane-groups-cumulative-citations.rds')
+rds_path <- '~/Sync/birddog-data/wos-sugarcane-groups-cumulative-citations.rds'
+if (file.exists(rds_path)) {
+  groups_cumulative_citations <- readRDS(rds_path)
 
-# First, create the data frame
-groups_cumulative_citations |>
-  purrr::map(\(x)
-    x |>
-      dplyr::select(- citations_by_year) |>
-      dplyr::arrange(dplyr::desc(growth_power)) |>
-      dplyr::slice_head(n = 50)) |>
-  dplyr::bind_rows() |>
-  dplyr::mutate(SR = paste0('<a href="https://www.webofscience.com/wos/alldb/full-record/', SR, '">', SR, '</a>')) ->
-  df
+  # First, create the data frame
+  groups_cumulative_citations |>
+    purrr::map(\(x)
+      x |>
+        dplyr::select(- citations_by_year) |>
+        dplyr::arrange(dplyr::desc(growth_power)) |>
+        dplyr::slice_head(n = 50)) |>
+    dplyr::bind_rows() |>
+    dplyr::mutate(SR = paste0('<a href="https://www.webofscience.com/wos/alldb/full-record/', SR, '">', SR, '</a>')) ->
+    df
 
-n_cols <- ncol(df)
-hidden_cols <- 7:(n_cols - 1)  # Hide columns 8 to second-to-last
+  n_cols <- ncol(df)
+  hidden_cols <- 7:(n_cols - 1)  # Hide columns 8 to second-to-last
 
-# Create the datatable
-DT::datatable(df, rownames = FALSE, filter = 'bottom', extensions = c('Buttons', 'ColReorder'), escape = FALSE,
-  options = list(
-    dom = 'Blfrtip',
-    pageLength = 10,
-    columnDefs = list(
-      list(visible = FALSE, targets = hidden_cols),
-      list(className = 'dt-center', targets = '_all')
-    ),
-    buttons = list( list( extend = 'colvis', text = 'Show/Hide Columns', columns = hidden_cols))
-  ))
+  # Create the datatable
+  DT::datatable(df, rownames = FALSE, filter = 'bottom', extensions = c('Buttons', 'ColReorder'), escape = FALSE,
+    options = list(
+      dom = 'Blfrtip',
+      pageLength = 10,
+      columnDefs = list(
+        list(visible = FALSE, targets = hidden_cols),
+        list(className = 'dt-center', targets = '_all')
+      ),
+      buttons = list( list( extend = 'colvis', text = 'Show/Hide Columns', columns = hidden_cols))
+    ))
+}
 ```
 
 ### Topic modeling (STM)
 
 Detect topics within a group with Structural Topic Modeling. Here, we create topics (sub-groups) based on linguistic similarities.
 
-```{r eval = T}
+```{r eval = F}
 
 # g01
 
@@ -383,17 +399,20 @@ groups_stm_run$top_documents |>
 
 All network.
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
-tictoc::tic()
-net_cct <- sniff_citations_cycle_time(net, scope = 'network', start_year = 1990, end_year = 2024)
-tictoc::toc()
+# tictoc::tic()
+# net_cct <- sniff_citations_cycle_time(net, scope = 'network', start_year = 1990, end_year = 2024)
+# tictoc::toc()
 # 1.3 min
 
-net_cct <- readRDS('~/Sync/birddog-data/wos-sugarcane-net-cct.rds')
+rds_path <- '~/Sync/birddog-data/wos-sugarcane-net-cct.rds'
+if (file.exists(rds_path)) {
+  net_cct <- readRDS(rds_path)
 
-# names(net_cct)
-net_cct$plots[['full_network']]
+  # names(net_cct)
+  net_cct$plots[['full_network']]
+}
 ```
 
 Groups.
@@ -422,14 +441,11 @@ tictoc::toc()
 
 Groups.
 
-```{r eval = T}
+```{r eval = run_pipeline}
 
-tictoc::tic()
 groups_entropy <- sniff_entropy(groups, scope = 'groups', start_year = 1990, end_year = 2024)
-tictoc::toc()
-# 7.7 sec
 
-groups_entropy$plots[['g02']]
+if ('g02' %in% names(groups_entropy$plots)) groups_entropy$plots[['g02']]
 ```
 
 ## Main Path Analysis
@@ -438,7 +454,7 @@ groups_entropy$plots[['g02']]
 
 All network.
 
-```{r eval = T, fig.width = 9, fig.height = 12}
+```{r eval = run_pipeline, fig.width = 9, fig.height = 12}
 
 net_dc <- sniff_network(M, type = "direct citation")
 
@@ -472,7 +488,7 @@ groups_key_route <- sniff_key_route(groups_dc, scope = 'groups')
 
 ## Session info
 
-```{r eval = T}
+```{r eval = requireNamespace("sessioninfo", quietly = TRUE)}
 
 sessioninfo::session_info()$platform |>
   unlist() |>
@@ -484,8 +500,8 @@ sessioninfo::session_info()$platform |>
 
 ## Hardware
 
-- Hostname: `r Sys.info() |> data.frame() |> janitor::clean_names() |> tibble::rownames_to_column('var') |> dplyr::filter(var == 'nodename') |> dplyr::pull(sys_info)`
-- Processor: `r benchmarkme::get_cpu()[[2]]`.
-- RAM: `r round(as.numeric(benchmarkme::get_ram()) / 1073741824, digits = 1)` Gigabit.
+- Hostname: `r tryCatch(Sys.info() |> data.frame() |> janitor::clean_names() |> tibble::rownames_to_column('var') |> dplyr::filter(var == 'nodename') |> dplyr::pull(sys_info), error = function(e) "N/A")`
+- Processor: `r tryCatch(benchmarkme::get_cpu()[[2]], error = function(e) "N/A")`.
+- RAM: `r tryCatch(round(as.numeric(benchmarkme::get_ram()) / 1073741824, digits = 1), error = function(e) "N/A")` Gigabit.
 - Storage: 2 SSD's in `raid0` for data and 1 SSD for the OS.
 
