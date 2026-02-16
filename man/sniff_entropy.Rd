@@ -27,27 +27,29 @@ A list with three components:
 \item{years_range}{A vector with the start_year and end_year used in calculations}
 }
 \description{
-Computes the entropy of keyword distributions from scientific publications
-over a specified time range. Entropy measures the diversity and uniformity
-of keyword usage within research groups or the entire network.
+Computes the normalized Shannon entropy of keyword distributions from scientific
+publications over a specified time range. Entropy measures the diversity and
+evenness of keyword usage within research groups or the entire network.
 }
 \details{
-The function calculates normalized entropy based on Shannon's information theory
-(Shannon, 1948). Entropy quantifies the average level of uncertainty in keyword
-distributions and measures the randomness or disorder within research groups.
+The function calculates the normalized Shannon entropy (Pielou's evenness index)
+based on Shannon's information theory (Shannon, 1948). For each year, entropy
+is computed from the keyword distribution of publications in that year (annual mode).
 
-The normalized entropy is a scale-independent measure of uncertainty that can be
-used to compare the uncertainty of different groups. It is calculated using the
-formula:
-\deqn{H = -\frac{\sum_{i=1}^{n} p_i \log_2 p_i}{n}}
-where \eqn{p_i} is the probability of keyword \eqn{i} and \eqn{n} is the number
-of unique keywords.
+The normalized entropy is calculated as:
+\deqn{J' = \frac{H}{H_{max}} = \frac{-\sum_{i=1}^{n} p_i \log_2 p_i}{\log_2 n}}
+where \eqn{p_i} is the relative frequency of keyword \eqn{i}, \eqn{n} is the
+number of unique keywords, and \eqn{H_{max} = \log_2 n} is the maximum possible
+entropy for \eqn{n} categories.
 
 Entropy values range from 0 to 1, where:
 \itemize{
-\item 0 indicates minimal diversity (few dominant keywords, low uncertainty)
-\item 1 indicates maximal diversity (uniform keyword distribution, high uncertainty)
+\item 0 indicates minimal diversity (one dominant keyword)
+\item 1 indicates maximal diversity (all keywords equally frequent)
 }
+
+A sudden increase in entropy may signal the emergence of new research topics,
+while a decrease suggests thematic convergence.
 }
 \examples{
 \dontrun{
@@ -55,8 +57,7 @@ Entropy values range from 0 to 1, where:
 groups_data <- sniff_groups(your_network_data)
 entropy_results <- sniff_entropy(groups_data, scope = "groups")
 
-# Calculate entropy for entire network from sniff_network() output
-network_data <- sniff_network(your_network_data)
+# Calculate entropy for entire network
 entropy_results <- sniff_entropy(network_data, scope = "network")
 
 # Specify custom year range
@@ -70,30 +71,16 @@ entropy_results <- sniff_entropy(
 # Access results
 entropy_data <- entropy_results$data
 entropy_plots <- entropy_results$plots
-year_range <- entropy_results$years_range
-
-# Interpret results: higher entropy indicates greater keyword diversity
-high_entropy_groups <- entropy_data \%>\%
-  group_by(group) \%>\%
-  summarise(mean_entropy = mean(index, na.rm = TRUE)) \%>\%
-  arrange(desc(mean_entropy))
 }
 
 }
 \references{
 Shannon, C. E. (1948). A mathematical theory of communication. \emph{Bell System
-Technical Journal}, 27(3), 379-423. doi: \doi{https://doi.org/10.1002/j.1538-7305.1948.tb01338.x}
+Technical Journal}, 27(3), 379-423. \doi{10.1002/j.1538-7305.1948.tb01338.x}
 
-The concept of entropy measures the randomness or disorder in the group and provides
-insights into the diversity of research topics and thematic concentration within
-scientific communities.
+Pielou, E. C. (1966). The measurement of diversity in different types of
+biological collections. \emph{Journal of Theoretical Biology}, 13, 131-144.
 }
 \seealso{
 \code{\link{sniff_groups}}, \code{\link{sniff_network}}, \code{\link{indexes_plots}}
 }
-\keyword{diversity}
-\keyword{entropy}
-\keyword{information-theory}
-\keyword{keywords}
-\keyword{shannon}
-\keyword{uncertainty}

@@ -1,8 +1,8 @@
 #' Calculate Entropy Based on Keywords Over Time
 #'
-#' Computes the entropy of keyword distributions from scientific publications
-#' over a specified time range. Entropy measures the diversity and uniformity
-#' of keyword usage within research groups or the entire network.
+#' Computes the normalized Shannon entropy of keyword distributions from scientific
+#' publications over a specified time range. Entropy measures the diversity and
+#' evenness of keyword usage within research groups or the entire network.
 #'
 #' @param network A network object to analyze. For `scope = "groups"`, this should be
 #'   the output of `sniff_groups()`. For `scope = "network"`, this should be a
@@ -20,34 +20,37 @@
 #'   \item{years_range}{A vector with the start_year and end_year used in calculations}
 #'
 #' @details
-#' The function calculates normalized entropy based on Shannon's information theory
-#' (Shannon, 1948). Entropy quantifies the average level of uncertainty in keyword
-#' distributions and measures the randomness or disorder within research groups.
+#' The function calculates the normalized Shannon entropy (Pielou's evenness index)
+#' based on Shannon's information theory (Shannon, 1948). For each year, entropy
+#' is computed from the keyword distribution of publications in that year (annual mode).
 #'
-#' The normalized entropy is a scale-independent measure of uncertainty that can be
-#' used to compare the uncertainty of different groups. It is calculated using the
-#' formula:
-#' \deqn{H = -\frac{\sum_{i=1}^{n} p_i \log_2 p_i}{n}}
-#' where \eqn{p_i} is the probability of keyword \eqn{i} and \eqn{n} is the number
-#' of unique keywords.
+#' The normalized entropy is calculated as:
+#' \deqn{J' = \frac{H}{H_{max}} = \frac{-\sum_{i=1}^{n} p_i \log_2 p_i}{\log_2 n}}
+#' where \eqn{p_i} is the relative frequency of keyword \eqn{i}, \eqn{n} is the
+#' number of unique keywords, and \eqn{H_{max} = \log_2 n} is the maximum possible
+#' entropy for \eqn{n} categories.
 #'
 #' Entropy values range from 0 to 1, where:
-#' - 0 indicates minimal diversity (few dominant keywords, low uncertainty)
-#' - 1 indicates maximal diversity (uniform keyword distribution, high uncertainty)
+#' \itemize{
+#'   \item 0 indicates minimal diversity (one dominant keyword)
+#'   \item 1 indicates maximal diversity (all keywords equally frequent)
+#' }
+#'
+#' A sudden increase in entropy may signal the emergence of new research topics,
+#' while a decrease suggests thematic convergence.
 #'
 #' @references
 #' Shannon, C. E. (1948). A mathematical theory of communication. \emph{Bell System
-#' Technical Journal}, 27(3), 379-423. doi: \doi{https://doi.org/10.1002/j.1538-7305.1948.tb01338.x}
+#' Technical Journal}, 27(3), 379-423. \doi{10.1002/j.1538-7305.1948.tb01338.x}
 #'
-#' The concept of entropy measures the randomness or disorder in the group and provides
-#' insights into the diversity of research topics and thematic concentration within
-#' scientific communities.
+#' Pielou, E. C. (1966). The measurement of diversity in different types of
+#' biological collections. \emph{Journal of Theoretical Biology}, 13, 131-144.
 #'
 #' @importFrom tidygraph activate
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr mutate filter select pull group_by summarise n
 #' @importFrom tidyr separate_rows
-#' @importFrom purrr safely map map_dfr map2
+#' @importFrom purrr map map_dfr map2
 #' @importFrom stringr str_squish
 #' @importFrom igraph V
 #' @importFrom stats na.omit
@@ -60,8 +63,7 @@
 #' groups_data <- sniff_groups(your_network_data)
 #' entropy_results <- sniff_entropy(groups_data, scope = "groups")
 #'
-#' # Calculate entropy for entire network from sniff_network() output
-#' network_data <- sniff_network(your_network_data)
+#' # Calculate entropy for entire network
 #' entropy_results <- sniff_entropy(network_data, scope = "network")
 #'
 #' # Specify custom year range
@@ -75,19 +77,10 @@
 #' # Access results
 #' entropy_data <- entropy_results$data
 #' entropy_plots <- entropy_results$plots
-#' year_range <- entropy_results$years_range
-#'
-#' # Interpret results: higher entropy indicates greater keyword diversity
-#' high_entropy_groups <- entropy_data %>%
-#'   group_by(group) %>%
-#'   summarise(mean_entropy = mean(index, na.rm = TRUE)) %>%
-#'   arrange(desc(mean_entropy))
 #' }
 #'
 #' @seealso
 #' \code{\link{sniff_groups}}, \code{\link{sniff_network}}, \code{\link{indexes_plots}}
-#'
-#' @keywords entropy diversity keywords uncertainty shannon information-theory
 sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year = NULL) {
   # Input validation
   if (is.null(network)) {
@@ -100,15 +93,12 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
   }
 
   if (scope == "groups") {
-    # Input validation for groups scope
     list_dimensions <- c("network", "pubs_by_year", "aggregate")
     if (!all(list_dimensions %in% names(network))) {
       stop(glue::glue("network file must be generated by sniff_groups()"), call. = FALSE)
     }
     net_data <- network$network
   } else {
-    # Input validation for network scope
-
     if (!inherits(network, c("tbl_graph", "igraph"))) {
       stop("Input (network) must be a network object (tbl_graph or igraph)", call. = FALSE)
     }
@@ -160,10 +150,7 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
         dplyr::pull("group") |>
         stats::na.omit() |>
         unique() |>
-        sort() ->
-        unique_groups
-
-      unique_groups
+        sort()
     },
     error = function(e) {
       stop("Error extracting groups from network: ", e$message, call. = FALSE)
@@ -174,58 +161,55 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
     stop("No valid groups found for analysis", call. = FALSE)
   }
 
-  # Safe function for entropy calculation
-  safe_entropy_calc <- purrr::safely(function(grp, year, net_data) {
-    result_data <- net_data |>
-      tidygraph::activate(nodes) |>
-      tibble::as_tibble() |>
-      dplyr::filter(.data$group == grp) |>
-      dplyr::select("DE", "PY") |>
-      tidyr::separate_rows("DE", sep = ";") |>
-      dplyr::mutate(DE = stringr::str_squish(tolower(.data$DE))) |>
-      dplyr::filter(!is.na(.data$DE) & .data$DE != "") |>
-      dplyr::filter(.data$PY <= year)
+  # --- Pre-extract keyword data once (avoid repeated network queries) ---
+  net_data |>
+    tidygraph::activate(nodes) |>
+    tibble::as_tibble() |>
+    dplyr::select("name", "group", "DE", "PY") |>
+    dplyr::filter(!is.na(.data$DE) & .data$DE != "") |>
+    dplyr::filter(.data$group %in% !!group) |>
+    tidyr::separate_rows("DE", sep = ";") |>
+    dplyr::mutate(DE = stringr::str_squish(tolower(.data$DE))) |>
+    dplyr::filter(.data$DE != "") ->
+    all_keywords
 
-    # Check if there's enough data to calculate entropy
-    if (nrow(result_data) == 0) {
-      return(data.frame(index = NA, year = year, group = grp))
-    }
+  years_seq <- start_year:end_year
 
-    result_data |>
-      dplyr::group_by(.data$DE) |>
-      dplyr::summarise(freq = dplyr::n(), .groups = "drop") |>
-      dplyr::mutate(P = .data$freq / sum(.data$freq)) |>
-      dplyr::summarise(
-        index = (-sum(.data$P * log2(.data$P), na.rm = TRUE)) / dplyr::n(),
-        .groups = "drop"
-      ) |>
-      dplyr::mutate(year = year, group = grp) ->
-      result
-
-    # Handle NaN values (when P = 0 or only one category)
-    if (is.nan(result$index) || is.infinite(result$index)) {
-      result$index <- 0
-    }
-
-    return(result)
-  })
-
+  # --- Entropy computation: annual, Pielou's J' ---
   entropy_list <- purrr::map(group, function(grp) {
-    years_seq <- start_year:end_year
+    group_keywords <- all_keywords |>
+      dplyr::filter(.data$group == grp)
 
-    results <- purrr::map_dfr(years_seq, function(year) {
-      result <- safe_entropy_calc(grp, year, net_data)
-      if (!is.null(result$error)) {
-        warning(
-          "Error calculating entropy for group ", grp, " year ", year,
-          ": ", result$error$message
-        )
-        return(data.frame(index = NA, year = year, group = grp))
+    purrr::map_dfr(years_seq, function(current_year) {
+      # Annual: only publications from this year
+      year_data <- group_keywords |>
+        dplyr::filter(.data$PY == current_year)
+
+      if (nrow(year_data) == 0) {
+        return(tibble::tibble(index = NA_real_, year = current_year, group = grp))
       }
-      return(result$result)
-    })
 
-    return(results)
+      # Compute keyword frequencies and probabilities
+      year_data |>
+        dplyr::group_by(.data$DE) |>
+        dplyr::summarise(freq = dplyr::n(), .groups = "drop") |>
+        dplyr::mutate(P = .data$freq / sum(.data$freq)) ->
+        freq_table
+
+      n_keywords <- nrow(freq_table)
+
+      # Shannon entropy needs at least 2 categories for normalization
+      if (n_keywords <= 1) {
+        return(tibble::tibble(index = 0, year = current_year, group = grp))
+      }
+
+      # Pielou's evenness: H / log2(n)
+      H <- -sum(freq_table$P * log2(freq_table$P), na.rm = TRUE)
+      H_max <- log2(n_keywords)
+      entropy_value <- H / H_max
+
+      tibble::tibble(index = entropy_value, year = current_year, group = grp)
+    })
   })
 
   names(entropy_list) <- group
@@ -236,13 +220,27 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
     entropy_data
 
   # Create plots for each group
-  plots_list <- purrr::map2(entropy_list, group, \(x, y) indexes_plots(x, group_name = y, start_year, end_year, method = "entropy"))
+  plots_list <- purrr::map2(entropy_list, group, function(x, y) {
+    if (all(is.na(x$index))) {
+      warning("No data available for group: ", y, " - skipping plot")
+      return(NULL)
+    }
+    tryCatch(
+      indexes_plots(x, group_name = y, start_year, end_year, method = "entropy"),
+      error = function(e) {
+        warning("Error creating plot for group ", y, ": ", e$message)
+        return(NULL)
+      }
+    )
+  })
 
-  result <- list(
+  valid_plots <- !sapply(plots_list, is.null)
+  plots_list <- plots_list[valid_plots]
+  names(plots_list) <- group[valid_plots]
+
+  list(
     data = entropy_data,
     plots = plots_list,
     years_range = c(start_year = start_year, end_year = end_year)
   )
-
-  return(result)
 }
