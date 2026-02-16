@@ -20,7 +20,7 @@
 #' }
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming you have cumulative group data:
 #' trajectories <- sniff_groups_trajectories(groups_cumulative, min_group_size = 15)
 #' }

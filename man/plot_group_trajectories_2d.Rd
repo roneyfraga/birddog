@@ -53,7 +53,7 @@ showing the evolution of research groups over time with node size representing g
 and color representing publication-year deviation.
 }
 \examples{
-\donttest{
+\dontrun{
 # Compute trajectories first
 traj_data <- plot_groups_trajectories(groups_cumulative)
 

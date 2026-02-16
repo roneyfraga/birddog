@@ -58,7 +58,7 @@
 #' Importers for Web of Science: \code{\link{read_wos}}.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ## CSV export (local path)
 #' x <- read_openalex("openalex-works.csv", format = "csv")
 #'

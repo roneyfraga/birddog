@@ -53,7 +53,7 @@ Performs cumulative community detection on a network over specified time spans,
 returning group statistics and keyword analysis for each time period.
 }
 \examples{
-\donttest{
+\dontrun{
 # Typical pipeline:
 data <- read_wos("savedrecs.txt")
 net <- sniff_network(data)

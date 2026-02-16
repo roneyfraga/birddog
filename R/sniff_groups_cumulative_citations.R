@@ -40,7 +40,7 @@
 #' Works with both Web of Science (WOS) and OpenAlex data formats.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming groups is output from sniff_groups()
 #' # Calculate cumulative citations
 #' groups_cumulative_citations <- sniff_groups_cumulative_citations(groups, min_citations = 5)

@@ -74,7 +74,7 @@ such as \code{keywords}, \code{authorships}, and \code{referenced_works}).
 }
 
 \examples{
-\donttest{
+\dontrun{
 ## CSV export (local path)
 x <- read_openalex("openalex-works.csv", format = "csv")
 

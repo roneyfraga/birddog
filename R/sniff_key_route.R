@@ -51,7 +51,7 @@
 #' Department of Theoretical Computer Science, Preprint Series. 2003;41:897.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example with network scope
 #' result <- sniff_key_route(my_network, scope = "network", citations_percentage = 0.8)
 #'

@@ -66,7 +66,7 @@
 #' \doi{10.1109/17.759138}
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Group analysis
 #' results <- sniff_citations_cycle_time(network_groups, scope = "groups")
 #'

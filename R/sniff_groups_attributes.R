@@ -27,7 +27,7 @@
 #' 4. Generates a comprehensive summary table
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming groups is output from sniff_groups()
 #' groups_attributes <- sniff_groups_attributes(groups,
 #'   growth_rate_period = 2010:2022,

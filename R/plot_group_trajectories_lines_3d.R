@@ -56,11 +56,11 @@
 #'
 #' The function uses a Sugiyama layout for the y-axis coordinates and cumulative
 #' sums of paper counts for the z-axis values. Colors for highlighted trajectories
-#' are assigned using RColorBrewer's Set2 palette (for ≤8 trajectories) or a 
+#' are assigned using RColorBrewer's Set2 palette (for <=8 trajectories) or a 
 #' hue-based palette (for more trajectories).
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Detect main trajectories first
 #' traj_data <- detect_main_trajectories(your_graph_data)
 #' 

@@ -43,7 +43,7 @@
 #' For phrase extraction, the default pattern finds noun phrases.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming groups is output from sniff_groups()
 #' terms <- sniff_groups_terms(groups, algorithm = "rake")
 #'

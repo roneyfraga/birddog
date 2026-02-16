@@ -52,7 +52,7 @@ counts paths from v to any sink (Batagelj, 2003). This guarantees the most
 significant link is always included in the key-route path.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example with network scope
 result <- sniff_key_route(my_network, scope = "network", citations_percentage = 0.8)
 

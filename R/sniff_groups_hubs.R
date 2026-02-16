@@ -33,7 +33,7 @@
 #' }
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #'
 #' # Assuming 'groups' is output from sniff_groups()
 #'

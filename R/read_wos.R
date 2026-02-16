@@ -17,8 +17,8 @@
 #' - When `file` is a URL, the file is downloaded to a temporary path before
 #'   parsing (a progress message is printed).
 #' - If `normalized_names = TRUE`, selected WoS tags are mapped to standardized
-#'   names (e.g., `AU` → `author`, `TI` → `title`, `PY` → `year`, `DI` → `doi`,
-#'   `DE` → `keywords`, `SR` → `unique_id`, etc.; the exact mapping depends on
+#'   names (e.g., `AU` -> `author`, `TI` -> `title`, `PY` -> `year`, `DI` -> `doi`,
+#'   `DE` -> `keywords`, `SR` -> `unique_id`, etc.; the exact mapping depends on
 #'   the format). Otherwise, original field tags are preserved.
 #' - The output includes:
 #'   - `DI2`: an uppercase, punctuation-stripped variant of `DI` (if present),
@@ -48,7 +48,7 @@
 #' M <- read_wos(bib_file, format = "bib", normalized_names = TRUE)
 #' head(M)
 #'
-#' \donttest{
+#' \dontrun{
 #' # load data from a URL
 #' M <- read_wos("https://example.com/savedrecs.bib", format = "bib")
 #' }

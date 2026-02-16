@@ -19,7 +19,7 @@
 #' }
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' output <- sniff_groups_stm_prepare(network_data)
 #' output$plots$p1 # View first plot
 #' output$result # Access search results

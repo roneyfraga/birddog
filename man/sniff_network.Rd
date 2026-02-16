@@ -27,7 +27,7 @@ Constructs different types of citation networks from bibliographic data imported
 from Web of Science or OpenAlex using \verb{birddog's} reading functions.
 }
 \examples{
-\donttest{
+\dontrun{
 # Using OpenAlex data
 oa_data <- read_openalex("works.csv", format = "csv")
 net <- sniff_network(oa_data, type = "direct citation")

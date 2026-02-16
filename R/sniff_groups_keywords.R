@@ -16,7 +16,7 @@
 #'     \item `term_tfidf`: the most distinctive terms (with TF-IDF scores).
 #'   }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming 'groups' is output from sniff_groups()
 #' groups_keywords <- sniff_groups_keywords(groups)
 #' }

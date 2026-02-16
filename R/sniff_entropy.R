@@ -58,7 +58,7 @@
 #' @export
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Calculate entropy for groups from sniff_groups() output
 #' groups_data <- sniff_groups(your_network_data)
 #' entropy_results <- sniff_entropy(groups_data, scope = "groups")

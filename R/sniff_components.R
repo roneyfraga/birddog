@@ -26,7 +26,7 @@
 #' @export
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Create a network first
 #' data <- read_wos("savedrecs.txt")
 #' net <- sniff_network(data)

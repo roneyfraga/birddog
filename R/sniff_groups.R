@@ -35,7 +35,7 @@
 #' simultaneously, applying clustering only to specified components.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming 'comps' is output from sniff_components()
 #' groups <- sniff_groups(comps,
 #'   min_group_size = 15,
