@@ -190,7 +190,7 @@ sniff_citations_cycle_time <- function(
         dplyr::pull("group") |>
         stats::na.omit() |>
         unique() |>
-        sort()
+        mixed_sort()
     },
     error = function(e) {
       stop("Error extracting groups from network: ", e$message, call. = FALSE)

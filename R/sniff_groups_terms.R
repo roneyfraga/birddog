@@ -114,7 +114,7 @@ sniff_groups_terms <- function(net_groups,
   )
 
   # Get unique groups
-  grupos <- sort(unique(igraph::vertex_attr(net_groups$network, "group")))
+  grupos <- mixed_sort(unique(igraph::vertex_attr(net_groups$network, "group")))
   if (length(grupos) == 0) {
     stop("No groups found in network", call. = FALSE)
   }
@@ -279,7 +279,10 @@ sniff_groups_terms <- function(net_groups,
           .groups = "drop"
         )
 
-      dplyr::full_join(freq_terms, tfidf_terms, by = "group")
+      dplyr::full_join(freq_terms, tfidf_terms, by = "group") |>
+        dplyr::mutate(group = factor(.data$group, levels = mixed_sort(unique(.data$group)))) |>
+        dplyr::arrange(.data$group) |>
+        dplyr::mutate(group = as.character(.data$group))
     },
     error = function(e) {
       warning("Failed to compute TF-IDF: ", e$message)

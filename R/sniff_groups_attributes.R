@@ -235,7 +235,7 @@ calculate_growth_rates <- function(pubs_by_year, growth_rate_period) {
   }
 
   # Initialize results
-  grupos <- sort(unique(pubs_by_year$group))
+  grupos <- mixed_sort(unique(pubs_by_year$group))
   res <- setNames(rep(NA_real_, length(grupos)), grupos)
   m2_summary <- setNames(rep(NA_real_, length(grupos)), grupos)
   model_failures <- character(0)

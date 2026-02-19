@@ -150,7 +150,7 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
         dplyr::pull("group") |>
         stats::na.omit() |>
         unique() |>
-        sort()
+        mixed_sort()
     },
     error = function(e) {
       stop("Error extracting groups from network: ", e$message, call. = FALSE)
