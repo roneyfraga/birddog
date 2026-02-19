@@ -141,7 +141,7 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
 
     net_data |>
       tidygraph::activate(nodes) |>
-      dplyr::filter(.data$group == group[[grp]]) ->
+      dplyr::filter(.data$group == .env$group[[grp]]) ->
       net_data_group
 
     n_nodes <- igraph::vcount(net_data_group)
