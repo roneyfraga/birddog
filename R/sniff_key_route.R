@@ -72,6 +72,7 @@
 #' @importFrom tibble as_tibble
 #' @importFrom stats na.omit quantile
 #' @importFrom glue glue
+#' @importFrom rlang .env
 sniff_key_route <- function(network, scope = "network", citations_percentage = 1) {
   # Input validation
   if (is.null(network)) {
