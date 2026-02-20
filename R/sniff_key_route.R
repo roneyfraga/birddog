@@ -315,25 +315,7 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1) {
       node_graph_tbl
 
     tree_layout <- ggraph::create_layout(node_graph_tbl, layout = "tree")
-    # Use PY for chronological y-axis with persistent lane offsets
-    # and guaranteed minimum spacing between all nodes.
     tree_layout$y <- tree_layout$PY
-    x_vals <- unique(sort(tree_layout$x))
-    if (length(x_vals) > 1) {
-      lane_offsets <- seq(-1.0, 1.0, length.out = length(x_vals))
-      names(lane_offsets) <- as.character(x_vals)
-      tree_layout$y <- tree_layout$y + lane_offsets[as.character(tree_layout$x)]
-    }
-    # Enforce minimum vertical gap: sweep from bottom to top and push
-    # nodes up when they are too close to the previous node
-    min_gap <- 0.5
-    ord <- order(tree_layout$y)
-    for (j in seq_along(ord)[-1]) {
-      gap <- tree_layout$y[ord[j]] - tree_layout$y[ord[j - 1]]
-      if (gap < min_gap) {
-        tree_layout$y[ord[j]] <- tree_layout$y[ord[j - 1]] + min_gap
-      }
-    }
 
     ggplot2::ggplot(tree_layout) +
       ggraph::geom_edge_link(color = "gray50", width = 1) +
@@ -349,11 +331,7 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1) {
       ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, 2, 1), "cm")) ->
       krp
 
-    # Add plot coordinates to data
-    coords <- tibble::tibble(name = tree_layout$name, x = tree_layout$x, y = tree_layout$y)
-    data_path <- dplyr::left_join(data_path, coords, by = "name")
-
-    res[[grp]] <- list(plot = krp, data = dplyr::arrange(data_path, .data$PY))
+    res[[grp]] <- list(plot = krp, data = data_path)
   }
 
   return(res)
