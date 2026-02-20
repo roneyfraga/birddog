@@ -315,7 +315,20 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1) {
       node_graph_tbl
 
     tree_layout <- ggraph::create_layout(node_graph_tbl, layout = "tree")
+    # Use PY for chronological y-axis; spread same-year nodes to avoid overlap
     tree_layout$y <- tree_layout$PY
+    x_range <- diff(range(tree_layout$x))
+    if (x_range == 0) x_range <- 1
+    for (yr in unique(tree_layout$y)) {
+      idx <- which(tree_layout$y == yr)
+      n <- length(idx)
+      if (n > 1) {
+        # Spread horizontally: evenly space around their mean x
+        mean_x <- mean(tree_layout$x[idx])
+        spread <- x_range * 0.8 * (n - 1) / max(1, igraph::vcount(node_graph) - 1)
+        tree_layout$x[idx] <- mean_x + seq(-spread / 2, spread / 2, length.out = n)
+      }
+    }
 
     ggplot2::ggplot(tree_layout) +
       ggraph::geom_edge_link(color = "gray50", width = 1) +
