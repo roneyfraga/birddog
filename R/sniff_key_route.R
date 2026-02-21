@@ -11,15 +11,22 @@
 #' @param scope Character string specifying the analysis scope. Must be either
 #'   "network" (for full network analysis) or "groups" (for group-wise analysis
 #'   of a grouped network)
-#' @param citations_percentage Numeric value between 0 and 1 indicating the
-#'   percentage of top SPC edges eligible for the key-route path.
-#'   Default is 1 (all edges)
+#' @param n_routes Positive integer specifying the number of key-route starting
+#'   edges to use (default: 1). Each iteration selects the next-highest SPC edge
+#'   as a new starting point and extends it into a full path. Higher values
+#'   reveal auxiliary knowledge diffusion paths and divergence-convergence
+#'   structures (see Liu & Lu, 2012, Figure 8).
+#' @param compact_gaps Logical. If TRUE, compresses the vertical axis by
+#'   removing empty year gaps between publications. This produces shorter plots
+#'   suitable for academic publications. Default is FALSE (chronological spacing).
+#' @param direction Character. Plot direction: `"vertical"` (default, top-to-bottom)
+#'   or `"horizontal"` (left-to-right, oldest on the left).
 #'
 #' @return A list containing for each group:
 #' \itemize{
-#'   \item \code{plot} - A ggplot2 object visualizing the key citation route
+#'   \item \code{plot} - A ggplot2 object visualizing the key citation route(s)
 #'   \item \code{data} - A tibble with publication details (name, TI, AU, PY)
-#'         of nodes in the key route
+#'         of nodes in the key route(s)
 #' }
 #'
 #' @details
@@ -34,6 +41,12 @@
 #'   \item Searches backward from the start node of the key-route, greedily
 #'         following the incoming link with the highest SPC, until a source is reached.
 #' }
+#'
+#' When \code{n_routes > 1}, the procedure is repeated: each iteration selects
+#' the edge with the next-highest SPC as a new starting point and extends it
+#' forward and backward. Routes can share nodes and edges, producing a
+#' divergence-convergence-divergence structure that reveals how knowledge
+#' flows through multiple sub-streams.
 #'
 #' The SPC is computed as \code{forward[u] * backward[v]} for each edge (u, v),
 #' where \code{forward[u]} counts paths from any source to u and \code{backward[v]}
@@ -52,12 +65,15 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Example with network scope
-#' result <- sniff_key_route(my_network, scope = "network", citations_percentage = 0.8)
+#' # Single key-route (default)
+#' result <- sniff_key_route(my_network, scope = "network")
 #'
-#' # Example with groups scope
+#' # Multiple key-routes for richer structure
+#' result <- sniff_key_route(my_network, scope = "network", n_routes = 5)
+#'
+#' # Group-wise analysis
 #' grouped_network <- sniff_groups(data)
-#' result <- sniff_key_route(grouped_network, scope = "groups")
+#' result <- sniff_key_route(grouped_network, scope = "groups", n_routes = 3)
 #'
 #' # Access results for a specific group
 #' result$group_name$plot
@@ -70,9 +86,10 @@
 #' @importFrom tidygraph activate
 #' @importFrom dplyr filter mutate pull select
 #' @importFrom tibble as_tibble
-#' @importFrom stats na.omit quantile
+#' @importFrom stats na.omit
 #' @importFrom glue glue
-sniff_key_route <- function(network, scope = "network", citations_percentage = 1) {
+#' @importFrom rlang .env
+sniff_key_route <- function(network, scope = "network", n_routes = 1, compact_gaps = FALSE, direction = "vertical") {
   # Input validation
   if (is.null(network)) {
     stop("Network data not found in groups object", call. = FALSE)
@@ -109,8 +126,13 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
     stop("Input (network) must be a directed network. Key-route analysis requires a direct citation network.", call. = FALSE)
   }
 
-  if (!is.numeric(citations_percentage) || citations_percentage <= 0 || citations_percentage > 1) {
-    stop("citations_percentage must be a number between 0 (exclusive) and 1 (inclusive)", call. = FALSE)
+  if (!is.numeric(n_routes) || n_routes < 1) {
+    stop("n_routes must be a positive integer", call. = FALSE)
+  }
+  n_routes <- as.integer(n_routes)
+
+  if (!direction %in% c("vertical", "horizontal")) {
+    stop("direction must be 'vertical' or 'horizontal'", call. = FALSE)
   }
 
   # Get unique groups
@@ -122,7 +144,7 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
         dplyr::pull("group") |>
         stats::na.omit() |>
         unique() |>
-        sort()
+        mixed_sort()
     },
     error = function(e) {
       stop("Error extracting groups from network: ", e$message, call. = FALSE)
@@ -141,7 +163,7 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
 
     net_data |>
       tidygraph::activate(nodes) |>
-      dplyr::filter(.data$group == group[[grp]]) ->
+      dplyr::filter(.data$group == .env$group[[grp]]) ->
       net_data_group
 
     n_nodes <- igraph::vcount(net_data_group)
@@ -204,64 +226,73 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
     spc <- forward_count[from_idx] * backward_count[to_idx]
 
     # --- Key-route search (Liu & Lu, 2012) ---
+    # Multiple key-routes: each iteration selects the next-highest SPC edge
+    # as a new starting point and extends forward/backward greedily.
+    # Routes can share edges and nodes (convergence-divergence structure).
 
-    # Filter eligible edges by SPC threshold
-    if (citations_percentage < 1) {
-      spc_cutoff <- stats::quantile(spc, probs = 1 - citations_percentage)
-      eligible <- spc >= spc_cutoff
-    } else {
-      eligible <- rep(TRUE, n_edges)
+    used_start_edges <- integer(0)
+    all_key_route_edges <- integer(0)
+
+    for (route_i in seq_len(n_routes)) {
+      # Mask already-used starting edges
+      candidate_spc <- spc
+      candidate_spc[used_start_edges] <- -1
+
+      if (all(candidate_spc <= 0)) break
+
+      # Step 1: Select the key-route (edge with highest remaining SPC)
+      key_edge <- which.max(candidate_spc)
+      used_start_edges <- c(used_start_edges, key_edge)
+      route_edges <- key_edge
+      visited_nodes <- c(from_idx[key_edge], to_idx[key_edge])
+
+      # Step 2: Search forward from end node of key-route until a sink
+      current_node <- to_idx[key_edge]
+
+      repeat {
+        out_edges <- as.integer(igraph::incident(net_data_group, current_node, mode = "out"))
+        if (length(out_edges) == 0) break
+        best_edge <- out_edges[which.max(spc[out_edges])]
+        next_node <- to_idx[best_edge]
+        if (next_node %in% visited_nodes) break
+        route_edges <- c(route_edges, best_edge)
+        visited_nodes <- c(visited_nodes, next_node)
+        current_node <- next_node
+      }
+
+      # Step 3: Search backward from start node of key-route until a source
+      current_node <- from_idx[key_edge]
+
+      repeat {
+        in_edges <- as.integer(igraph::incident(net_data_group, current_node, mode = "in"))
+        if (length(in_edges) == 0) break
+        best_edge <- in_edges[which.max(spc[in_edges])]
+        next_node <- from_idx[best_edge]
+        if (next_node %in% visited_nodes) break
+        route_edges <- c(best_edge, route_edges)
+        visited_nodes <- c(visited_nodes, next_node)
+        current_node <- next_node
+      }
+
+      all_key_route_edges <- c(all_key_route_edges, route_edges)
     }
 
-    # Step 1: Select the key-route (edge with highest SPC among eligible)
-    eligible_spc <- ifelse(eligible, spc, -1)
-    key_edge <- which.max(eligible_spc)
-    key_route_edges <- key_edge
-    visited_nodes <- c(from_idx[key_edge], to_idx[key_edge])
-
-    # Step 2: Search forward from end node of key-route until a sink
-    current_node <- to_idx[key_edge]
-
-    repeat {
-      out_edges <- as.integer(igraph::incident(net_data_group, current_node, mode = "out"))
-      out_edges <- out_edges[eligible[out_edges]]
-      if (length(out_edges) == 0) break
-      best_edge <- out_edges[which.max(spc[out_edges])]
-      next_node <- to_idx[best_edge]
-      if (next_node %in% visited_nodes) break
-      key_route_edges <- c(key_route_edges, best_edge)
-      visited_nodes <- c(visited_nodes, next_node)
-      current_node <- next_node
-    }
-
-    # Step 3: Search backward from start node of key-route until a source
-    current_node <- from_idx[key_edge]
-
-    repeat {
-      in_edges <- as.integer(igraph::incident(net_data_group, current_node, mode = "in"))
-      in_edges <- in_edges[eligible[in_edges]]
-      if (length(in_edges) == 0) break
-      best_edge <- in_edges[which.max(spc[in_edges])]
-      next_node <- from_idx[best_edge]
-      if (next_node %in% visited_nodes) break
-      key_route_edges <- c(best_edge, key_route_edges)
-      visited_nodes <- c(visited_nodes, next_node)
-      current_node <- next_node
-    }
+    # Deduplicate edges (routes can share edges)
+    all_key_route_edges <- unique(all_key_route_edges)
 
     # --- Build result graph and visualization ---
 
     # Build edge list from key-route edges using vertex names
     vertex_names <- igraph::V(net_data_group)$name
     route_el <- cbind(
-      vertex_names[from_idx[key_route_edges]],
-      vertex_names[to_idx[key_route_edges]]
+      vertex_names[from_idx[all_key_route_edges]],
+      vertex_names[to_idx[all_key_route_edges]]
     )
 
     node_graph <- igraph::graph_from_edgelist(route_el, directed = TRUE)
 
     # Assign SPC as edge weight for visualization
-    igraph::E(node_graph)$spc <- spc[key_route_edges]
+    igraph::E(node_graph)$spc <- spc[all_key_route_edges]
 
     # Extract publication data for labeling
     data_source <- gsub("_.*$", "", igraph::V(net_data_group)$DB[[1]])
@@ -273,7 +304,7 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
         dplyr::select(.data$name, .data$TI, .data$AU, .data$PY) |>
         dplyr::mutate(name2 = paste(stringr::word(gsub("\\|.*", "", .data$AU), -1), .data$PY, sep = "_")) |>
         tibble::as_tibble() |>
-        dplyr::select(.data$name, .data$name2, .data$TI) ->
+        dplyr::select(.data$name, .data$name2, .data$TI, .data$PY) ->
         data_path
     } else {
       net_data_group |>
@@ -282,28 +313,116 @@ sniff_key_route <- function(network, scope = "network", citations_percentage = 1
         dplyr::select(.data$name, .data$TI, .data$AU, .data$PY) |>
         dplyr::mutate(name2 = paste(stringr::word(sub(' ', '-', gsub("\\,.*", "", .data$AU)), 1), .data$PY, sep = "_")) |>
         tibble::as_tibble() |>
-        dplyr::select(.data$name, .data$name2, .data$TI) ->
+        dplyr::select(.data$name, .data$name2, .data$TI, .data$PY) ->
         data_path
     }
 
+    # Use tree layout for x-positions, but replace y with PY for chronological order
     node_graph |>
       tidygraph::as_tbl_graph() |>
-      dplyr::left_join(data_path, by = 'name') |>
-      ggraph::ggraph(layout = "tree") +
-      ggraph::geom_edge_link(color = "gray50", width = 1) +
-      ggraph::geom_node_point(color = "steelblue", size = 4) +
-      ggrepel::geom_text_repel(ggplot2::aes(x = x, y = y, label = .data$name2),
-        size = 4,
-        min.segment.length = 0,
-        box.padding = 0.5,
-        max.overlaps = Inf
-      ) +
-      ggplot2::scale_y_reverse() +
-      ggraph::theme_graph() +
-      ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, 2, 1), "cm")) ->
-      krp
+      dplyr::left_join(data_path, by = 'name') ->
+      node_graph_tbl
 
-    res[[grp]] <- list(plot = krp, data = data_path)
+    tree_layout <- ggraph::create_layout(node_graph_tbl, layout = "tree")
+    # Use PY for chronological y-axis with persistent lane offsets
+    # and guaranteed minimum spacing between all nodes.
+    tree_layout$y <- tree_layout$PY
+
+    # Compact gaps: remap years to sequential positions (1-unit spacing)
+    # so empty years between publications are removed
+    if (compact_gaps) {
+      occupied_years <- sort(unique(tree_layout$PY))
+      year_map <- stats::setNames(seq_along(occupied_years), occupied_years)
+      tree_layout$y <- year_map[as.character(tree_layout$PY)]
+    }
+
+    x_vals <- unique(sort(tree_layout$x))
+    if (length(x_vals) > 1) {
+      lane_offsets <- seq(-1.0, 1.0, length.out = length(x_vals))
+      names(lane_offsets) <- as.character(x_vals)
+      tree_layout$y <- tree_layout$y + lane_offsets[as.character(tree_layout$x)]
+    }
+    # Enforce minimum vertical gap: sweep from bottom to top and push
+    # nodes up when they are too close to the previous node
+    min_gap <- 0.5
+    ord <- order(tree_layout$y)
+    for (j in seq_along(ord)[-1]) {
+      gap <- tree_layout$y[ord[j]] - tree_layout$y[ord[j - 1]]
+      if (gap < min_gap) {
+        tree_layout$y[ord[j]] <- tree_layout$y[ord[j - 1]] + min_gap
+      }
+    }
+
+    # Build y-axis: show actual year labels
+    if (compact_gaps) {
+      occupied_years <- sort(unique(tree_layout$PY))
+      year_map <- stats::setNames(seq_along(occupied_years), occupied_years)
+      y_breaks <- as.numeric(year_map)
+      y_labels <- names(year_map)
+    } else {
+      y_breaks <- ggplot2::waiver()
+      y_labels <- ggplot2::waiver()
+    }
+
+    # Flip axes for horizontal direction: timeline runs left-to-right
+    if (direction == "horizontal") {
+      orig_x <- tree_layout$x
+      tree_layout$x <- tree_layout$y
+      tree_layout$y <- orig_x
+    }
+
+    if (direction == "horizontal") {
+      x_rng <- range(tree_layout$x)
+      y_rng <- range(tree_layout$y)
+      x_pad <- diff(x_rng) * 0.15 + 0.5
+      y_pad <- diff(y_rng) * 0.15 + 0.5
+
+      ggplot2::ggplot(tree_layout) +
+        ggraph::geom_edge_link(color = "gray70", width = 1) +
+        ggraph::geom_node_point(color = "dodgerblue3", size = 4) +
+        ggrepel::geom_text_repel(ggplot2::aes(x = x, y = y, label = .data$name2),
+          size = 4,
+          min.segment.length = 0,
+          box.padding = 0.5,
+          max.overlaps = Inf,
+          angle = 90,
+          bg.color = "white",
+          bg.r = 0.15,
+          xlim = c(x_rng[1] - x_pad, x_rng[2] + x_pad),
+          ylim = c(y_rng[1] - y_pad, y_rng[2] + y_pad)
+        ) +
+        ggplot2::coord_cartesian(
+          xlim = c(x_rng[1] - x_pad, x_rng[2] + x_pad),
+          ylim = c(y_rng[1] - y_pad, y_rng[2] + y_pad),
+          clip = "off"
+        ) +
+        ggplot2::scale_x_continuous(breaks = y_breaks, labels = y_labels) +
+        ggraph::theme_graph() +
+        ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, 2, 1), "cm")) ->
+        krp
+    } else {
+      ggplot2::ggplot(tree_layout) +
+        ggraph::geom_edge_link(color = "gray70", width = 1) +
+        ggraph::geom_node_point(color = "dodgerblue3", size = 4) +
+        ggrepel::geom_text_repel(ggplot2::aes(x = x, y = y, label = .data$name2),
+          size = 4,
+          min.segment.length = 0,
+          box.padding = 0.5,
+          max.overlaps = Inf,
+          bg.color = "white",
+          bg.r = 0.15
+        ) +
+        ggplot2::scale_y_reverse(breaks = y_breaks, labels = y_labels) +
+        ggraph::theme_graph() +
+        ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, 2, 1), "cm")) ->
+        krp
+    }
+
+    # Add plot coordinates to data
+    coords <- tibble::tibble(name = tree_layout$name, x = tree_layout$x, y = tree_layout$y)
+    data_path <- dplyr::left_join(data_path, coords, by = "name")
+
+    res[[grp]] <- list(plot = krp, data = dplyr::arrange(data_path, .data$PY))
   }
 
   return(res)

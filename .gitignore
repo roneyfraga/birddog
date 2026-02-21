@@ -21,6 +21,6 @@ birddog.Rproj
 /Meta/
 .chat
 .claude
-.claude
-*.Rcheck/
-*.tar.gz
+birddog.Rcheck/
+birddog_*.tar.gz
+CRAN-SUBMISSION

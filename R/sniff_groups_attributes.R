@@ -139,7 +139,7 @@ sniff_groups_attributes <- function(groups,
         locations = gt::cells_body(columns = "horizon"),
         fn = function(column) {
           column |>
-            purrr::map(\(x) plot_horizon_group(growth_rate_horizon, group_name = x, year_range = c(min(growth_rate_period), max(growth_rate_period)))) |>
+            purrr::map(\(x) plot_horizon_group(growth_rate_horizon, group_name = x, year_range = c(min(growth_rate_period), max(growth_rate_period)), show_x_axis = TRUE)) |>
             gt::ggplot_image(aspect_ratio = 3)
         }
       ) |>
@@ -235,7 +235,7 @@ calculate_growth_rates <- function(pubs_by_year, growth_rate_period) {
   }
 
   # Initialize results
-  grupos <- sort(unique(pubs_by_year$group))
+  grupos <- mixed_sort(unique(pubs_by_year$group))
   res <- setNames(rep(NA_real_, length(grupos)), grupos)
   m2_summary <- setNames(rep(NA_real_, length(grupos)), grupos)
   model_failures <- character(0)
@@ -416,7 +416,7 @@ plot_horizon_group <- function(data,
       horizonscale = horizon_scale
     ) +
     ggHoriPlot::scale_fill_hcl(palette = palette, reverse = TRUE) +
-    ggplot2::labs(title = paste("Group:", group_name)) +
+    # ggplot2::labs(title = paste("Group:", group_name)) +
     ggplot2::scale_x_continuous(
       limits = year_range,
       breaks = seq(year_range[1], year_range[2], by = 5),
@@ -440,7 +440,8 @@ plot_horizon_group <- function(data,
     plot.title = ggplot2::element_text(size = ggplot2::rel(0.9), hjust = 0.5),
     axis.text.y = ggplot2::element_blank(),
     axis.ticks.y = ggplot2::element_blank(),
-    axis.title.y = ggplot2::element_blank()
+    axis.title.y = ggplot2::element_blank(),
+    axis.title.x = ggplot2::element_blank()
   )
 
   # X-axis customization
@@ -450,7 +451,7 @@ plot_horizon_group <- function(data,
         angle = 90,
         vjust = 0.5,
         hjust = 1,
-        size = ggplot2::rel(0.8)
+        size = ggplot2::rel(5)
       ),
       axis.ticks.x = ggplot2::element_line(),
       panel.spacing.y = ggplot2::unit(0, "lines")

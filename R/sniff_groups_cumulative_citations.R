@@ -103,7 +103,7 @@ sniff_groups_cumulative_citations <- function(groups, min_citations = 5) {
   }
 
   # Initialize results structure
-  grupos <- sort(unique(data$group))
+  grupos <- mixed_sort(unique(data$group))
   results <- stats::setNames(vector("list", length(grupos)), grupos)
 
   # Process each group

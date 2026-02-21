@@ -33,8 +33,8 @@ will be combined row-wise when applicable.
 \item When \code{file} is a URL, the file is downloaded to a temporary path before
 parsing (a progress message is printed).
 \item If \code{normalized_names = TRUE}, selected WoS tags are mapped to standardized
-names (e.g., \code{AU} → \code{author}, \code{TI} → \code{title}, \code{PY} → \code{year}, \code{DI} → \code{doi},
-\code{DE} → \code{keywords}, \code{SR} → \code{unique_id}, etc.; the exact mapping depends on
+names (e.g., \code{AU} -> \code{author}, \code{TI} -> \code{title}, \code{PY} -> \code{year}, \code{DI} -> \code{doi},
+\code{DE} -> \code{keywords}, \code{SR} -> \code{unique_id}, etc.; the exact mapping depends on
 the format). Otherwise, original field tags are preserved.
 \item The output includes:
 \itemize{

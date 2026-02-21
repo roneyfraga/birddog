@@ -136,7 +136,7 @@ sniff_groups_hubs <- function(groups, min_citations = 1) {
     Ml <- Ml |> dplyr::mutate(CR = toupper(gsub("[[:punct:]]", "", CR)))
   }
 
-  Ml <- split(Ml, Ml$group)
+  Ml <- split(Ml, Ml$group)[mixed_sort(unique(Ml$group))]
 
   # Calculate cross-group citations
   for (i in seq_len(nrow(M))) {
@@ -172,7 +172,7 @@ sniff_groups_hubs <- function(groups, min_citations = 1) {
     M
 
   # Calculate standardized within-group citation score (Zi)
-  M_split <- split(M, M$group)
+  M_split <- split(M, M$group)[mixed_sort(unique(M$group))]
 
   lapply(M_split, function(x) {
     if (nrow(x) > 1 && stats::sd(x$ki, na.rm = TRUE) != 0) {
@@ -202,7 +202,9 @@ sniff_groups_hubs <- function(groups, min_citations = 1) {
       by = "SR",
       relationship = "many-to-many"
     ) |>
-    dplyr::arrange(group, dplyr::desc(Ki)) |>
+    dplyr::mutate(group = factor(.data$group, levels = mixed_sort(unique(.data$group)))) |>
+    dplyr::arrange(.data$group, dplyr::desc(Ki)) |>
+    dplyr::mutate(group = as.character(.data$group)) |>
     dplyr::select(group, SR, TC, Ki, ki, Zi, Pi) |>
     dplyr::rename(name = SR) |>
     dplyr::mutate(
