@@ -329,6 +329,10 @@ sniff_citations_cycle_time <- function(
   }
 
   # --- Plots ---
+  dplyr::bind_rows(cct_list) |>
+    dplyr::select("group", "year", "index") ->
+    cct_data
+
   plots_list <- purrr::map(group, function(group_name) {
     group_data <- cct_list[[group_name]]
     if (all(is.na(group_data$index))) {
@@ -349,10 +353,6 @@ sniff_citations_cycle_time <- function(
   valid_plots <- !sapply(plots_list, is.null)
   plots_list <- plots_list[valid_plots]
   names(plots_list) <- group[valid_plots]
-
-  dplyr::bind_rows(cct_list) |>
-    dplyr::select("group", "year", "index") ->
-    cct_data
 
   list(
     data = cct_data,

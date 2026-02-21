@@ -248,6 +248,22 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
     dplyr::select("group", "year", "index") ->
     entropy_data
 
+  # Compute global y-axis ranges for consistent comparison across groups
+  all_index <- entropy_data$index[!is.na(entropy_data$index)]
+  y_limits <- c(
+    max(0, min(all_index, na.rm = TRUE) - 0.05),
+    min(1, max(all_index, na.rm = TRUE) + 0.05)
+  )
+
+  # Compute global diff range
+  all_diffs <- entropy_data |>
+    dplyr::group_by(.data$group) |>
+    dplyr::mutate(diff = c(NA, base::diff(.data$index))) |>
+    dplyr::pull(.data$diff)
+  all_diffs <- all_diffs[!is.na(all_diffs)]
+  diff_margin <- max(abs(all_diffs), na.rm = TRUE) * 1.1
+  y_limits_diff <- c(-diff_margin, diff_margin)
+
   # Create plots for each group
   plots_list <- purrr::map2(entropy_list, group, function(x, y) {
     if (all(is.na(x$index))) {
@@ -255,7 +271,8 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
       return(NULL)
     }
     tryCatch(
-      indexes_plots(x, group_name = y, start_year, end_year, method = "entropy"),
+      indexes_plots(x, group_name = y, start_year, end_year, method = "entropy",
+                    y_limits = y_limits, y_limits_diff = y_limits_diff),
       error = function(e) {
         warning("Error creating plot for group ", y, ": ", e$message)
         return(NULL)
