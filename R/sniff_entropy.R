@@ -13,6 +13,14 @@
 #'   publication year found in the network data.
 #' @param end_year Ending year for entropy calculation. If NULL, uses the maximum
 #'   publication year found in the network data.
+#' @param mode Character specifying the temporal mode for entropy calculation:
+#'   \describe{
+#'     \item{"annual"}{Uses only publications from each specific year (default).}
+#'     \item{"cumulative"}{Uses all publications from the start up to each year.}
+#'     \item{"rolling"}{Uses a sliding window of \code{window_size} years ending at each year.}
+#'   }
+#' @param window_size Integer specifying the rolling window size in years (default: 5).
+#'   Only used when \code{mode = "rolling"}.
 #'
 #' @return A list with three components:
 #'   \item{data}{A tibble containing entropy values for each group and year}
@@ -21,10 +29,18 @@
 #'
 #' @details
 #' The function calculates the normalized Shannon entropy (Pielou's evenness index)
-#' based on Shannon's information theory (Shannon, 1948). For each year, entropy
-#' is computed from the keyword distribution of publications in that year (annual mode).
+#' based on Shannon's information theory (Shannon, 1948). The temporal scope of
+#' keyword data depends on the \code{mode} parameter:
+#' \itemize{
+#'   \item \strong{annual}: entropy from keywords published in each specific year.
+#'     Values tend to be high (near 1) since within-year distributions are typically even.
+#'   \item \strong{cumulative}: entropy from all keywords published up to each year.
+#'     Shows long-term trends in thematic concentration as the keyword pool grows.
+#'   \item \strong{rolling}: entropy from a sliding window of recent years.
+#'     Balances sensitivity to recent shifts with enough data for stable estimates.
+#' }
 #'
-#' The normalized entropy is calculated as:
+#' The normalized entropy (Pielou's J') is calculated as:
 #' \deqn{J' = \frac{H}{H_{max}} = \frac{-\sum_{i=1}^{n} p_i \log_2 p_i}{\log_2 n}}
 #' where \eqn{p_i} is the relative frequency of keyword \eqn{i}, \eqn{n} is the
 #' number of unique keywords, and \eqn{H_{max} = \log_2 n} is the maximum possible
@@ -59,20 +75,17 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Calculate entropy for groups from sniff_groups() output
-#' groups_data <- sniff_groups(your_network_data)
+#' # Rolling window (default: 5 years)
 #' entropy_results <- sniff_entropy(groups_data, scope = "groups")
 #'
-#' # Calculate entropy for entire network
-#' entropy_results <- sniff_entropy(network_data, scope = "network")
+#' # Cumulative mode
+#' entropy_results <- sniff_entropy(groups_data, mode = "cumulative")
 #'
-#' # Specify custom year range
-#' entropy_results <- sniff_entropy(
-#'   groups_data,
-#'   scope = "groups",
-#'   start_year = 2010,
-#'   end_year = 2020
-#' )
+#' # Annual mode
+#' entropy_results <- sniff_entropy(groups_data, mode = "annual")
+#'
+#' # Rolling window with custom size
+#' entropy_results <- sniff_entropy(groups_data, mode = "rolling", window_size = 3)
 #'
 #' # Access results
 #' entropy_data <- entropy_results$data
@@ -81,10 +94,20 @@
 #'
 #' @seealso
 #' \code{\link{sniff_groups}}, \code{\link{sniff_network}}, \code{\link{indexes_plots}}
-sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year = NULL) {
+sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year = NULL,
+                          mode = "rolling", window_size = 5) {
   # Input validation
   if (is.null(network)) {
     stop("Network data not found in groups object", call. = FALSE)
+  }
+
+  valid_modes <- c("annual", "cumulative", "rolling")
+  if (!mode %in% valid_modes) {
+    stop(glue::glue("mode must be: {paste(valid_modes, collapse = ', ')}"), call. = FALSE)
+  }
+
+  if (mode == "rolling" && (!is.numeric(window_size) || length(window_size) != 1 || window_size < 2)) {
+    stop("window_size must be a single integer >= 2", call. = FALSE)
   }
 
   required_scope <- c("network", "groups")
@@ -175,15 +198,21 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
 
   years_seq <- start_year:end_year
 
-  # --- Entropy computation: annual, Pielou's J' ---
+  # --- Entropy computation: Pielou's J' with mode-based filtering ---
   entropy_list <- purrr::map(group, function(grp) {
     group_keywords <- all_keywords |>
       dplyr::filter(.data$group == grp)
 
     purrr::map_dfr(years_seq, function(current_year) {
-      # Annual: only publications from this year
-      year_data <- group_keywords |>
-        dplyr::filter(.data$PY == current_year)
+      # Filter keywords based on mode
+      year_data <- switch(mode,
+        "annual" = group_keywords |>
+          dplyr::filter(.data$PY == current_year),
+        "cumulative" = group_keywords |>
+          dplyr::filter(.data$PY <= current_year),
+        "rolling" = group_keywords |>
+          dplyr::filter(.data$PY >= (current_year - window_size + 1) & .data$PY <= current_year)
+      )
 
       if (nrow(year_data) == 0) {
         return(tibble::tibble(index = NA_real_, year = current_year, group = grp))
