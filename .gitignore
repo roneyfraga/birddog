@@ -22,3 +22,5 @@ birddog.Rproj
 .chat
 .claude
 .claude
+*.Rcheck/
+*.tar.gz
