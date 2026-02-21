@@ -261,7 +261,7 @@ sniff_entropy <- function(network, scope = "groups", start_year = NULL, end_year
     dplyr::mutate(diff = c(NA, base::diff(.data$index))) |>
     dplyr::pull(.data$diff)
   all_diffs <- all_diffs[!is.na(all_diffs)]
-  diff_margin <- max(abs(all_diffs), na.rm = TRUE) * 1.1
+  diff_margin <- stats::quantile(abs(all_diffs), 0.95, na.rm = TRUE) * 1.1
   y_limits_diff <- c(-diff_margin, diff_margin)
 
   # Create plots for each group
