@@ -4,7 +4,13 @@
 \alias{sniff_key_route}
 \title{Identify Key Routes in Citation Networks}
 \usage{
-sniff_key_route(network, scope = "network", n_routes = 1)
+sniff_key_route(
+  network,
+  scope = "network",
+  n_routes = 1,
+  compact_gaps = FALSE,
+  direction = "vertical"
+)
 }
 \arguments{
 \item{network}{A network object of class \code{tbl_graph} or \code{igraph} containing
@@ -20,6 +26,13 @@ edges to use (default: 1). Each iteration selects the next-highest SPC edge
 as a new starting point and extends it into a full path. Higher values
 reveal auxiliary knowledge diffusion paths and divergence-convergence
 structures (see Liu & Lu, 2012, Figure 8).}
+
+\item{compact_gaps}{Logical. If TRUE, compresses the vertical axis by
+removing empty year gaps between publications. This produces shorter plots
+suitable for academic publications. Default is FALSE (chronological spacing).}
+
+\item{direction}{Character. Plot direction: \code{"vertical"} (default, top-to-bottom)
+or \code{"horizontal"} (left-to-right, oldest on the left).}
 }
 \value{
 A list containing for each group:

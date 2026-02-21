@@ -16,6 +16,11 @@
 #'   as a new starting point and extends it into a full path. Higher values
 #'   reveal auxiliary knowledge diffusion paths and divergence-convergence
 #'   structures (see Liu & Lu, 2012, Figure 8).
+#' @param compact_gaps Logical. If TRUE, compresses the vertical axis by
+#'   removing empty year gaps between publications. This produces shorter plots
+#'   suitable for academic publications. Default is FALSE (chronological spacing).
+#' @param direction Character. Plot direction: `"vertical"` (default, top-to-bottom)
+#'   or `"horizontal"` (left-to-right, oldest on the left).
 #'
 #' @return A list containing for each group:
 #' \itemize{
@@ -84,7 +89,7 @@
 #' @importFrom stats na.omit
 #' @importFrom glue glue
 #' @importFrom rlang .env
-sniff_key_route <- function(network, scope = "network", n_routes = 1) {
+sniff_key_route <- function(network, scope = "network", n_routes = 1, compact_gaps = FALSE, direction = "vertical") {
   # Input validation
   if (is.null(network)) {
     stop("Network data not found in groups object", call. = FALSE)
@@ -125,6 +130,10 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1) {
     stop("n_routes must be a positive integer", call. = FALSE)
   }
   n_routes <- as.integer(n_routes)
+
+  if (!direction %in% c("vertical", "horizontal")) {
+    stop("direction must be 'vertical' or 'horizontal'", call. = FALSE)
+  }
 
   # Get unique groups
   group <- tryCatch(
@@ -315,23 +324,105 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1) {
       node_graph_tbl
 
     tree_layout <- ggraph::create_layout(node_graph_tbl, layout = "tree")
+    # Use PY for chronological y-axis with persistent lane offsets
+    # and guaranteed minimum spacing between all nodes.
     tree_layout$y <- tree_layout$PY
 
-    ggplot2::ggplot(tree_layout) +
-      ggraph::geom_edge_link(color = "gray50", width = 1) +
-      ggraph::geom_node_point(color = "steelblue", size = 4) +
-      ggrepel::geom_text_repel(ggplot2::aes(x = x, y = y, label = .data$name2),
-        size = 4,
-        min.segment.length = 0,
-        box.padding = 0.5,
-        max.overlaps = Inf
-      ) +
-      ggplot2::scale_y_reverse() +
-      ggraph::theme_graph() +
-      ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, 2, 1), "cm")) ->
-      krp
+    # Compact gaps: remap years to sequential positions (1-unit spacing)
+    # so empty years between publications are removed
+    if (compact_gaps) {
+      occupied_years <- sort(unique(tree_layout$PY))
+      year_map <- stats::setNames(seq_along(occupied_years), occupied_years)
+      tree_layout$y <- year_map[as.character(tree_layout$PY)]
+    }
 
-    res[[grp]] <- list(plot = krp, data = data_path)
+    x_vals <- unique(sort(tree_layout$x))
+    if (length(x_vals) > 1) {
+      lane_offsets <- seq(-1.0, 1.0, length.out = length(x_vals))
+      names(lane_offsets) <- as.character(x_vals)
+      tree_layout$y <- tree_layout$y + lane_offsets[as.character(tree_layout$x)]
+    }
+    # Enforce minimum vertical gap: sweep from bottom to top and push
+    # nodes up when they are too close to the previous node
+    min_gap <- 0.5
+    ord <- order(tree_layout$y)
+    for (j in seq_along(ord)[-1]) {
+      gap <- tree_layout$y[ord[j]] - tree_layout$y[ord[j - 1]]
+      if (gap < min_gap) {
+        tree_layout$y[ord[j]] <- tree_layout$y[ord[j - 1]] + min_gap
+      }
+    }
+
+    # Build y-axis: show actual year labels
+    if (compact_gaps) {
+      occupied_years <- sort(unique(tree_layout$PY))
+      year_map <- stats::setNames(seq_along(occupied_years), occupied_years)
+      y_breaks <- as.numeric(year_map)
+      y_labels <- names(year_map)
+    } else {
+      y_breaks <- ggplot2::waiver()
+      y_labels <- ggplot2::waiver()
+    }
+
+    # Flip axes for horizontal direction: timeline runs left-to-right
+    if (direction == "horizontal") {
+      orig_x <- tree_layout$x
+      tree_layout$x <- tree_layout$y
+      tree_layout$y <- orig_x
+    }
+
+    if (direction == "horizontal") {
+      x_rng <- range(tree_layout$x)
+      y_rng <- range(tree_layout$y)
+      x_pad <- diff(x_rng) * 0.15 + 0.5
+      y_pad <- diff(y_rng) * 0.15 + 0.5
+
+      ggplot2::ggplot(tree_layout) +
+        ggraph::geom_edge_link(color = "gray70", width = 1) +
+        ggraph::geom_node_point(color = "dodgerblue3", size = 4) +
+        ggrepel::geom_text_repel(ggplot2::aes(x = x, y = y, label = .data$name2),
+          size = 4,
+          min.segment.length = 0,
+          box.padding = 0.5,
+          max.overlaps = Inf,
+          angle = 90,
+          bg.color = "white",
+          bg.r = 0.15,
+          xlim = c(x_rng[1] - x_pad, x_rng[2] + x_pad),
+          ylim = c(y_rng[1] - y_pad, y_rng[2] + y_pad)
+        ) +
+        ggplot2::coord_cartesian(
+          xlim = c(x_rng[1] - x_pad, x_rng[2] + x_pad),
+          ylim = c(y_rng[1] - y_pad, y_rng[2] + y_pad),
+          clip = "off"
+        ) +
+        ggplot2::scale_x_continuous(breaks = y_breaks, labels = y_labels) +
+        ggraph::theme_graph() +
+        ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, 2, 1), "cm")) ->
+        krp
+    } else {
+      ggplot2::ggplot(tree_layout) +
+        ggraph::geom_edge_link(color = "gray70", width = 1) +
+        ggraph::geom_node_point(color = "dodgerblue3", size = 4) +
+        ggrepel::geom_text_repel(ggplot2::aes(x = x, y = y, label = .data$name2),
+          size = 4,
+          min.segment.length = 0,
+          box.padding = 0.5,
+          max.overlaps = Inf,
+          bg.color = "white",
+          bg.r = 0.15
+        ) +
+        ggplot2::scale_y_reverse(breaks = y_breaks, labels = y_labels) +
+        ggraph::theme_graph() +
+        ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, 2, 1), "cm")) ->
+        krp
+    }
+
+    # Add plot coordinates to data
+    coords <- tibble::tibble(name = tree_layout$name, x = tree_layout$x, y = tree_layout$y)
+    data_path <- dplyr::left_join(data_path, coords, by = "name")
+
+    res[[grp]] <- list(plot = krp, data = dplyr::arrange(data_path, .data$PY))
   }
 
   return(res)
