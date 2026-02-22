@@ -10,7 +10,8 @@ indexes_plots(
   start_year,
   end_year,
   method = "cct",
-  y_limits = NULL
+  y_limits = NULL,
+  y_limits_diff = NULL
 )
 }
 \arguments{
@@ -29,7 +30,10 @@ indexes_plots(
 \item{method}{Character string indicating the method: "cct" or "entropy"}
 
 \item{y_limits}{Optional numeric vector of length 2 (c(min, max)) to fix the
-y-axis range across all plots. If NULL (default), auto-scales per group.}
+y-axis range for the absolute values plot. If NULL (default), auto-scales per group.}
+
+\item{y_limits_diff}{Optional numeric vector of length 2 (c(min, max)) to fix the
+y-axis range for the differences plot. If NULL (default), auto-scales per group.}
 }
 \value{
 A plotly object with combined plots

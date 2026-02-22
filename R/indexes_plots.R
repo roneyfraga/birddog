@@ -82,7 +82,7 @@ indexes_plots <- function(data, group_name, start_year, end_year, method = "cct"
     group_data |>
       dplyr::mutate(diff = c(NA, base::diff(.data$index))) |>
       stats::na.omit() |>
-      dplyr::mutate(color_flag = ifelse(.data$diff < 0, "red", "blue")) ->
+      dplyr::mutate(color_flag = ifelse(.data$diff < 0, "#b33600", "#1a7a1a")) ->
       diff_data
     
     if (nrow(diff_data) == 0) {
