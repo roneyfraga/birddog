@@ -135,13 +135,42 @@ get_openalex_fields <- function(
     return(result)
   }
 
+  # Load previously saved batches to avoid re-downloading
+  all_data <- list()
+  if (!is.null(save_dir) && dir.exists(save_dir)) {
+    existing_files <- sort(list.files(save_dir, pattern = "^batch_\\d+\\.rds$", full.names = TRUE))
+    if (length(existing_files) > 0) {
+      for (f in existing_files) {
+        tryCatch({
+          saved <- readRDS(f)
+          if (is.data.frame(saved) && "id" %in% names(saved)) {
+            all_data[[length(all_data) + 1]] <- saved
+          }
+        }, error = function(e) {
+          message("Warning: could not read ", f, ": ", e$message)
+        })
+      }
+      if (length(all_data) > 0) {
+        cached_ids <- gsub("https://openalex.org/", "", unlist(lapply(all_data, `[[`, "id")))
+        n_cached <- sum(valid_ids %in% cached_ids)
+        valid_ids <- valid_ids[!valid_ids %in% cached_ids]
+        message("Found ", n_cached, " IDs already saved in ", save_dir, ", skipping them")
+      }
+    }
+  }
+
+  if (length(valid_ids) == 0) {
+    message("All IDs already available from saved batches")
+    result <- dplyr::bind_rows(all_data) |>
+      dplyr::mutate(id = gsub("https://openalex.org/", "", .data$id)) |>
+      tibble::as_tibble()
+    return(result)
+  }
+
   message(
     "Fetching ", paste(variables, collapse = ", "), " for ",
     length(valid_ids), " unique work IDs using openalexR package"
   )
-
-  # Process in batches
-  all_data <- list()
 
   for (i in seq(1, length(valid_ids), by = batch_size)) {
     batch_ids <- valid_ids[i:min(i + batch_size - 1, length(valid_ids))]
@@ -175,9 +204,14 @@ get_openalex_fields <- function(
           all_data[[length(all_data) + 1]] <- batch_df
           message("  Retrieved ", nrow(batch_data), " records")
 
-          # Save batch if directory specified
+          # Save batch if directory specified (avoid overwriting existing files)
           if (!is.null(save_dir)) {
-            batch_file <- file.path(save_dir, paste0("batch_", batch_num, ".rds"))
+            file_num <- 1
+            batch_file <- file.path(save_dir, paste0("batch_", file_num, ".rds"))
+            while (file.exists(batch_file)) {
+              file_num <- file_num + 1
+              batch_file <- file.path(save_dir, paste0("batch_", file_num, ".rds"))
+            }
             saveRDS(batch_df, batch_file)
             message("  Saved to: ", batch_file)
           }
