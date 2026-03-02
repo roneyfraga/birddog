@@ -81,7 +81,7 @@
 #' }
 #'
 #' @export
-#' @importFrom igraph V E ends degree vcount ecount incident is_dag is_directed
+#' @importFrom igraph V E ends degree vcount ecount is_dag is_directed
 #' @importFrom igraph topo_sort graph_from_edgelist feedback_arc_set delete_edges
 #' @importFrom tidygraph activate
 #' @importFrom dplyr filter mutate pull select
@@ -200,14 +200,18 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1, compact_ga
 
     topo <- as.integer(igraph::topo_sort(net_data_group, mode = "out"))
 
+    # Pre-build adjacency lists from edge list to avoid repeated igraph::incident() calls
+    in_edges_list <- split(seq_along(to_idx), to_idx)
+    out_edges_list <- split(seq_along(from_idx), from_idx)
+
     # Forward count: paths from sources to each node
     forward_count <- numeric(n_nodes)
     forward_count[igraph::degree(net_data_group, mode = "in") == 0] <- 1
 
     for (v in topo) {
-      in_edges <- as.integer(igraph::incident(net_data_group, v, mode = "in"))
-      if (length(in_edges) > 0) {
-        forward_count[v] <- sum(forward_count[from_idx[in_edges]])
+      edges <- in_edges_list[[as.character(v)]]
+      if (!is.null(edges)) {
+        forward_count[v] <- sum(forward_count[from_idx[edges]])
       }
     }
 
@@ -216,9 +220,9 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1, compact_ga
     backward_count[igraph::degree(net_data_group, mode = "out") == 0] <- 1
 
     for (v in rev(topo)) {
-      out_edges <- as.integer(igraph::incident(net_data_group, v, mode = "out"))
-      if (length(out_edges) > 0) {
-        backward_count[v] <- sum(backward_count[to_idx[out_edges]])
+      edges <- out_edges_list[[as.character(v)]]
+      if (!is.null(edges)) {
+        backward_count[v] <- sum(backward_count[to_idx[edges]])
       }
     }
 
@@ -250,8 +254,8 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1, compact_ga
       current_node <- to_idx[key_edge]
 
       repeat {
-        out_edges <- as.integer(igraph::incident(net_data_group, current_node, mode = "out"))
-        if (length(out_edges) == 0) break
+        out_edges <- out_edges_list[[as.character(current_node)]]
+        if (is.null(out_edges) || length(out_edges) == 0) break
         best_edge <- out_edges[which.max(spc[out_edges])]
         next_node <- to_idx[best_edge]
         if (next_node %in% visited_nodes) break
@@ -264,8 +268,8 @@ sniff_key_route <- function(network, scope = "network", n_routes = 1, compact_ga
       current_node <- from_idx[key_edge]
 
       repeat {
-        in_edges <- as.integer(igraph::incident(net_data_group, current_node, mode = "in"))
-        if (length(in_edges) == 0) break
+        in_edges <- in_edges_list[[as.character(current_node)]]
+        if (is.null(in_edges) || length(in_edges) == 0) break
         best_edge <- in_edges[which.max(spc[in_edges])]
         next_node <- from_idx[best_edge]
         if (next_node %in% visited_nodes) break

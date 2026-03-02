@@ -124,6 +124,23 @@ sniff_groups_attributes <- function(groups,
     growth_rate_data_gt
 
   if (horizon_plot == TRUE) {
+    # Pre-render horizon plot images to avoid capturing large objects
+    # (network, groups) in the gt text_transform closure
+    horizon_imgs <- gt::ggplot_image(
+      purrr::map(growth_rate_data_gt$group, function(x) {
+        plot_horizon_group(growth_rate_horizon, group_name = x,
+                           year_range = c(min(growth_rate_period), max(growth_rate_period)),
+                           show_x_axis = TRUE)
+      }),
+      aspect_ratio = 3
+    )
+    names(horizon_imgs) <- growth_rate_data_gt$group
+
+    # Isolate the transform function environment so the gt object
+    # does not serialize the full parent environment (network data)
+    horizon_fn <- function(column) get("imgs")[column]
+    environment(horizon_fn) <- list2env(list(imgs = horizon_imgs), parent = globalenv())
+
     growth_rate_data_gt |>
       gt::gt() |>
       gt::tab_header(title = "Groups Attributes") |>
@@ -137,11 +154,7 @@ sniff_groups_attributes <- function(groups,
       ) |>
       gt::text_transform(
         locations = gt::cells_body(columns = "horizon"),
-        fn = function(column) {
-          column |>
-            purrr::map(\(x) plot_horizon_group(growth_rate_horizon, group_name = x, year_range = c(min(growth_rate_period), max(growth_rate_period)), show_x_axis = TRUE)) |>
-            gt::ggplot_image(aspect_ratio = 3)
-        }
+        fn = horizon_fn
       ) |>
       gt::tab_source_note(source_note = gt::md(paste0("**Source**: ", DB, ". Data extracted, organized and estimated by the authors."))) |>
       gt::tab_footnote(footnote = "Average publication year: For example, '2016+7m' means that the articles were published, on average, in 2016 plus seven months.", locations = gt::cells_column_labels(columns = average_age)) |>

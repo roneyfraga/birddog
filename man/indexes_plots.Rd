@@ -4,7 +4,15 @@
 \alias{indexes_plots}
 \title{Create CCT or Entropy Visualization Plots}
 \usage{
-indexes_plots(data, group_name, start_year, end_year, method = "cct")
+indexes_plots(
+  data,
+  group_name,
+  start_year,
+  end_year,
+  method = "cct",
+  y_limits = NULL,
+  y_limits_diff = NULL
+)
 }
 \arguments{
 \item{data}{Data from calculate_cct or calculate_entropy function. Can be either:
@@ -20,6 +28,12 @@ indexes_plots(data, group_name, start_year, end_year, method = "cct")
 \item{end_year}{Ending year for x-axis}
 
 \item{method}{Character string indicating the method: "cct" or "entropy"}
+
+\item{y_limits}{Optional numeric vector of length 2 (c(min, max)) to fix the
+y-axis range for the absolute values plot. If NULL (default), auto-scales per group.}
+
+\item{y_limits_diff}{Optional numeric vector of length 2 (c(min, max)) to fix the
+y-axis range for the differences plot. If NULL (default), auto-scales per group.}
 }
 \value{
 A plotly object with combined plots

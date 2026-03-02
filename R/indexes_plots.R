@@ -7,10 +7,14 @@
 #' @param start_year Starting year for x-axis
 #' @param end_year Ending year for x-axis
 #' @param method Character string indicating the method: "cct" or "entropy"
+#' @param y_limits Optional numeric vector of length 2 (c(min, max)) to fix the
+#'   y-axis range for the absolute values plot. If NULL (default), auto-scales per group.
+#' @param y_limits_diff Optional numeric vector of length 2 (c(min, max)) to fix the
+#'   y-axis range for the differences plot. If NULL (default), auto-scales per group.
 #'
 #' @return A plotly object with combined plots
 #' @keywords internal
-indexes_plots <- function(data, group_name, start_year, end_year, method = "cct") {
+indexes_plots <- function(data, group_name, start_year, end_year, method = "cct", y_limits = NULL, y_limits_diff = NULL) {
   
   tryCatch({
     # Handle list input - extract the specific group's data
@@ -57,7 +61,7 @@ indexes_plots <- function(data, group_name, start_year, end_year, method = "cct"
     # Plot 1: Absolute values
     p1 <- ggplot2::ggplot(group_data, ggplot2::aes(x = .data$year, y = .data$index)) +
       ggplot2::geom_line(color = "steelblue", linewidth = 1) +
-      ggplot2::scale_y_continuous(limits = c(0, max(group_data$index, na.rm = TRUE) * 1.1)) +
+      ggplot2::scale_y_continuous(limits = if (!is.null(y_limits)) y_limits else c(0, max(group_data$index, na.rm = TRUE) * 1.1)) +
       ggplot2::scale_x_continuous(
         limits = c(start_year, end_year),
         breaks = seq(start_year, end_year, by = max(1, floor(n_years / n_breaks)))
@@ -78,7 +82,7 @@ indexes_plots <- function(data, group_name, start_year, end_year, method = "cct"
     group_data |>
       dplyr::mutate(diff = c(NA, base::diff(.data$index))) |>
       stats::na.omit() |>
-      dplyr::mutate(color_flag = ifelse(.data$diff < 0, "red", "blue")) ->
+      dplyr::mutate(color_flag = ifelse(.data$diff < 0, "#b33600", "#1a7a1a")) ->
       diff_data
     
     if (nrow(diff_data) == 0) {
@@ -99,6 +103,7 @@ indexes_plots <- function(data, group_name, start_year, end_year, method = "cct"
       ) +
       ggplot2::geom_point(ggplot2::aes(color = .data$color_flag), size = 1) +
       ggplot2::geom_hline(yintercept = 0, color = "black", linetype = "dashed") +
+      {if (!is.null(y_limits_diff)) ggplot2::scale_y_continuous(limits = y_limits_diff) else ggplot2::scale_y_continuous()} +
       ggplot2::scale_x_continuous(
         limits = c(start_year, end_year),
         breaks = seq(start_year, end_year, by = max(1, floor(n_years / n_breaks)))
