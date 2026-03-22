@@ -13,7 +13,7 @@ file points to an http:// or https:// resource."><meta property="og:image" conte
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,8 +86,8 @@ will be combined row-wise when applicable.</p></li>
 <li><p>When <code>file</code> is a URL, the file is downloaded to a temporary path before
 parsing (a progress message is printed).</p></li>
 <li><p>If <code>normalized_names = TRUE</code>, selected WoS tags are mapped to standardized
-names (e.g., <code>AU</code> → <code>author</code>, <code>TI</code> → <code>title</code>, <code>PY</code> → <code>year</code>, <code>DI</code> → <code>doi</code>,
-<code>DE</code> → <code>keywords</code>, <code>SR</code> → <code>unique_id</code>, etc.; the exact mapping depends on
+names (e.g., <code>AU</code> -&gt; <code>author</code>, <code>TI</code> -&gt; <code>title</code>, <code>PY</code> -&gt; <code>year</code>, <code>DI</code> -&gt; <code>doi</code>,
+<code>DE</code> -&gt; <code>keywords</code>, <code>SR</code> -&gt; <code>unique_id</code>, etc.; the exact mapping depends on
 the format). Otherwise, original field tags are preserved.</p></li>
 <li><p>The output includes:</p><ul><li><p><code>DI2</code>: an uppercase, punctuation-stripped variant of <code>DI</code> (if present),</p></li>
 <li><p><code>PY</code>: coerced to numeric (when present),</p></li>

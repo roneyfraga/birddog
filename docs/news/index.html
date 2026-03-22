@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,11 +37,48 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="birddog-development-version">birddog (development version)<a class="anchor" aria-label="anchor" href="#birddog-development-version"></a></h2>
-<ul><li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
+<div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/sniff_key_route.html">sniff_key_route()</a></code>: support for multiple key-routes and natural group ordering.</li>
+<li>
+<code><a href="../reference/sniff_key_route.html">sniff_key_route()</a></code>: new <code>compact_gaps</code> and <code>direction</code> arguments.</li>
+<li>
+<code><a href="../reference/sniff_entropy.html">sniff_entropy()</a></code>: new <code>mode</code> and <code>window_size</code> arguments.</li>
+<li>
+<code><a href="../reference/get_openalex_fields.html">get_openalex_fields()</a></code>: cache saved batches to skip duplicate API downloads.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-development-version">Improvements<a class="anchor" aria-label="anchor" href="#improvements-development-version"></a></h3>
+<ul><li>Optimize SPC and key-route search with pre-built adjacency lists.</li>
+<li>Pre-render horizon plots to reduce gt object size in <code><a href="../reference/sniff_groups_attributes.html">sniff_groups_attributes()</a></code>.</li>
+<li>Improve key-route plot layout, axis labels, and data output.</li>
+<li>Improve horizon plot x-axis: vertical year labels, removed title.</li>
+<li>Use 95th percentile for entropy diff plot y-axis range.</li>
+<li>Swap diff colors in index plots: red for negative, blue for positive.</li>
+<li>Add <code>y_limits_diff</code> parameter to <code><a href="../reference/indexes_plots.html">indexes_plots()</a></code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>Fix y-axis scale across entropy plots for group comparison.</li>
+<li>Fix dplyr variable collision in <code><a href="../reference/sniff_key_route.html">sniff_key_route()</a></code> group filter.</li>
+<li>Fix <code>rlang</code> <code>.env</code> import to resolve R CMD check NOTE.</li>
+<li>Fix plot issues: diff colors and same-year node spreading.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="birddog-100">birddog 1.0.0<a class="anchor" aria-label="anchor" href="#birddog-100"></a></h2><p class="text-muted">CRAN release: 2026-02-19</p>
+<ul><li>Initial CRAN release.</li>
+<li>Rewrite of <code><a href="../reference/sniff_key_route.html">sniff_key_route()</a></code>, <code><a href="../reference/sniff_citations_cycle_time.html">sniff_citations_cycle_time()</a></code>, and <code><a href="../reference/sniff_entropy.html">sniff_entropy()</a></code>.</li>
+<li>Added <code>testthat</code> test suite with 102 tests across 16 files.</li>
+<li>Fix BibTeX parser for Windows CRLF line endings.</li>
+<li>Fix CRAN check issues: Unicode chars, <code>\dontrun</code> examples, DOI URLs.</li>
+<li>Replace <code>\dontrun</code> with <code>\donttest</code> in all examples.</li>
+<li>Add error guards to vignettes to prevent crashes.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="birddog-010">birddog 0.1.0<a class="anchor" aria-label="anchor" href="#birddog-010"></a></h2>
-<ul><li>Initial CRAN submission.</li>
+<ul><li>Initial development version.</li>
 <li>Added <code><a href="../reference/sniff_key_route.html">sniff_key_route()</a></code> function for main path analysis.</li>
 <li>Includes visualization capabilities.</li>
 <li>Implements methodology from Liu &amp; Lu (2012).</li>

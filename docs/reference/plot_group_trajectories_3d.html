@@ -11,7 +11,7 @@ representing publication year deviation."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,8 @@ representing publication year deviation.</p>
 <span>  label_angle <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  time_span <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  show_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  last_year_keywords <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  last_year_keywords <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  log_scale <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -112,6 +113,12 @@ for nodes to be included (default: 0.2)</p></dd>
 
 <dt id="arg-last-year-keywords">last_year_keywords<a class="anchor" aria-label="anchor" href="#arg-last-year-keywords"></a></dt>
 <dd><p>Optional keywords description for the last year (default: NULL)</p></dd>
+
+
+<dt id="arg-log-scale">log_scale<a class="anchor" aria-label="anchor" href="#arg-log-scale"></a></dt>
+<dd><p>Whether to apply log transformation to the z-axis size values
+(default: FALSE). Uses <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log1p()</a></code> (i.e., log(1 + x)) to compress large
+differences between node sizes.</p></dd>
 
 </dl></div>
     <div class="section level2">
