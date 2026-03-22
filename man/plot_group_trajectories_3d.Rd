@@ -15,7 +15,8 @@ plot_group_trajectories_3d(
   label_angle = 0,
   time_span = NA,
   show_legend = TRUE,
-  last_year_keywords = NULL
+  last_year_keywords = NULL,
+  log_scale = FALSE
 )
 }
 \arguments{
@@ -45,6 +46,10 @@ for nodes to be included (default: 0.2)}
 \item{show_legend}{Logical indicating whether to show the color legend (default: TRUE)}
 
 \item{last_year_keywords}{Optional keywords description for the last year (default: NULL)}
+
+\item{log_scale}{Whether to apply log transformation to the z-axis size values
+(default: FALSE). Uses \code{log1p()} (i.e., log(1 + x)) to compress large
+differences between node sizes.}
 }
 \value{
 A plotly 3D visualization object

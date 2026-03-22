@@ -20,6 +20,9 @@
 #' @param time_span Optional vector specifying the time span to display (default: NA shows all years)
 #' @param show_legend Logical indicating whether to show the color legend (default: TRUE)
 #' @param last_year_keywords Optional keywords description for the last year (default: NULL)
+#' @param log_scale Whether to apply log transformation to the z-axis size values
+#'   (default: FALSE). Uses `log1p()` (i.e., log(1 + x)) to compress large
+#'   differences between node sizes.
 #'
 #' @return A plotly 3D visualization object
 #'
@@ -54,7 +57,8 @@ plot_group_trajectories_3d <- function(
   label_angle = 0,
   time_span = NA,
   show_legend = TRUE,
-  last_year_keywords = NULL) {
+  last_year_keywords = NULL,
+  log_scale = FALSE) {
 
   # Extract components from input
   groups_similarity <- groups_cumulative_trajectories[["groups_similarity"]]
@@ -106,7 +110,10 @@ plot_group_trajectories_3d <- function(
       net2 <- net |>
         tidygraph::activate(nodes) |>
         dplyr::left_join(dados3, by = dplyr::join_by(name)) |>
-        dplyr::mutate(size = quantity_papers * prop_tracked_intra_group) |>
+        dplyr::mutate(
+          size = quantity_papers * prop_tracked_intra_group,
+          size = if (log_scale) log1p(size) else size
+        ) |>
         dplyr::filter(
           prop_tracked_intra_group >= prop_tracked_intra_group_treshold,
           tracked_documents > 1
@@ -252,7 +259,7 @@ plot_group_trajectories_3d <- function(
               tickfont = list(size = 13)
             ),
             zaxis = list(
-              title = "Size",
+              title = if (log_scale) "Size (log)" else "Size",
               titlefont = list(size = 22),
               tickfont = list(size = 13)
             ),

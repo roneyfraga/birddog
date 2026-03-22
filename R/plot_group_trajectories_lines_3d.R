@@ -17,9 +17,13 @@
 #'   (default: c(4, 12)). Segment widths scale with cumulative paper counts.
 #' @param width_range_lo Baseline width range used to compute constant lowlight 
 #'   width (default: c(1.2, 3)). The mean of this range determines lowlight width.
-#' @param use_raw_papers Whether to use raw paper counts for z-axis scaling 
-#'   (default: TRUE). If TRUE, uses raw `quantity_papers`; if FALSE, uses 
+#' @param use_raw_papers Whether to use raw paper counts for z-axis scaling
+#'   (default: TRUE). If TRUE, uses raw `quantity_papers`; if FALSE, uses
 #'   weighted size: `quantity_papers * prop_tracked_intra_group`.
+#' @param log_scale Whether to apply log transformation to cumulative document
+#'   counts on the z-axis (default: FALSE). Uses `log1p()` (i.e., log(1 + x))
+#'   to handle zero values. Useful when trajectories have very different growth
+#'   rates, compressing the z-axis to better visualize relative trajectory shapes.
 #' @param connect_only_existing_edges Whether to draw only edges that exist in 
 #'   the graph (default: TRUE). If FALSE, draws all consecutive node pairs in 
 #'   trajectories regardless of graph edges.
@@ -33,6 +37,8 @@
 #'   network (default: 1)
 #' @param lowlight_alpha Transparency for lowlight elements (default: 0.9)
 #' @param lowlight_color Color for lowlight elements (default: "#9AA5B1" - neutral gray)
+#' @param group_id Optional group identifier to display in the plot title
+#'   (default: NULL). When provided, the title becomes "3D Trajectories - group_id".
 #'
 #' @return A plotly interactive 3D plot object
 #'
@@ -77,6 +83,13 @@
 #'   show_labels = TRUE
 #' )
 #' 
+#' # Log-scale z-axis for trajectories with very different growth rates
+#' plot_group_trajectories_lines_3d(
+#'   traj_data = traj_data,
+#'   traj_filtered = filtered_traj,
+#'   log_scale = TRUE
+#' )
+#'
 #' # Minimal view with only highlighted trajectories
 #' plot_group_trajectories_lines_3d(
 #'   traj_data = traj_data,
@@ -100,6 +113,7 @@ plot_group_trajectories_lines_3d <- function(
   width_range_hi = c(4, 12),
   width_range_lo = c(1.2, 3),
   use_raw_papers = TRUE,
+  log_scale = FALSE,
   connect_only_existing_edges = TRUE,
   show_labels = TRUE,
   show_only_highlighted = FALSE,
@@ -107,7 +121,8 @@ plot_group_trajectories_lines_3d <- function(
   hover_font_size = 12,
   lowlight_width = 1,
   lowlight_alpha = 0.9,
-  lowlight_color = "#9AA5B1"
+  lowlight_color = "#9AA5B1",
+  group_id = NULL
 ) {
   if (!requireNamespace("plotly", quietly = TRUE))
     stop("plotly is required for 3D plotting. Please install.packages('plotly').", call. = FALSE)
@@ -178,9 +193,11 @@ plot_group_trajectories_lines_3d <- function(
       years <- as_year(nodes)
       yvals <- v_y[nodes]
       step_p <- node_measure[match(nodes, nm)]; step_p[is.na(step_p)] <- 0
-      zvals <- cumsum(step_p)  # cumulative
+      zvals_raw <- cumsum(step_p)
+      zvals <- if (log_scale) log1p(zvals_raw) else zvals_raw
       out[[i]] <- list(traj_id = tid, nodes = nodes, years = years,
-                       yvals = yvals, step_p = step_p, zvals = zvals)
+                       yvals = yvals, step_p = step_p,
+                       zvals = zvals, zvals_raw = zvals_raw)
     }
     Filter(Negate(is.null), out)
   }
@@ -266,12 +283,25 @@ plot_group_trajectories_lines_3d <- function(
       }
 
       # Invisible markers for hover
-      hover_txt <- paste0(
-        "<b>", td$traj_id, "</b><br>",
-        "Year: ", td$years, "<br>",
-        "Step papers: ", td$step_p, "<br>",
-        "Cumulative: ", td$zvals
-      )
+      group_label <- if (!is.null(group_id)) paste0("Group: ", group_id, "<br>") else ""
+      hover_txt <- if (log_scale) {
+        paste0(
+          group_label,
+          "<b>", td$traj_id, "</b><br>",
+          "Year: ", td$years, "<br>",
+          "Step papers: ", td$step_p, "<br>",
+          "Cumulative: ", td$zvals_raw, "<br>",
+          "Log cumulative: ", round(td$zvals, 2)
+        )
+      } else {
+        paste0(
+          group_label,
+          "<b>", td$traj_id, "</b><br>",
+          "Year: ", td$years, "<br>",
+          "Step papers: ", td$step_p, "<br>",
+          "Cumulative: ", td$zvals
+        )
+      }
       p <- p |>
         plotly::add_trace(
           x = td$years, y = td$yvals, z = td$zvals,
@@ -306,10 +336,13 @@ plot_group_trajectories_lines_3d <- function(
       scene = list(
         xaxis = list(title = "Year"),
         yaxis = list(title = "Route"),
-        zaxis = list(title = if (use_raw_papers) "Cumulative documents" else "Cumulative weighted documents"),
+        zaxis = list(title = paste0(
+          if (use_raw_papers) "Cumulative documents" else "Cumulative weighted documents",
+          if (log_scale) " (log)" else ""
+        )),
         camera = camera_settings
       ),
       legend = list(font = list(size = 16)),
-      title = "3D Trajectories"
+      title = if (!is.null(group_id)) paste0("3D Trajectories - ", group_id) else "3D Trajectories"
     )
 }

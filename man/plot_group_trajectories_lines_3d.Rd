@@ -10,6 +10,7 @@ plot_group_trajectories_lines_3d(
   width_range_hi = c(4, 12),
   width_range_lo = c(1.2, 3),
   use_raw_papers = TRUE,
+  log_scale = FALSE,
   connect_only_existing_edges = TRUE,
   show_labels = TRUE,
   show_only_highlighted = FALSE,
@@ -17,7 +18,8 @@ plot_group_trajectories_lines_3d(
   hover_font_size = 12,
   lowlight_width = 1,
   lowlight_alpha = 0.9,
-  lowlight_color = "#9AA5B1"
+  lowlight_color = "#9AA5B1",
+  group_id = NULL
 )
 }
 \arguments{
@@ -45,6 +47,11 @@ width (default: c(1.2, 3)). The mean of this range determines lowlight width.}
 (default: TRUE). If TRUE, uses raw \code{quantity_papers}; if FALSE, uses
 weighted size: \code{quantity_papers * prop_tracked_intra_group}.}
 
+\item{log_scale}{Whether to apply log transformation to cumulative document
+counts on the z-axis (default: FALSE). Uses \code{log1p()} (i.e., log(1 + x))
+to handle zero values. Useful when trajectories have very different growth
+rates, compressing the z-axis to better visualize relative trajectory shapes.}
+
 \item{connect_only_existing_edges}{Whether to draw only edges that exist in
 the graph (default: TRUE). If FALSE, draws all consecutive node pairs in
 trajectories regardless of graph edges.}
@@ -65,6 +72,9 @@ network (default: 1)}
 \item{lowlight_alpha}{Transparency for lowlight elements (default: 0.9)}
 
 \item{lowlight_color}{Color for lowlight elements (default: "#9AA5B1" - neutral gray)}
+
+\item{group_id}{Optional group identifier to display in the plot title
+(default: NULL). When provided, the title becomes "3D Trajectories - group_id".}
 }
 \value{
 A plotly interactive 3D plot object
@@ -118,6 +128,13 @@ plot_group_trajectories_lines_3d(
   width_range_hi = c(3, 10),
   use_raw_papers = FALSE,
   show_labels = TRUE
+)
+
+# Log-scale z-axis for trajectories with very different growth rates
+plot_group_trajectories_lines_3d(
+  traj_data = traj_data,
+  traj_filtered = filtered_traj,
+  log_scale = TRUE
 )
 
 # Minimal view with only highlighted trajectories
