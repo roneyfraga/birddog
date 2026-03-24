@@ -2,18 +2,33 @@
 % Please edit documentation in R/utils.R
 \name{mixed_sort}
 \alias{mixed_sort}
-\title{Natural sort for alphanumeric group names}
+\title{Natural sort for alphanumeric strings}
 \usage{
 mixed_sort(x)
 }
 \arguments{
-\item{x}{Character vector to sort}
+\item{x}{Character vector to sort.}
 }
 \value{
-Sorted character vector
+A character vector sorted in natural numeric order.
 }
 \description{
-Sorts strings like "c1g1", "c1g2", "c1g10" in natural numeric order
-by extracting and comparing embedded numbers sequentially.
+Sort character vectors containing embedded numbers in natural numeric
+order rather than lexicographic order. For example, \code{"c1g2"} comes before
+\code{"c1g10"}, which standard \code{\link[=sort]{sort()}} would not guarantee.
 }
-\keyword{internal}
+\details{
+The function extracts all numeric segments from each string using
+\code{\link[stringr:str_extract]{stringr::str_extract_all()}} and sorts by them sequentially (first
+number, then second). Designed for two-segment identifiers such as
+\code{"c1g1"}, \code{"c2g10"}, etc.
+}
+\examples{
+mixed_sort(c("c1g10", "c1g2", "c1g1", "c1g9"))
+
+mixed_sort(c("group12", "group1", "group3"))
+
+}
+\seealso{
+\code{\link[=sort]{sort()}} for standard lexicographic sorting.
+}

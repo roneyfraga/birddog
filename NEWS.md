@@ -2,6 +2,12 @@
 
 ## New features
 
+* `mixed_sort()`: exported for external use, with improved documentation.
+
+# birddog 1.0.2
+
+## New features
+
 * `sniff_key_route()`: support for multiple key-routes and natural group ordering.
 * `sniff_key_route()`: new `compact_gaps` and `direction` arguments.
 * `sniff_entropy()`: new `mode` and `window_size` arguments.
