@@ -30,7 +30,7 @@ The stable release is on CRAN. The development version is available on GitHub: <
 
 ### Methodological workflow
 
-![](https://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg){width=95%}
+![](https://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg){width=99%}
 
 ## Installation
 
@@ -252,7 +252,13 @@ groups_hubs |>
   dplyr::mutate(Zi = round(Zi, 2), Pi = round(Pi, 2)) |>
   dplyr::arrange(dplyr::desc(zone), dplyr::desc(Zi)) |>
   dplyr::slice_head(n = 15) |>
-  gt::gt()
+  gt::gt() |>
+  gt::text_transform(
+    locations = gt::cells_body(columns = name),
+    fn = function(x) {
+      glue::glue('<a href="https://openalex.org/{x}" target="_blank">{x}</a>')
+    }
+  )
 ```
 
 ## Indexes: Citations Cycle Time
@@ -268,21 +274,20 @@ groups_cct <- birddog::sniff_citations_cycle_time(
   end_year = 2024
 )
 
+groups_cct$plots[["c1g3"]]
 ```
 
 ```{r include = FALSE}
 groups_cct <- readRDS(file.path(local_data, "groups_cct.rds"))
 ```
 
-```{r}
-groups_cct$plots[["c1g3"]]
-```
+![](cct-c1g3.png)
 
 ## Indexes: Entropy
 
 Track keyword diversity within each group over time. Increasing entropy signals thematic diversification; decreasing entropy signals convergence.
 
-```{r eval = TRUE}
+```{r eval = FALSE}
 groups_entropy <- birddog::sniff_entropy(
   groups,
   scope = "groups",
@@ -292,6 +297,8 @@ groups_entropy <- birddog::sniff_entropy(
 
 groups_entropy$plots[["c1g3"]]
 ```
+
+![](entropy-c1g3.png)
 
 ## Group trajectories
 
@@ -307,7 +314,7 @@ groups_cumulative <- birddog::sniff_groups_cumulative(groups)
 groups_cumulative <- readRDS(file.path(local_data, "groups_cumulative.rds"))
 ```
 
-```{r warning = FALSE}
+```{r eval = FALSE}
 suppressMessages({
   groups_cumulative_trajectories <- birddog::sniff_groups_trajectories(groups_cumulative)
 })
@@ -322,13 +329,17 @@ birddog::plot_group_trajectories_3d(
   groups_cumulative_trajectories,
   group = "c1g3"
 )
+
 ```
+
+![](group-evolution-2d-c1g3.png){width=99%}
+![](group-evolution-3d-c1g3.png)
 
 ### Trajectory detection and variable-width lines
 
 Automatically detect the highest-scoring temporal paths within a group using dynamic programming, then display them as variable-width lines that grow with cumulative paper counts.
 
-```{r eval = TRUE, warning = FALSE}
+```{r eval = FALSE, warning = FALSE}
 traj_data <- birddog::detect_main_trajectories(
   groups_cumulative_trajectories,
   group = "c1g3"
@@ -352,6 +363,9 @@ birddog::plot_group_trajectories_lines_3d(
 )
 ```
 
+![](group_trajectories_lines_2d-c1g3.png){width=99%}
+![](group_trajectories_lines_3d-c1g3.png)
+
 ## Citation growth per document
 
 Track how individual documents accumulate citations over time to identify fast-growing papers.
@@ -369,8 +383,6 @@ groups_cumulative_citations <- birddog::sniff_groups_cumulative_citations(
 
 Identify the key route through the citation network, revealing the most influential chain of documents over time.
 
-![](https://roneyfraga.com/volume/keep_it/biogas-data/key_route_example.png){width=99%}
-
 ```{r eval = FALSE}
 
 groups_key_route <- birddog::sniff_key_route(groups, scope = "groups")
@@ -382,15 +394,22 @@ groups_key_route[["c1g3"]]$data |>
   gt::gt()
 ```
 
+![](key-route-c1g3.png){width=99%}
+
 ```{r include = FALSE}
 key_route_c1g3_data <- readRDS(file.path(local_data, "key_route_c1g3_data.rds"))
 ```
 
 ```{r}
 key_route_c1g3_data |>
-  dplyr::select(name = name2, title = TI) |>
-  dplyr::slice_head(n = 10) |>
-  gt::gt()
+  dplyr::select(document = name, name2, title = TI) |>
+  gt::gt() |>
+  gt::text_transform(
+    locations = gt::cells_body(columns = document),
+    fn = function(x) {
+      glue::glue('<a href="https://openalex.org/{x}" target="_blank">{x}</a>')
+    }
+  )
 ```
 
 ## Topic modeling (STM)
@@ -398,24 +417,51 @@ key_route_c1g3_data |>
 Detect topics within a group using Structural Topic Modeling, creating sub-groups based on linguistic similarities.
 
 ```{r eval = FALSE}
-# Prepare STM data (~20 min)
+# Prepare STM data (~30 min)
 groups_stm_prepare <- birddog::sniff_groups_stm_prepare(
   groups,
   group_to_stm = "c1g3"
 )
+```
 
-groups_stm_prepare$plots
+```{r include = FALSE}
+groups_stm_prepare <- readRDS(file.path(local_data, "groups_stm_prepare.rds"))
+```
 
+**17 topics** is the best fit.
+
+```{r}
+groups_stm_prepare$plots[['metrics_by_k']]
+groups_stm_prepare$plots[['exclusivity_vs_coherence']]
+```
+
+```{r}
 # Run STM (~35 sec)
 groups_stm_run <- birddog::sniff_groups_stm_run(
   groups_stm_prepare,
-  k_topics = 18,
+  k_topics = 17,
   n_top_documents = 20
 )
+```
+
+```{r}
 
 groups_stm_run$topic_proportion |>
   dplyr::mutate(topic_proportion = round(topic_proportion, 3)) |>
   gt::gt()
+
+groups_stm_run$top_documents |>
+  dplyr::group_by(topic) |>
+  dplyr::arrange(dplyr::desc(gamma)) |>
+  dplyr::slice_head(n = 3) |>
+  dplyr::select(-DI) |>
+  gt::gt() |>
+  gt::text_transform(
+    locations = gt::cells_body(columns = document),
+    fn = function(x) {
+      glue::glue('<a href="https://openalex.org/{x}" target="_blank">{x}</a>')
+    }
+  )
 ```
 
 ## Session info
