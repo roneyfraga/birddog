@@ -1,6 +1,6 @@
 Package: birddog
 Title: Sniffing Emergence and Trajectories in Academic Papers and Patents
-Version: 1.0.4.9000
+Version: 1.0.4
 Authors@R: c( person( given = c("Roney", "Fraga"), family = "Souza", role = c("aut", "cre", "cph"), email = "roneyfraga@gmail.com", comment = c(ORCID = "orcid.org/0000-0001-5750-489X")), person( given = c("Luis", "Felipe"), family = "de Souza Rodrigues", role = "ctb", email = "lfsouza25@gmail.com"))
 Description: Provides a unified set of methods to detect scientific emergence
     and technological trajectories in academic papers and patents. The package
@@ -41,7 +41,11 @@ Imports:
     RColorBrewer,
     scales,
     stringr
+VignetteBuilder: knitr
 Suggests:
+    benchmarkme,
+    knitr,
+    rmarkdown,
     cli,
     ggHoriPlot,
     ggrepel,
@@ -49,6 +53,7 @@ Suggests:
     janitor,
     gt,
     testthat (>= 3.0.0),
+    tictoc,
     viridis,
     zoo,
     stm,

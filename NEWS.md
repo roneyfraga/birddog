@@ -1,8 +1,15 @@
-# birddog (development version)
+# birddog 1.0.4
 
 ## New features
 
 * `mixed_sort()`: exported for external use, with improved documentation.
+* `plot_group_trajectories_lines_2d()`: new `width_by_traj_size` parameter to scale line width by trajectory size (default TRUE).
+* `plot_group_trajectories_lines_3d()`: new `width_by_traj_size` parameter to scale line width by trajectory size (default TRUE).
+
+## Improvements
+
+* Rewrite vignette with biogas dataset and gallery-with-code format.
+* Fix README: wrong package name and CRAN URL, add Features section.
 
 # birddog 1.0.2
 

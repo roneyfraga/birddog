@@ -19,6 +19,9 @@ knitr::opts_chunk$set(
 )
 set.seed(888L)
 local_data <- "~/Sync/birddog/data-biogas/rawfiles-direct"
+has_local_data <- dir.exists(local_data)
+knitr::opts_chunk$set(eval = has_local_data)
+# When local data is absent (e.g. CRAN), no chunk runs; the pre-built HTML ships instead.
 ```
 
 ## Overview
@@ -111,11 +114,11 @@ url_m <- "https://roneyfraga.com/volume/keep_it/biogas-data/M.rds"
 M <- readRDS(url(url_m))
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 M <- readRDS(file.path(local_data, "M.rds"))
 ```
 
-```{r}
+```{r }
 dplyr::glimpse(M)
 ```
 
@@ -127,11 +130,11 @@ Build a citation network to map the relationships between documents. Direct cita
 net <- birddog::sniff_network(M, type = "direct citation")
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 net <- readRDS(file.path(local_data, "net.rds"))
 ```
 
-```{r}
+```{r }
 net |>
   tidygraph::activate(nodes) |>
   dplyr::select(name, AU, PY, TI, TC) |>
@@ -146,11 +149,11 @@ Identify connected components to eliminate disconnected documents that do not sh
 comps <- birddog::sniff_components(net)
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 comps <- readRDS(file.path(local_data, "comps.rds"))
 ```
 
-```{r}
+```{r }
 comps$components |>
   dplyr::slice_head(n = 5) |>
   gt::gt()
@@ -169,11 +172,11 @@ groups <- birddog::sniff_groups(
 )
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 groups <- readRDS(file.path(local_data, "groups.rds"))
 ```
 
-```{r}
+```{r }
 groups$aggregate |>
   gt::gt()
 ```
@@ -192,11 +195,11 @@ groups_attributes <- birddog::sniff_groups_attributes(
 
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 groups_attributes <- readRDS(file.path(local_data, "groups_attributes.rds"))
 ```
 
-```{r}
+```{r }
 groups_attributes$attributes_table
 ```
 
@@ -204,7 +207,7 @@ groups_attributes$attributes_table
 
 Explore the most frequent keywords in each group.
 
-```{r eval = TRUE}
+```{r }
 groups_keywords <- birddog::sniff_groups_keywords(groups)
 
 groups_keywords |>
@@ -222,11 +225,11 @@ groups_terms <- birddog::sniff_groups_terms(groups, algorithm = "phrase")
 
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 groups_terms <- readRDS(file.path(local_data, "groups_terms.rds"))
 ```
 
-```{r}
+```{r }
 groups_terms$terms_table |>
   dplyr::slice_head(n = 3) |>
   gt::gt()
@@ -242,11 +245,11 @@ groups_hubs <- birddog::sniff_groups_hubs(groups)
 
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 groups_hubs <- readRDS(file.path(local_data, "groups_hubs.rds"))
 ```
 
-```{r}
+```{r }
 groups_hubs |>
   dplyr::filter(zone != "noHub") |>
   dplyr::mutate(Zi = round(Zi, 2), Pi = round(Pi, 2)) |>
@@ -277,7 +280,7 @@ groups_cct <- birddog::sniff_citations_cycle_time(
 groups_cct$plots[["c1g3"]]
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 groups_cct <- readRDS(file.path(local_data, "groups_cct.rds"))
 ```
 
@@ -310,7 +313,7 @@ groups_cumulative <- birddog::sniff_groups_cumulative(groups)
 
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 groups_cumulative <- readRDS(file.path(local_data, "groups_cumulative.rds"))
 ```
 
@@ -396,11 +399,11 @@ groups_key_route[["c1g3"]]$data |>
 
 ![](key-route-c1g3.png){width=99%}
 
-```{r include = FALSE}
+```{r include = FALSE, }
 key_route_c1g3_data <- readRDS(file.path(local_data, "key_route_c1g3_data.rds"))
 ```
 
-```{r}
+```{r }
 key_route_c1g3_data |>
   dplyr::select(document = name, name2, title = TI) |>
   gt::gt() |>
@@ -424,18 +427,18 @@ groups_stm_prepare <- birddog::sniff_groups_stm_prepare(
 )
 ```
 
-```{r include = FALSE}
+```{r include = FALSE, }
 groups_stm_prepare <- readRDS(file.path(local_data, "groups_stm_prepare.rds"))
 ```
 
 **17 topics** is the best fit.
 
-```{r}
+```{r eval = FALSE}
 groups_stm_prepare$plots[['metrics_by_k']]
 groups_stm_prepare$plots[['exclusivity_vs_coherence']]
 ```
 
-```{r}
+```{r eval = FALSE}
 # Run STM (~35 sec)
 groups_stm_run <- birddog::sniff_groups_stm_run(
   groups_stm_prepare,
@@ -444,8 +447,7 @@ groups_stm_run <- birddog::sniff_groups_stm_run(
 )
 ```
 
-```{r}
-
+```{r eval = FALSE}
 groups_stm_run$topic_proportion |>
   dplyr::mutate(topic_proportion = round(topic_proportion, 3)) |>
   gt::gt()

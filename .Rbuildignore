@@ -9,8 +9,7 @@
 ^Meta$
 ^cran-comments\.md$
 ^support\.R$
-^vignettes/
-^vignettes/introduction_birddog\.Rmd$
+^vignettes/introduction_birddog\.html$
 ^CRAN-SUBMISSION$
 ^nlp-udpipe-model$
 ^\.chat$
