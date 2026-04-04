@@ -13,7 +13,7 @@ on cumulative paper counts, and labels are placed at trajectory endpoints."><met
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.4.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +56,7 @@ on cumulative paper counts, and labels are placed at trajectory endpoints.</p>
 <span>  <span class="va">traj_filtered</span>,</span>
 <span>  title <span class="op">=</span> <span class="st">"Main trajectories"</span>,</span>
 <span>  width_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  width_by_traj_size <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  use_raw_papers <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  label_nudge_x <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">4</span>,</span>
@@ -92,6 +93,13 @@ containing the subset to emphasize. Must contain columns:</p><ul><li><p><code>tr
 <dd><p>Range for edge widths of highlighted trajectories
 (default: c(0.8, 6.0)). Width at each segment is scaled by cumulative
 paper count up to the next node.</p></dd>
+
+
+<dt id="arg-width-by-traj-size">width_by_traj_size<a class="anchor" aria-label="anchor" href="#arg-width-by-traj-size"></a></dt>
+<dd><p>Whether to scale each highlighted trajectory's line
+width proportionally to its total paper count (default: TRUE). When TRUE,
+the trajectory with the most papers uses the full <code>width_range</code>, while
+smaller trajectories are proportionally thinner (minimum 25% of full range).</p></dd>
 
 
 <dt id="arg-use-raw-papers">use_raw_papers<a class="anchor" aria-label="anchor" href="#arg-use-raw-papers"></a></dt>
