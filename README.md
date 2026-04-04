@@ -12,31 +12,83 @@ scientific and patent literature.
 
 ## Installation
 
-You can install the development version of `birddog` from
-[GitHub](https://github.com/roneyfraga/birddog/) with:
-
-``` r
-# install.packages("devtools")
-library(devtools)
-
-# install and load getLattes
-devtools::install_github("roneyfraga/birddog")
-library(birddog)
-```
-
-or the stable version from
-[CRAN](https://cran.r-project.org/package=getLattes):
+Install the stable version from
+[CRAN](https://cran.r-project.org/package=birddog):
 
 ``` r
 install.packages("birddog")
 library(birddog)
 ```
 
+Or the development version from
+[GitHub](https://github.com/roneyfraga/birddog/):
+
+``` r
+# install.packages("remotes")
+remotes::install_github("roneyfraga/birddog")
+library(birddog)
+```
+
+## Features
+
+### Data import
+
+- `read_openalex()` – OpenAlex API or CSV exports
+- `read_wos()` – Web of Science BibTeX, RIS, plain-text, tab-delimited
+
+### Citation network and community detection
+
+- `sniff_network()` – direct citation or bibliographic coupling networks
+- `sniff_components()` – identify connected components
+- `sniff_groups()` – community detection (fast greedy, Louvain, Leiden,
+  walktrap, edge betweenness)
+
+### Group analysis
+
+- `sniff_groups_attributes()` – group-level summary statistics and
+  horizon plots
+- `sniff_groups_keywords()` – keyword frequency per group
+- `sniff_groups_terms()` – NLP-based phrase extraction
+- `sniff_groups_hubs()` – hub classification (Zi-Pi, Guimera and Amaral
+  2005)
+- `sniff_groups_cumulative_citations()` – per-document citation growth
+
+### Indexes
+
+- `sniff_citations_cycle_time()` – measures the pace of change (Kayal
+  1999)
+- `sniff_entropy()` – normalized Shannon entropy for keyword diversity
+  (Shannon 1948; Pielou 1966)
+
+### Trajectories
+
+- `sniff_groups_cumulative()` – cumulative clusterization over time
+- `sniff_groups_trajectories()` – Jaccard similarity DAG across years
+- `plot_group_trajectories_2d()` / `plot_group_trajectories_3d()` –
+  node-based trajectory plots
+- `detect_main_trajectories()` – top-N disjoint paths via dynamic
+  programming
+- `filter_trajectories()` – filter and rank detected trajectories
+- `plot_group_trajectories_lines_2d()` /
+  `plot_group_trajectories_lines_3d()` – variable-width line plots
+
+### Main path analysis
+
+- `sniff_key_route()` – key-route search (Liu and Lu 2012) with SPC
+  weights
+
+### Topic modeling
+
+- `sniff_groups_stm_prepare()` / `sniff_groups_stm_run()` – structural
+  topic modeling within groups
+
 ## Vignettes
 
 The vignettes are available online here:
 
 - <https://roneyfraga.com/birddog/articles/introduction_birddog.html>
+- [Interactive presentation
+  (biogas)](https://roneyfraga.com/birddog-class)
 
 ## Methodological workflow
 

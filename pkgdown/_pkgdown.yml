@@ -19,4 +19,13 @@ template:
 
 navbar:
   title: "<img src='logo.png' alt='birddog' style='height:24px;vertical-align:middle;margin-right:.4rem'> birddog"
+  components:
+    articles:
+      text: Articles
+      menu:
+        - text: Introduction to birddog
+          href: articles/introduction_birddog.html
+        - text: "---"
+        - text: Interactive presentation (biogas)
+          href: https://roneyfraga.com/birddog-class
 

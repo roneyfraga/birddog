@@ -42,6 +42,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/introduction_birddog.html">Introduction to birddog</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="https://roneyfraga.com/birddog-class">Interactive presentation (biogas)</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -70,18 +72,109 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <code>birddog</code> from <a href="https://github.com/roneyfraga/birddog/" class="external-link">GitHub</a> with:</p>
+<p>Install the stable version from <a href="https://cran.r-project.org/package=birddog" class="external-link">CRAN</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># install and load getLattes</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"roneyfraga/birddog"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://roneyfraga.com/birddog/" class="external-link">birddog</a></span><span class="op">)</span></span></code></pre></div>
-<p>or the stable version from <a href="https://cran.r-project.org/package=getLattes" class="external-link">CRAN</a>:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"birddog"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://roneyfraga.com/birddog/" class="external-link">birddog</a></span><span class="op">)</span></span></code></pre></div>
+<p>Or the development version from <a href="https://github.com/roneyfraga/birddog/" class="external-link">GitHub</a>:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"roneyfraga/birddog"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://roneyfraga.com/birddog/" class="external-link">birddog</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
+<div class="section level3">
+<h3 id="data-import">Data import<a class="anchor" aria-label="anchor" href="#data-import"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/read_openalex.html">read_openalex()</a></code> – OpenAlex API or CSV exports</li>
+<li>
+<code><a href="reference/read_wos.html">read_wos()</a></code> – Web of Science BibTeX, RIS, plain-text, tab-delimited</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="citation-network-and-community-detection">Citation network and community detection<a class="anchor" aria-label="anchor" href="#citation-network-and-community-detection"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/sniff_network.html">sniff_network()</a></code> – direct citation or bibliographic coupling networks</li>
+<li>
+<code><a href="reference/sniff_components.html">sniff_components()</a></code> – identify connected components</li>
+<li>
+<code><a href="reference/sniff_groups.html">sniff_groups()</a></code> – community detection (fast greedy, Louvain, Leiden, walktrap, edge betweenness)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="group-analysis">Group analysis<a class="anchor" aria-label="anchor" href="#group-analysis"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/sniff_groups_attributes.html">sniff_groups_attributes()</a></code> – group-level summary statistics and horizon plots</li>
+<li>
+<code><a href="reference/sniff_groups_keywords.html">sniff_groups_keywords()</a></code> – keyword frequency per group</li>
+<li>
+<code><a href="reference/sniff_groups_terms.html">sniff_groups_terms()</a></code> – NLP-based phrase extraction</li>
+<li>
+<code><a href="reference/sniff_groups_hubs.html">sniff_groups_hubs()</a></code> – hub classification (Zi-Pi, Guimera and Amaral
+<ol start="2005" style="list-style-type: decimal">
+<li></li>
+</ol>
+</li>
+<li>
+<code><a href="reference/sniff_groups_cumulative_citations.html">sniff_groups_cumulative_citations()</a></code> – per-document citation growth</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="indexes">Indexes<a class="anchor" aria-label="anchor" href="#indexes"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/sniff_citations_cycle_time.html">sniff_citations_cycle_time()</a></code> – measures the pace of change (Kayal
+<ol start="1999" style="list-style-type: decimal">
+<li></li>
+</ol>
+</li>
+<li>
+<code><a href="reference/sniff_entropy.html">sniff_entropy()</a></code> – normalized Shannon entropy for keyword diversity (Shannon 1948; Pielou 1966)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="trajectories">Trajectories<a class="anchor" aria-label="anchor" href="#trajectories"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/sniff_groups_cumulative.html">sniff_groups_cumulative()</a></code> – cumulative clusterization over time</li>
+<li>
+<code><a href="reference/sniff_groups_trajectories.html">sniff_groups_trajectories()</a></code> – Jaccard similarity DAG across years</li>
+<li>
+<code><a href="reference/plot_group_trajectories_2d.html">plot_group_trajectories_2d()</a></code> / <code><a href="reference/plot_group_trajectories_3d.html">plot_group_trajectories_3d()</a></code> – node-based trajectory plots</li>
+<li>
+<code><a href="reference/detect_main_trajectories.html">detect_main_trajectories()</a></code> – top-N disjoint paths via dynamic programming</li>
+<li>
+<code><a href="reference/filter_trajectories.html">filter_trajectories()</a></code> – filter and rank detected trajectories</li>
+<li>
+<code><a href="reference/plot_group_trajectories_lines_2d.html">plot_group_trajectories_lines_2d()</a></code> / <code><a href="reference/plot_group_trajectories_lines_3d.html">plot_group_trajectories_lines_3d()</a></code> – variable-width line plots</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="main-path-analysis">Main path analysis<a class="anchor" aria-label="anchor" href="#main-path-analysis"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/sniff_key_route.html">sniff_key_route()</a></code> – key-route search (Liu and Lu 2012) with SPC weights</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="topic-modeling">Topic modeling<a class="anchor" aria-label="anchor" href="#topic-modeling"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/sniff_groups_stm_prepare.html">sniff_groups_stm_prepare()</a></code> / <code><a href="reference/sniff_groups_stm_run.html">sniff_groups_stm_run()</a></code> – structural topic modeling within groups</li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
@@ -89,6 +182,7 @@
 <p>The vignettes are available online here:</p>
 <ul>
 <li><a href="https://roneyfraga.com/birddog/articles/introduction_birddog.html" class="uri">https://roneyfraga.com/birddog/articles/introduction_birddog.html</a></li>
+<li><a href="https://roneyfraga.com/birddog-class">Interactive presentation (biogas)</a></li>
 </ul>
 </div>
 <div class="section level2">
