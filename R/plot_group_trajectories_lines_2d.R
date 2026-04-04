@@ -14,10 +14,14 @@
 #'   - `traj_id`: trajectory identifiers
 #'   - `nodes`: list of character vectors (ordered by time or orderable)
 #' @param title Plot title (default: "Main trajectories")
-#' @param width_range Range for edge widths of highlighted trajectories 
-#'   (default: c(0.8, 6.0)). Width at each segment is scaled by cumulative 
+#' @param width_range Range for edge widths of highlighted trajectories
+#'   (default: c(0.8, 6.0)). Width at each segment is scaled by cumulative
 #'   paper count up to the next node.
-#' @param use_raw_papers Whether to use raw paper counts for width scaling 
+#' @param width_by_traj_size Whether to scale each highlighted trajectory's line
+#'   width proportionally to its total paper count (default: TRUE). When TRUE,
+#'   the trajectory with the most papers uses the full `width_range`, while
+#'   smaller trajectories are proportionally thinner (minimum 25% of full range).
+#' @param use_raw_papers Whether to use raw paper counts for width scaling
 #'   (default: FALSE). If TRUE, uses raw `quantity_papers`; if FALSE, uses 
 #'   weighted size: `quantity_papers * prop_tracked_intra_group`.
 #' @param label_nudge_x Horizontal nudge for trajectory end labels to prevent 
@@ -84,6 +88,7 @@ plot_group_trajectories_lines_2d <- function(
   traj_filtered,
   title = "Main trajectories",
   width_range = c(0.8, 6.0),
+  width_by_traj_size = TRUE,
   use_raw_papers = FALSE,
   label_nudge_x = 0.30,
   label_size = 4,
@@ -105,6 +110,35 @@ plot_group_trajectories_lines_2d <- function(
 
   # 1) Tag highlighted edges (adds E(g)$traj_id and E(g)$traj_width)
   g2 <- assign_traj_edge_widths(g, tr_highlight, width_range, use_raw_papers)
+
+  # Scale per-trajectory widths by total trajectory size
+  if (width_by_traj_size && nrow(tr_highlight) > 0) {
+    qp <- igraph::V(g2)$quantity_papers
+    if (is.null(qp)) qp <- rep(0, igraph::vcount(g2))
+    node_m <- if (use_raw_papers) {
+      qp
+    } else {
+      pit <- igraph::V(g2)$prop_tracked_intra_group
+      if (is.null(pit)) pit <- rep(0, igraph::vcount(g2))
+      qp * pit
+    }
+    vnames <- igraph::V(g2)$name
+    traj_totals <- vapply(tr_highlight$nodes, function(nodes) {
+      s <- node_m[match(nodes, vnames)]
+      sum(s[!is.na(s)])
+    }, numeric(1))
+    if (max(traj_totals) > 0 && length(unique(traj_totals)) > 1) {
+      sf <- scales::rescale(traj_totals, to = c(0.25, 1.0))
+    } else {
+      sf <- rep(1, length(traj_totals))
+    }
+    for (i in seq_along(sf)) {
+      eidx <- which(igraph::E(g2)$traj_id == tr_highlight$traj_id[i])
+      if (length(eidx)) {
+        igraph::E(g2)$traj_width[eidx] <- igraph::E(g2)$traj_width[eidx] * sf[i]
+      }
+    }
+  }
 
   # 2) Optionally tag edges that belong to ANY trajectory (for cleaner lowlight)
   igraph::E(g2)$in_any_traj <- FALSE

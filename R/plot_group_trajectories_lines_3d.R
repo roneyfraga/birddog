@@ -15,8 +15,12 @@
 #'   - `nodes`: list of character vectors (ordered by time or orderable)
 #' @param width_range_hi Width range for highlighted trajectory segments 
 #'   (default: c(4, 12)). Segment widths scale with cumulative paper counts.
-#' @param width_range_lo Baseline width range used to compute constant lowlight 
+#' @param width_range_lo Baseline width range used to compute constant lowlight
 #'   width (default: c(1.2, 3)). The mean of this range determines lowlight width.
+#' @param width_by_traj_size Whether to scale each highlighted trajectory's line
+#'   width proportionally to its total paper count (default: TRUE). When TRUE,
+#'   the trajectory with the most papers uses the full `width_range_hi`, while
+#'   smaller trajectories are proportionally thinner (minimum 25% of full range).
 #' @param use_raw_papers Whether to use raw paper counts for z-axis scaling
 #'   (default: TRUE). If TRUE, uses raw `quantity_papers`; if FALSE, uses
 #'   weighted size: `quantity_papers * prop_tracked_intra_group`.
@@ -122,6 +126,7 @@ plot_group_trajectories_lines_3d <- function(
   lowlight_width = 1,
   lowlight_alpha = 0.9,
   lowlight_color = "#9AA5B1",
+  width_by_traj_size = TRUE,
   group_id = NULL
 ) {
   if (!requireNamespace("plotly", quietly = TRUE))
@@ -256,13 +261,27 @@ plot_group_trajectories_lines_3d <- function(
 
   # Draw HIGHLIGHT trajectories (growing thickness)
   if (length(td_hi)) {
-    for (td in td_hi) {
+    # Per-trajectory width scaling based on total size
+    if (width_by_traj_size) {
+      traj_totals <- vapply(td_hi, function(td) sum(td$step_p), numeric(1))
+      if (max(traj_totals) > 0 && length(unique(traj_totals)) > 1) {
+        size_factors <- scales::rescale(traj_totals, to = c(0.25, 1.0))
+      } else {
+        size_factors <- rep(1, length(td_hi))
+      }
+    } else {
+      size_factors <- rep(1, length(td_hi))
+    }
+
+    for (j in seq_along(td_hi)) {
+      td <- td_hi[[j]]
       col <- unname(col_map_hi[td$traj_id])
+      wr <- width_range_hi * size_factors[j]
 
       seg_widths <- if (length(unique(td$zvals)) <= 1) {
-        rep(mean(width_range_hi), max(0, length(td$nodes) - 1))
+        rep(mean(wr), max(0, length(td$nodes) - 1))
       } else {
-        scales::rescale(td$zvals[-1], to = width_range_hi, from = range(td$zvals, na.rm = TRUE))
+        scales::rescale(td$zvals[-1], to = wr, from = range(td$zvals, na.rm = TRUE))
       }
 
       for (i in seq_len(length(td$nodes) - 1)) {

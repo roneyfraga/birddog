@@ -9,6 +9,7 @@ plot_group_trajectories_lines_2d(
   traj_filtered,
   title = "Main trajectories",
   width_range = c(0.8, 6),
+  width_by_traj_size = TRUE,
   use_raw_papers = FALSE,
   label_nudge_x = 0.3,
   label_size = 4,
@@ -38,6 +39,11 @@ containing the subset to emphasize. Must contain columns:
 \item{width_range}{Range for edge widths of highlighted trajectories
 (default: c(0.8, 6.0)). Width at each segment is scaled by cumulative
 paper count up to the next node.}
+
+\item{width_by_traj_size}{Whether to scale each highlighted trajectory's line
+width proportionally to its total paper count (default: TRUE). When TRUE,
+the trajectory with the most papers uses the full \code{width_range}, while
+smaller trajectories are proportionally thinner (minimum 25\% of full range).}
 
 \item{use_raw_papers}{Whether to use raw paper counts for width scaling
 (default: FALSE). If TRUE, uses raw \code{quantity_papers}; if FALSE, uses

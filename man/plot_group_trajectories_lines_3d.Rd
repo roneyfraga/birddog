@@ -19,6 +19,7 @@ plot_group_trajectories_lines_3d(
   lowlight_width = 1,
   lowlight_alpha = 0.9,
   lowlight_color = "#9AA5B1",
+  width_by_traj_size = TRUE,
   group_id = NULL
 )
 }
@@ -72,6 +73,11 @@ network (default: 1)}
 \item{lowlight_alpha}{Transparency for lowlight elements (default: 0.9)}
 
 \item{lowlight_color}{Color for lowlight elements (default: "#9AA5B1" - neutral gray)}
+
+\item{width_by_traj_size}{Whether to scale each highlighted trajectory's line
+width proportionally to its total paper count (default: TRUE). When TRUE,
+the trajectory with the most papers uses the full \code{width_range_hi}, while
+smaller trajectories are proportionally thinner (minimum 25\% of full range).}
 
 \item{group_id}{Optional group identifier to display in the plot title
 (default: NULL). When provided, the title becomes "3D Trajectories - group_id".}
