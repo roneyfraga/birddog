@@ -1,3 +1,10 @@
+# birddog 1.0.5
+
+## Bug fixes
+
+* `sniff_groups_terms()`: replace base `tolower()` with `stringr::str_to_lower()` to avoid locale-dependent failures on non-ASCII UTF-8 text.
+* `sniff_groups_terms()`: fix `tryCatch` scoping bug where error-handler assignments to `stats[[i]]` were lost, causing `purrr::map_int(stats, nrow)` to abort the whole run on a single failing group. Skipped groups are now dropped cleanly via `purrr::compact()`.
+
 # birddog 1.0.4
 
 ## New features

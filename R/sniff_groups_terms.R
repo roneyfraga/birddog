@@ -124,7 +124,7 @@ sniff_groups_terms <- function(net_groups,
 
   # Process each group
   for (i in seq_along(grupos)) {
-    tryCatch(
+    stats[[i]] <- tryCatch(
       {
         # Prepare text data
         text_data <- net_groups$network |>
@@ -137,86 +137,86 @@ sniff_groups_terms <- function(net_groups,
             text = paste(stats::na.omit(c(TI, AB)), collapse = ". "),
             .groups = "drop"
           ) |>
-          dplyr::mutate(text = tolower(text))
+          dplyr::mutate(text = stringr::str_to_lower(text))
 
-        if (nchar(text_data$text) == 0) {
+        if (nrow(text_data) == 0 || !nzchar(text_data$text[1])) {
           warning("No text data available for group: ", grupos[i])
-          next
-        }
-
-        # Annotate text
-        if (n_cores == 1) {
-          x <- udpipe::udpipe_annotate(
-            ud_model,
-            x = text_data$text,
-            doc_id = text_data$group,
-            trace = show_progress
-          )
+          NULL
         } else {
-          x <- udpipe::udpipe(
-            text_data,
-            ud_model,
-            parallel.cores = n_cores
-          )
-        }
-
-        x <- as.data.frame(x)
-
-        # Extract terms based on algorithm
-        stats[[i]] <- switch(algorithm,
-          "rake" = {
-            udpipe::keywords_rake(
-              x = x,
-              term = "lemma",
-              group = "doc_id",
-              relevant = x$upos %in% c("NOUN", "ADJ")
-            ) |>
-              dplyr::mutate(arranged_by = .data$rake)
-          },
-          "pointwise" = {
-            x$word <- tolower(x$token)
-            udpipe::keywords_collocation(
-              x = x,
-              term = "word",
-              group = "doc_id"
-            ) |>
-              dplyr::mutate(arranged_by = .data$freq)
-          },
-          "phrase" = {
-            x$phrase_tag <- udpipe::as_phrasemachine(x$upos, type = "upos")
-            udpipe::keywords_phrases(
-              x = x$phrase_tag,
-              term = tolower(x$token),
-              pattern = phrase_pattern,
-              is_regex = TRUE,
-              detailed = FALSE
-            ) |>
-              dplyr::filter(.data$ngram > 1 & .data$freq > min_freq) |>
-              dplyr::mutate(arranged_by = .data$freq)
+          # Annotate text
+          if (n_cores == 1) {
+            x <- udpipe::udpipe_annotate(
+              ud_model,
+              x = text_data$text,
+              doc_id = text_data$group,
+              trace = show_progress
+            )
+          } else {
+            x <- udpipe::udpipe(
+              text_data,
+              ud_model,
+              parallel.cores = n_cores
+            )
           }
-        )
 
-        # Convert to tibble and arrange
-        if (!is.null(stats[[i]])) {
-          stats[[i]] <- stats[[i]] |>
-            tibble::as_tibble() |>
-            dplyr::arrange(dplyr::desc(.data$arranged_by))
+          x <- as.data.frame(x)
+
+          # Extract terms based on algorithm
+          result <- switch(algorithm,
+            "rake" = {
+              udpipe::keywords_rake(
+                x = x,
+                term = "lemma",
+                group = "doc_id",
+                relevant = x$upos %in% c("NOUN", "ADJ")
+              ) |>
+                dplyr::mutate(arranged_by = .data$rake)
+            },
+            "pointwise" = {
+              x$word <- stringr::str_to_lower(x$token)
+              udpipe::keywords_collocation(
+                x = x,
+                term = "word",
+                group = "doc_id"
+              ) |>
+                dplyr::mutate(arranged_by = .data$freq)
+            },
+            "phrase" = {
+              x$phrase_tag <- udpipe::as_phrasemachine(x$upos, type = "upos")
+              udpipe::keywords_phrases(
+                x = x$phrase_tag,
+                term = stringr::str_to_lower(x$token),
+                pattern = phrase_pattern,
+                is_regex = TRUE,
+                detailed = FALSE
+              ) |>
+                dplyr::filter(.data$ngram > 1 & .data$freq > min_freq) |>
+                dplyr::mutate(arranged_by = .data$freq)
+            }
+          )
+
+          # Convert to tibble and arrange
+          if (!is.null(result) && nrow(result) > 0) {
+            result |>
+              tibble::as_tibble() |>
+              dplyr::arrange(dplyr::desc(.data$arranged_by))
+          } else {
+            NULL
+          }
         }
       },
       error = function(e) {
         warning("Failed to process group ", grupos[i], ": ", e$message)
-        stats[[i]] <- tibble::tibble(
-          keyword = character(),
-          ngram = integer(),
-          freq = numeric(),
-          arranged_by = numeric()
-        )
+        NULL
       }
     )
   }
 
-  # Remove empty groups
-  stats <- stats[purrr::map_int(stats, nrow) > 0]
+  # Remove empty / NULL groups
+  stats <- purrr::compact(stats)
+  if (length(stats) > 0) {
+    stats <- stats[purrr::map_int(stats, nrow) > 0]
+  }
 
   if (length(stats) == 0) {
     warning("No terms could be extracted from any group")
@@ -237,7 +237,7 @@ sniff_groups_terms <- function(net_groups,
       term_freq <- purrr::map_dfr(stats, ~.x, .id = "group") |>
         dplyr::select(.data$group, .data$keyword, freq = .data$arranged_by) |>
         dplyr::filter(!is.na(.data$group), !is.na(.data$keyword)) |>
-        dplyr::mutate(keyword = tolower(.data$keyword))
+        dplyr::mutate(keyword = stringr::str_to_lower(.data$keyword))
 
       # Calculate TF-IDF
       tfidf_data <- term_freq |>
