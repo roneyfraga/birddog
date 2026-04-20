@@ -28,4 +28,6 @@ navbar:
         - text: "---"
         - text: Interactive presentation (biogas)
           href: https://roneyfraga.com/birddog-class
+        - text: AI Chat Assistant (biogas)
+          href: https://roneyfraga.com/birddog-chat
 

@@ -12,7 +12,10 @@ sniff_citations_cycle_time(
   tracked_cr_py = NULL,
   batch_size = 50,
   min_papers_per_year = 3,
-  rolling_window = NULL
+  rolling_window = NULL,
+  normalize = "none",
+  dispersion = FALSE,
+  citation_scope = "global"
 )
 }
 \arguments{
@@ -40,10 +43,30 @@ to compute CCT. Years with fewer papers are reported as NA (default: 3).}
 \item{rolling_window}{Optional integer for rolling window smoothing.
 If provided, CCT values are smoothed using a centered moving average of the
 specified width (e.g., 3 for a 3-year window). Default is NULL (no smoothing).}
+
+\item{normalize}{Normalization mode. Either \code{"none"} (default) for raw CCT values
+in years, or \code{"domain"} to divide each group's annual CCT by the per-year network
+median across all groups. With \code{normalize = "domain"}, values around 1 indicate
+average cycle time for the domain; values below 1 = short-cycle relative to the
+domain; values above 1 = long-cycle. Only applies when \code{scope = "groups"}.}
+
+\item{dispersion}{Logical. If \code{TRUE}, the returned data tibble includes \code{p25} and
+\code{p75} columns (25th and 75th percentiles of per-paper citation-age medians),
+useful for detecting bimodal citation-age distributions and wide within-group
+heterogeneity. Default is \code{FALSE}.}
+
+\item{citation_scope}{Either \code{"global"} (default) to count all references, or
+\code{"local"} to restrict references to those that are also nodes in the birddog
+network (i.e., intra-corpus citations). Local CCT captures the renewal pace of
+the domain's own knowledge stock and is closer to Lee's (2024) sector-level TCT.
+Currently supported for OpenAlex data only; Web of Science data falls back to
+\code{"global"} with a warning.}
 }
 \value{
 A list with the following components:
-\item{data}{Tibble with CCT data containing columns: group, year, index}
+\item{data}{Tibble with CCT data containing columns: group, year, index.
+When \code{dispersion = TRUE}, also includes \code{p25} and \code{p75} columns with the
+25th and 75th percentiles of per-paper citation-age medians.}
 \item{plots}{Named list of plotly objects showing temporal evolution of CCT for each group.
 Each plot shows both absolute CCT values and year-over-year differences.}
 \item{years_range}{Named vector with start_year and end_year used in the analysis}
@@ -94,6 +117,27 @@ results_smooth <- sniff_citations_cycle_time(
   network_groups,
   scope = "groups",
   rolling_window = 3
+)
+
+# Domain-normalized CCT (values around 1; <1 = short-cycle relative to domain)
+results_norm <- sniff_citations_cycle_time(
+  network_groups,
+  scope = "groups",
+  normalize = "domain"
+)
+
+# With dispersion (adds p25 and p75 columns to detect bimodal distributions)
+results_disp <- sniff_citations_cycle_time(
+  network_groups,
+  scope = "groups",
+  dispersion = TRUE
+)
+
+# Local citations only (intra-corpus references)
+results_local <- sniff_citations_cycle_time(
+  network_groups,
+  scope = "groups",
+  citation_scope = "local"
 )
 
 # Accessing results

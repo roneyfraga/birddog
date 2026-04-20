@@ -1,3 +1,11 @@
+# birddog 1.0.6
+
+## New features
+
+* `sniff_citations_cycle_time()`: new `normalize` argument (`"none"` | `"domain"`) to divide each group's annual CCT by the per-year network median, enabling within-domain comparability following Lee (2024).
+* `sniff_citations_cycle_time()`: new `dispersion` argument (logical) that adds `p25` and `p75` columns to the returned data tibble, useful for detecting bimodal citation-age distributions.
+* `sniff_citations_cycle_time()`: new `citation_scope` argument (`"global"` | `"local"`) to restrict CCT to intra-corpus citations. Currently supported for OpenAlex data; Web of Science data falls back to `"global"` with a warning.
+
 # birddog 1.0.5
 
 ## Bug fixes

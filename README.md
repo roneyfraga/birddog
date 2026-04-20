@@ -89,6 +89,7 @@ The vignettes are available online here:
 - <https://roneyfraga.com/birddog/articles/introduction_birddog.html>
 - [Interactive presentation
   (biogas)](https://roneyfraga.com/birddog-class)
+- [AI Chat Assistant (biogas)](https://roneyfraga.com/birddog-chat)
 
 ## Methodological workflow
 

@@ -1,0 +1,136 @@
+# birddog
+
+The goal of `birddog` is sniffing out emergence and trajectories in
+scientific and patent literature.
+
+## Installation
+
+Install the stable version from
+[CRAN](https://cran.r-project.org/package=birddog):
+
+``` r
+install.packages("birddog")
+library(birddog)
+```
+
+Or the development version from
+[GitHub](https://github.com/roneyfraga/birddog/):
+
+``` r
+# install.packages("remotes")
+remotes::install_github("roneyfraga/birddog")
+library(birddog)
+```
+
+## Features
+
+### Data import
+
+- [`read_openalex()`](https://roneyfraga.com/birddog/reference/read_openalex.md)
+  – OpenAlex API or CSV exports
+- [`read_wos()`](https://roneyfraga.com/birddog/reference/read_wos.md) –
+  Web of Science BibTeX, RIS, plain-text, tab-delimited
+
+### Citation network and community detection
+
+- [`sniff_network()`](https://roneyfraga.com/birddog/reference/sniff_network.md)
+  – direct citation or bibliographic coupling networks
+- [`sniff_components()`](https://roneyfraga.com/birddog/reference/sniff_components.md)
+  – identify connected components
+- [`sniff_groups()`](https://roneyfraga.com/birddog/reference/sniff_groups.md)
+  – community detection (fast greedy, Louvain, Leiden, walktrap, edge
+  betweenness)
+
+### Group analysis
+
+- [`sniff_groups_attributes()`](https://roneyfraga.com/birddog/reference/sniff_groups_attributes.md)
+  – group-level summary statistics and horizon plots
+- [`sniff_groups_keywords()`](https://roneyfraga.com/birddog/reference/sniff_groups_keywords.md)
+  – keyword frequency per group
+- [`sniff_groups_terms()`](https://roneyfraga.com/birddog/reference/sniff_groups_terms.md)
+  – NLP-based phrase extraction
+- [`sniff_groups_hubs()`](https://roneyfraga.com/birddog/reference/sniff_groups_hubs.md)
+  – hub classification (Zi-Pi, Guimera and Amaral
+  2005. 
+- [`sniff_groups_cumulative_citations()`](https://roneyfraga.com/birddog/reference/sniff_groups_cumulative_citations.md)
+  – per-document citation growth
+
+### Indexes
+
+- [`sniff_citations_cycle_time()`](https://roneyfraga.com/birddog/reference/sniff_citations_cycle_time.md)
+  – measures the pace of change (Kayal
+  1999. 
+- [`sniff_entropy()`](https://roneyfraga.com/birddog/reference/sniff_entropy.md)
+  – normalized Shannon entropy for keyword diversity (Shannon 1948;
+  Pielou 1966)
+
+### Trajectories
+
+- [`sniff_groups_cumulative()`](https://roneyfraga.com/birddog/reference/sniff_groups_cumulative.md)
+  – cumulative clusterization over time
+- [`sniff_groups_trajectories()`](https://roneyfraga.com/birddog/reference/sniff_groups_trajectories.md)
+  – Jaccard similarity DAG across years
+- [`plot_group_trajectories_2d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_2d.md)
+  /
+  [`plot_group_trajectories_3d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_3d.md)
+  – node-based trajectory plots
+- [`detect_main_trajectories()`](https://roneyfraga.com/birddog/reference/detect_main_trajectories.md)
+  – top-N disjoint paths via dynamic programming
+- [`filter_trajectories()`](https://roneyfraga.com/birddog/reference/filter_trajectories.md)
+  – filter and rank detected trajectories
+- [`plot_group_trajectories_lines_2d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_lines_2d.md)
+  /
+  [`plot_group_trajectories_lines_3d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_lines_3d.md)
+  – variable-width line plots
+
+### Main path analysis
+
+- [`sniff_key_route()`](https://roneyfraga.com/birddog/reference/sniff_key_route.md)
+  – key-route search (Liu and Lu 2012) with SPC weights
+
+### Topic modeling
+
+- [`sniff_groups_stm_prepare()`](https://roneyfraga.com/birddog/reference/sniff_groups_stm_prepare.md)
+  /
+  [`sniff_groups_stm_run()`](https://roneyfraga.com/birddog/reference/sniff_groups_stm_run.md)
+  – structural topic modeling within groups
+
+## Vignettes
+
+The vignettes are available online here:
+
+- <https://roneyfraga.com/birddog/articles/introduction_birddog.html>
+- [Interactive presentation
+  (biogas)](https://roneyfraga.com/birddog-class)
+- [AI Chat Assistant (biogas)](https://roneyfraga.com/birddog-chat)
+
+## Methodological workflow
+
+![](https://roneyfraga.com/volume/keep_it/cnpq-pq-horizontal.svg)
+
+## Main publications
+
+- [Miranda et
+  al. (2025)](https://doi.org/10.1016/j.ijhydene.2025.01.089) The
+  Landscape of Green and Biohydrogen Technology: A Data-Driven
+  Exploration Using Non-Supervised Methods
+- [Felizardo et
+  al. (2025)](https://link.springer.com/article/10.1007/s12649-025-03136-z)
+  Transforming Wastes into Resources: Innovations in Cotton
+  Biorefineries for a Sustainable Future
+- [Biazatti et
+  al. (2024)](https://www.sciencedirect.com/science/article/pii/S221146452400112X)
+  Soybean biorefinery and technological forecasts based on a
+  bibliometric analysis and network mapping
+- [Maria et al. (2023)](https://doi.org/10.3390/su15020967) Evolution of
+  Green Finance: A Bibliometric Analysis through Complex Networks and
+  Machine Learning
+- [Matos et al. (2023)](https://doi.org/10.1007/s43938-023-00036-3)
+  Building and evaluating prospective scenarios for corn-based
+  biorefineries
+- [Souza et al. (2022)](https://doi.org/10.14211/ibjesb.e1742) Is
+  entrepreneurship an emerging area of research? A computational
+  response
+- [Souza et al. (2022)](https://doi.org/10.1002/bbb.2441) Bioenergy
+  research in Brazil: A bibliometric evaluation of the BIOEN Research
+  Program
