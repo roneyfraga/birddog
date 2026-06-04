@@ -2,6 +2,9 @@
 
 ## New features
 
+* `sniff_trajectory_destination()`: track where the papers of an incomplete trajectory (one that stops before the last year) end up. Takes a `detect_main_trajectories()` result and a `traj_id`, follows the terminal node's documents forward, and returns the final-year destiny vector, the dormant share, the dominant continuation group, and a per-year flow table. With the optional `all_detected` argument (all groups' `detect_main_trajectories()` outputs) it also resolves the destination at the trajectory level, identifying which living trajectory absorbed the stagnant one (`destination_traj`, `continuation_traj`).
+* `plot_trajectory_destination()`: render the destinations from `sniff_trajectory_destination()` as variable-width lines on a Sugiyama time layout, matching `plot_group_trajectories_lines_2d()`. Each destination is one line whose width tracks the papers carried; `color_by` switches between destination group and destination trajectory, and `min_prop` folds minor destinations into a grey `(other)` line.
+* `plot_trajectory_handoff()`: draw the stagnant trajectory and the trajectory that absorbed it as two timelines on a shared year axis, with an arrow at the handoff year.
 * `sniff_citations_cycle_time()`: new `normalize` argument (`"none"` | `"domain"`) to divide each group's annual CCT by the per-year network median, enabling within-domain comparability following Lee (2024).
 * `sniff_citations_cycle_time()`: new `dispersion` argument (logical) that adds `p25` and `p75` columns to the returned data tibble, useful for detecting bimodal citation-age distributions.
 * `sniff_citations_cycle_time()`: new `citation_scope` argument (`"global"` | `"local"`) to restrict CCT to intra-corpus citations. Currently supported for OpenAlex data; Web of Science data falls back to `"global"` with a warning.

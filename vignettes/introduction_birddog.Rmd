@@ -369,6 +369,37 @@ birddog::plot_group_trajectories_lines_3d(
 ![](group_trajectories_lines_2d-c1g3.png){width=99%}
 ![](group_trajectories_lines_3d-c1g3.png)
 
+### Where an incomplete trajectory's papers go
+
+A trajectory can stop before the final year, but with cumulative clustering its papers never leave the network: they are re-grouped each year. `sniff_trajectory_destination()` follows the papers from a trajectory's terminal node forward and reports where they land, both by destination group and by the living trajectory that absorbed them. `plot_trajectory_destination()` then draws each destination as a variable-width line, in the same idiom as the trajectory plots above (use `color_by = "group"` or `color_by = "trajectory"`).
+
+The trajectory-level view needs every group's `detect_main_trajectories()` output, passed as `all_detected`. Here the stagnant trajectory `c1g3 tr3` (last seen in 2017) is mostly absorbed by `c1g3 tr1`, the group's main living lineage.
+
+```{r eval = FALSE, warning = FALSE}
+# detect_main_trajectories() for every group (used as `all_detected`)
+grupos <- names(groups_cumulative_trajectories$groups_attributes)
+groups_detected <- lapply(grupos, function(g) {
+  birddog::detect_main_trajectories(groups_cumulative_trajectories, group = g)
+})
+names(groups_detected) <- grupos
+
+# where do the papers of the stagnant trajectory c1g3 tr3 go?
+dest <- birddog::sniff_trajectory_destination(
+  detected       = groups_detected[["c1g3"]],
+  traj_id        = "tr3",
+  docs_per_group = groups_cumulative_trajectories$docs_per_group,
+  all_detected   = groups_detected,
+  group          = "c1g3"
+)
+
+# destination by absorbing trajectory (years on each path)
+dest$destination_traj
+
+birddog::plot_trajectory_destination(dest, color_by = "trajectory", min_prop = 0.03)
+```
+
+![](trajectory-destination-c1g3.png){width=99%}
+
 ## Citation growth per document
 
 Track how individual documents accumulate citations over time to identify fast-growing papers.

@@ -71,6 +71,13 @@ library(birddog)
 - `filter_trajectories()` – filter and rank detected trajectories
 - `plot_group_trajectories_lines_2d()` /
   `plot_group_trajectories_lines_3d()` – variable-width line plots
+- `sniff_trajectory_destination()` – track where an incomplete
+  trajectory’s papers go, by group and by absorbing trajectory
+- `plot_trajectory_destination()` – variable-width lines (Sugiyama time
+  layout) of where the papers go, coloured by destination group or
+  trajectory
+- `plot_trajectory_handoff()` – timeline of the stagnant trajectory and
+  the one that absorbed it
 
 ### Main path analysis
 
