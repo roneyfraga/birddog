@@ -335,11 +335,13 @@ plot_group_trajectories_lines_3d <- function(
         )
 
       if (show_labels) {
+        # name with the trajectory's total paper count on a line below
+        label_txt <- paste0(td$traj_id, "<br>(", tail(td$zvals_raw, 1), ")")
         p <- p |>
           plotly::add_trace(
             x = tail(td$years, 1), y = tail(td$yvals, 1), z = tail(td$zvals, 1),
             type = "scatter3d", mode = "text",
-            text = td$traj_id,
+            text = label_txt,
             textfont = list(size = label_size, color = col),
             showlegend = FALSE
           )
