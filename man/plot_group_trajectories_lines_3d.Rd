@@ -20,7 +20,8 @@ plot_group_trajectories_lines_3d(
   lowlight_alpha = 0.9,
   lowlight_color = "#9AA5B1",
   width_by_traj_size = TRUE,
-  group_id = NULL
+  group_id = NULL,
+  descriptions = NULL
 )
 }
 \arguments{
@@ -81,6 +82,12 @@ smaller trajectories are proportionally thinner (minimum 25\% of full range).}
 
 \item{group_id}{Optional group identifier to display in the plot title
 (default: NULL). When provided, the title becomes "3D Trajectories - group_id".}
+
+\item{descriptions}{Optional data frame of manual hover descriptions
+(default: NULL). Must have columns \code{id} (trajectory key as \code{"group:traj_id"},
+e.g. \code{"c1g1:tr1"}; \code{"::"} is also accepted) and \code{text}. When supplied, the
+matching trajectory's end node and line show the description on hover;
+trajectories without an entry keep the default hover.}
 }
 \value{
 A plotly interactive 3D plot object

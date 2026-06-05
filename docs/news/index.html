@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,22 @@
       <small>Source: <a href="https://github.com/roneyfraga/birddog/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.7" id="birddog-107">birddog 1.0.7<a class="anchor" aria-label="anchor" href="#birddog-107"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-0-7">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-7"></a></h3>
+<ul><li>
+<code><a href="../reference/sniff_trajectory_formation.html">sniff_trajectory_formation()</a></code> and <code><a href="../reference/sniff_trajectory_formations.html">sniff_trajectory_formations()</a></code>: the inverse of <code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code>. Given a living target trajectory, find every other trajectory whose terminal cohort was absorbed into it (its feeders), for one target or all targets at once. Each feeder carries the documents transferred, its cohort size and handoff year, plus measured <code>size_curve</code> and <code>inflow_curve</code> series; <code>target_info</code> also reports the target’s own document count.</li>
+<li>
+<code><a href="../reference/plot_trajectory_formation_2d.html">plot_trajectory_formation_2d()</a></code> and <code><a href="../reference/plot_trajectory_formation_3d.html">plot_trajectory_formation_3d()</a></code>: draw the confluence of feeders into a target trajectory – a 2D cumulative-river timeline or an interactive 3D plotly view (X = year, Y = feeder lane, Z = documents), with terminal-node markers and optional manual hover descriptions.</li>
+<li>
+<code><a href="../reference/sniff_trajectory_self_sufficiency.html">sniff_trajectory_self_sufficiency()</a></code>: per-trajectory endogenous-growth index, <code>1 - imported / size</code>, distinguishing lineages that grew on their own from confluences of other communities.</li>
+<li>
+<code><a href="../reference/plot_group_trajectories_2d.html">plot_group_trajectories_2d()</a></code>: new <code>color_by</code> argument with <code>"final_group_share"</code>, colouring each node by the share of its documents that belong to the group’s last-year cluster (plasma palette), with white-haloed labels for readability over dark nodes.</li>
+<li>
+<code><a href="../reference/plot_group_trajectories_lines_3d.html">plot_group_trajectories_lines_3d()</a></code>: new <code>descriptions</code> argument for manual per-trajectory hover text, plus terminal-node markers sized by document count.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.6" id="birddog-106">birddog 1.0.6<a class="anchor" aria-label="anchor" href="#birddog-106"></a></h2>
 <div class="section level3">

@@ -43,6 +43,11 @@
 #' @param lowlight_color Color for lowlight elements (default: "#9AA5B1" - neutral gray)
 #' @param group_id Optional group identifier to display in the plot title
 #'   (default: NULL). When provided, the title becomes "3D Trajectories - group_id".
+#' @param descriptions Optional data frame of manual hover descriptions
+#'   (default: NULL). Must have columns `id` (trajectory key as `"group:traj_id"`,
+#'   e.g. `"c1g1:tr1"`; `"::"` is also accepted) and `text`. When supplied, the
+#'   matching trajectory's end node and line show the description on hover;
+#'   trajectories without an entry keep the default hover.
 #'
 #' @return A plotly interactive 3D plot object
 #'
@@ -127,13 +132,26 @@ plot_group_trajectories_lines_3d <- function(
   lowlight_alpha = 0.9,
   lowlight_color = "#9AA5B1",
   width_by_traj_size = TRUE,
-  group_id = NULL
+  group_id = NULL,
+  descriptions = NULL
 ) {
   if (!requireNamespace("plotly", quietly = TRUE))
     stop("plotly is required for 3D plotting. Please install.packages('plotly').", call. = FALSE)
 
   `%||%` <- function(a, b) if (!is.null(a)) a else b
   as_year <- function(x) as.integer(sub("^y(\\d{4}).*$", "\\1", x))
+
+  # Optional manual hover descriptions, keyed by "group:traj_id" (":" or "::").
+  desc_lookup <- NULL
+  if (!is.null(descriptions)) {
+    if (!all(c("id", "text") %in% names(descriptions))) {
+      stop("'descriptions' must be a data.frame with columns 'id' and 'text'", call. = FALSE)
+    }
+    desc_lookup <- stats::setNames(
+      as.character(descriptions$text),
+      gsub("::", ":", as.character(descriptions$id))
+    )
+  }
 
   # Input validation
   if (!is.list(traj_data) || !all(c("graph", "trajectories") %in% names(traj_data))) {
@@ -273,9 +291,26 @@ plot_group_trajectories_lines_3d <- function(
       size_factors <- rep(1, length(td_hi))
     }
 
+    # terminal-node ball sizes: proportional to each trajectory's paper count
+    # (terminal-node size) but kept small in absolute terms, because WebGL
+    # renders scatter3d lines thin regardless of `width`, so a large marker
+    # would dwarf the line.
+    term_sizes <- vapply(td_hi, function(td) tail(td$step_p, 1), numeric(1))
+    ball_sizes <- if (length(unique(term_sizes)) > 1) {
+      scales::rescale(term_sizes, to = c(2.5, 5))
+    } else {
+      rep(4, length(td_hi))
+    }
+
     for (j in seq_along(td_hi)) {
       td <- td_hi[[j]]
       col <- unname(col_map_hi[td$traj_id])
+
+      # optional manual description for this trajectory ("group:traj_id")
+      traj_key <- if (!is.null(group_id)) paste0(group_id, ":", td$traj_id) else td$traj_id
+      desc <- if (!is.null(desc_lookup)) unname(desc_lookup[gsub("::", ":", traj_key)]) else NA_character_
+      has_desc <- !is.na(desc)
+
       wr <- width_range_hi * size_factors[j]
 
       seg_widths <- if (length(unique(td$zvals)) <= 1) {
@@ -321,6 +356,7 @@ plot_group_trajectories_lines_3d <- function(
           "Cumulative: ", td$zvals
         )
       }
+      if (has_desc) hover_txt <- paste0(hover_txt, "<br><i>", desc, "</i>")
       p <- p |>
         plotly::add_trace(
           x = td$years, y = td$yvals, z = td$zvals,
@@ -334,9 +370,24 @@ plot_group_trajectories_lines_3d <- function(
           showlegend = FALSE
         )
 
+      # terminal node: a small ball on the trajectory's end (size by paper
+      # count). Hover shows the paper count and, if supplied, the description.
+      ball_hover <- paste0("<b>", traj_key, "</b><br>documents: ", tail(td$step_p, 1))
+      if (has_desc) ball_hover <- paste0(ball_hover, "<br>", desc)
+      p <- p |>
+        plotly::add_trace(
+          x = tail(td$years, 1), y = tail(td$yvals, 1), z = tail(td$zvals, 1),
+          type = "scatter3d", mode = "markers",
+          marker = list(size = ball_sizes[j], color = col),
+          hoverinfo = "text", text = ball_hover,
+          hoverlabel = list(bgcolor = "rgba(50,50,50,0.9)",
+                            font = list(color = "white", size = hover_font_size)),
+          showlegend = FALSE
+        )
+
       if (show_labels) {
-        # name with the trajectory's total paper count on a line below
-        label_txt <- paste0(td$traj_id, "<br>(", tail(td$zvals_raw, 1), ")")
+        # trajectory name only; the paper count lives in the hover now
+        label_txt <- td$traj_id
         p <- p |>
           plotly::add_trace(
             x = tail(td$years, 1), y = tail(td$yvals, 1), z = tail(td$zvals, 1),

@@ -12,7 +12,8 @@ plot_trajectory_formation_3d(
   width_range = c(3, 12),
   title = NULL,
   label_size = 16,
-  hover_font_size = 12
+  hover_font_size = 12,
+  descriptions = NULL
 )
 }
 \arguments{
@@ -38,6 +39,11 @@ feeders from dwarfing the river (default: TRUE).}
 \item{label_size}{Font size for the end labels (default: 16).}
 
 \item{hover_font_size}{Font size for hover tooltips (default: 12).}
+
+\item{descriptions}{Optional data frame of manual hover descriptions
+(default: NULL). Must have columns \code{id} (trajectory key \code{"group::traj_id"}
+or \code{"group:traj_id"}) and \code{text}. When supplied, the matching target or
+feeder node shows the description on hover; others keep the default hover.}
 }
 \value{
 A plotly 3D plot object.

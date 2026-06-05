@@ -78,6 +78,14 @@ library(birddog)
   trajectory
 - `plot_trajectory_handoff()` – timeline of the stagnant trajectory and
   the one that absorbed it
+- `sniff_trajectory_formation()` / `sniff_trajectory_formations()` – the
+  inverse of destination: which trajectories fed into a target (its
+  feeders), for one target or all at once
+- `plot_trajectory_formation_2d()` / `plot_trajectory_formation_3d()` –
+  confluence of feeders into a target trajectory (2D river timeline /
+  interactive 3D)
+- `sniff_trajectory_self_sufficiency()` – per-trajectory
+  endogenous-growth index (`1 - imported / size`)
 
 ### Main path analysis
 

@@ -14,5 +14,5 @@ utils::globalVariables(c(
   "metric", "value", "semcoh", "exclus", "topic", "term", "terms",
   "document", "AB", "from", "to", "weight", "documents", "network_until",
   "quantity_papers", "prop_tracked_intra_group", "tracked_documents",
-  "PY.sd", "traj_id", "traj_width", "y_from", "y_to",  "group_id", "document_id", "label", 
-  "score", "in_any_traj"))
+  "PY.sd", "traj_id", "traj_width", "y_from", "y_to",  "group_id", "document_id", "label",
+  "score", "in_any_traj", "color_value"))

@@ -39,3 +39,22 @@ test_that("plot_trajectory_formation_3d errors on a non-formation input", {
     "sniff_trajectory_formation"
   )
 })
+
+test_that("plot_trajectory_formation_3d shows manual descriptions on hover", {
+  desc <- data.frame(
+    id = c("c1g16::tr1", "c1g10:tr3"),       # target (::) and feeder (:) keys
+    text = c("target description", "feeder description"),
+    stringsAsFactors = FALSE
+  )
+  p <- plot_trajectory_formation_3d(make_fx_formation(), descriptions = desc)
+  txts <- unlist(lapply(p$x$attrs, function(tr) tr$text))
+  expect_true(any(grepl("target description", txts)))
+  expect_true(any(grepl("feeder description", txts)))
+})
+
+test_that("plot_trajectory_formation_3d errors on malformed descriptions", {
+  expect_error(
+    plot_trajectory_formation_3d(make_fx_formation(), descriptions = data.frame(id = "x")),
+    "columns"
+  )
+})

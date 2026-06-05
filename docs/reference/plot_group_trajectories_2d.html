@@ -11,7 +11,7 @@ and color representing publication-year deviation."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,7 +61,8 @@ and color representing publication-year deviation.</p>
 <span>  label_horizontal_position <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  label_angle <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  time_span <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  show_legend <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  show_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  color_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"py_deviation"</span>, <span class="st">"final_group_share"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,15 +97,19 @@ for nodes to be included (default: 0.2).</p></dd>
 
 
 <dt id="arg-label-vertical-position">label_vertical_position<a class="anchor" aria-label="anchor" href="#arg-label-vertical-position"></a></dt>
-<dd><p>Vertical adjustment for node labels (default: 0).</p></dd>
+<dd><p>Kept for backward compatibility; no longer
+applied, as labels are auto-positioned (repelled) with a white halo so they
+stay readable over dark nodes and do not overlap.</p></dd>
 
 
 <dt id="arg-label-horizontal-position">label_horizontal_position<a class="anchor" aria-label="anchor" href="#arg-label-horizontal-position"></a></dt>
-<dd><p>Horizontal adjustment for node labels (default: 0).</p></dd>
+<dd><p>Kept for backward compatibility; not applied
+(see <code>label_vertical_position</code>).</p></dd>
 
 
 <dt id="arg-label-angle">label_angle<a class="anchor" aria-label="anchor" href="#arg-label-angle"></a></dt>
-<dd><p>Angle for node labels (default: 0).</p></dd>
+<dd><p>Kept for backward compatibility; not applied (labels are
+auto-positioned).</p></dd>
 
 
 <dt id="arg-time-span">time_span<a class="anchor" aria-label="anchor" href="#arg-time-span"></a></dt>
@@ -113,6 +118,15 @@ for nodes to be included (default: 0.2).</p></dd>
 
 <dt id="arg-show-legend">show_legend<a class="anchor" aria-label="anchor" href="#arg-show-legend"></a></dt>
 <dd><p>Logical indicating whether to show the color legend (default: <code>TRUE</code>).</p></dd>
+
+
+<dt id="arg-color-by">color_by<a class="anchor" aria-label="anchor" href="#arg-color-by"></a></dt>
+<dd><p>What the node color encodes: <code>"py_deviation"</code> (default)
+colors by the average publication-year deviation (<code>PY.sd</code>);
+<code>"final_group_share"</code> colors each node by the share of its papers that
+belong to <code>group</code>'s last-year cluster (a plasma palette, 0-100\<!-- %), -->
+showing how much of each earlier cluster funnels into the final group. The
+latter requires <code>docs_per_group</code> in <code>groups_cumulative_trajectories</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

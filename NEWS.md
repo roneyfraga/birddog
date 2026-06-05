@@ -1,3 +1,13 @@
+# birddog 1.0.7
+
+## New features
+
+* `sniff_trajectory_formation()` and `sniff_trajectory_formations()`: the inverse of `sniff_trajectory_destination()`. Given a living target trajectory, find every other trajectory whose terminal cohort was absorbed into it (its feeders), for one target or all targets at once. Each feeder carries the documents transferred, its cohort size and handoff year, plus measured `size_curve` and `inflow_curve` series; `target_info` also reports the target's own document count.
+* `plot_trajectory_formation_2d()` and `plot_trajectory_formation_3d()`: draw the confluence of feeders into a target trajectory -- a 2D cumulative-river timeline or an interactive 3D plotly view (X = year, Y = feeder lane, Z = documents), with terminal-node markers and optional manual hover descriptions.
+* `sniff_trajectory_self_sufficiency()`: per-trajectory endogenous-growth index, `1 - imported / size`, distinguishing lineages that grew on their own from confluences of other communities.
+* `plot_group_trajectories_2d()`: new `color_by` argument with `"final_group_share"`, colouring each node by the share of its documents that belong to the group's last-year cluster (plasma palette), with white-haloed labels for readability over dark nodes.
+* `plot_group_trajectories_lines_3d()`: new `descriptions` argument for manual per-trajectory hover text, plus terminal-node markers sized by document count.
+
 # birddog 1.0.6
 
 ## New features

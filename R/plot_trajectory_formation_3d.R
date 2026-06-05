@@ -24,6 +24,10 @@
 #' @param title Plot title (default: the target trajectory key).
 #' @param label_size Font size for the end labels (default: 16).
 #' @param hover_font_size Font size for hover tooltips (default: 12).
+#' @param descriptions Optional data frame of manual hover descriptions
+#'   (default: NULL). Must have columns `id` (trajectory key `"group::traj_id"`
+#'   or `"group:traj_id"`) and `text`. When supplied, the matching target or
+#'   feeder node shows the description on hover; others keep the default hover.
 #'
 #' @return A plotly 3D plot object.
 #'
@@ -51,7 +55,8 @@ plot_trajectory_formation_3d <- function(formation,
                                          width_range = c(3, 12),
                                          title = NULL,
                                          label_size = 16,
-                                         hover_font_size = 12) {
+                                         hover_font_size = 12,
+                                         descriptions = NULL) {
   feeder_curve <- match.arg(feeder_curve)
   if (!requireNamespace("plotly", quietly = TRUE)) {
     stop("plotly is required for 3D plotting. install.packages('plotly').", call. = FALSE)
@@ -60,6 +65,22 @@ plot_trajectory_formation_3d <- function(formation,
         is.null(formation$feeders) ||
         is.null(formation$target_info)) {
     stop("'formation' must be the output of sniff_trajectory_formation()", call. = FALSE)
+  }
+
+  # Optional manual hover descriptions, keyed by trajectory key (":" or "::").
+  desc_lookup <- NULL
+  if (!is.null(descriptions)) {
+    if (!all(c("id", "text") %in% names(descriptions))) {
+      stop("'descriptions' must be a data.frame with columns 'id' and 'text'", call. = FALSE)
+    }
+    desc_lookup <- stats::setNames(
+      as.character(descriptions$text),
+      gsub("::", ":", as.character(descriptions$id))
+    )
+  }
+  desc_of <- function(key) {
+    if (is.null(desc_lookup)) return(NA_character_)
+    unname(desc_lookup[gsub("::", ":", key)])
   }
 
   feeders <- formation$feeders
@@ -190,6 +211,8 @@ plot_trajectory_formation_3d <- function(formation,
       " (", round(100 * fd$prop_of_source), "%)<br>",
       "handoff: ", fd$handoff_year
     )
+    fd_desc <- desc_of(fd$source_key)
+    if (!is.na(fd_desc)) hover <- paste0(hover, "<br>", fd_desc)
     p <- plotly::add_trace(
       p, x = fd$handoff_year, y = fd$lane, z = ztop,
       type = "scatter3d", mode = "markers",
@@ -209,6 +232,24 @@ plot_trajectory_formation_3d <- function(formation,
       showlegend = FALSE, hoverinfo = "skip"
     )
   }
+
+  # terminal node: a ball on the target river's end
+  target_hover <- if (!is.null(ti$size)) {
+    paste0("<b>", target_label, "</b><br>documents: ", ti$size)
+  } else {
+    target_label
+  }
+  tgt_desc <- desc_of(target_label)
+  if (!is.na(tgt_desc)) target_hover <- paste0(target_hover, "<br>", tgt_desc)
+  p <- plotly::add_trace(
+    p, x = rx[length(rx)], y = 0, z = rz[length(rz)],
+    type = "scatter3d", mode = "markers",
+    marker = list(size = 6, color = "#2E3440"),
+    hoverinfo = "text", text = target_hover,
+    hoverlabel = list(bgcolor = "rgba(50,50,50,0.9)",
+                      font = list(color = "white", size = hover_font_size)),
+    showlegend = FALSE
+  )
 
   # target label at the river end: name with the main trajectory's paper count
   # on a line below (e.g. "c1g10::tr1\n(214)")

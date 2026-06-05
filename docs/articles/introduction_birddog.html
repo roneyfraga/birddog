@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -3709,44 +3709,52 @@ trajectory plots above (use <code>color_by = "group"</code> or
 <span><span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_trajectory_destination.html">plot_trajectory_destination</a></span><span class="op">(</span><span class="va">dest</span>, color_by <span class="op">=</span> <span class="st">"trajectory"</span>, min_prop <span class="op">=</span> <span class="fl">0.03</span><span class="op">)</span></span></code></pre></div>
 <p><img src="trajectory-destination-c1g3.png" style="width:99.0%"></p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="citation-growth-per-document">Citation growth per document<a class="anchor" aria-label="anchor" href="#citation-growth-per-document"></a>
-</h2>
-<p>Track how individual documents accumulate citations over time to
-identify fast-growing papers.</p>
+<div class="section level3">
+<h3 id="which-trajectories-formed-a-living-one">Which trajectories formed a living one<a class="anchor" aria-label="anchor" href="#which-trajectories-formed-a-living-one"></a>
+</h3>
+<p>The mirror of the previous analysis: instead of following a stagnant
+trajectory forward, stand at a living trajectory and ask <strong>which
+trajectories fed into it</strong>.
+<code><a href="../reference/sniff_trajectory_formation.html">sniff_trajectory_formation()</a></code> (and the batch
+<code><a href="../reference/sniff_trajectory_formations.html">sniff_trajectory_formations()</a></code>) returns, for a target
+trajectory, every other trajectory whose terminal cohort was absorbed
+into it – the exact inverse of
+<code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code>.
+<code><a href="../reference/plot_trajectory_formation_2d.html">plot_trajectory_formation_2d()</a></code> draws the target as a
+cumulative “river” with each feeder merging at its handoff year;
+<code><a href="../reference/plot_trajectory_formation_3d.html">plot_trajectory_formation_3d()</a></code> is the interactive plotly
+version (X = year, Y = feeder lane, Z = documents).</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># ~11 min</span></span>
-<span><span class="va">groups_cumulative_citations</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_groups_cumulative_citations.html">sniff_groups_cumulative_citations</a></span><span class="op">(</span></span>
-<span>  <span class="va">groups</span>,</span>
-<span>  min_citations <span class="op">=</span> <span class="fl">2</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># which trajectories formed the main living trajectory c1g3 tr1?</span></span>
+<span><span class="va">form</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_trajectory_formation.html">sniff_trajectory_formation</a></span><span class="op">(</span></span>
+<span>  target         <span class="op">=</span> <span class="st">"c1g3::tr1"</span>,</span>
+<span>  all_detected   <span class="op">=</span> <span class="va">groups_detected</span>,</span>
+<span>  docs_per_group <span class="op">=</span> <span class="va">groups_cumulative_trajectories</span><span class="op">$</span><span class="va">docs_per_group</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">form</span><span class="op">$</span><span class="va">feeders</span>                       <span class="co"># feeders with document counts and handoff years</span></span>
+<span></span>
+<span><span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_trajectory_formation_2d.html">plot_trajectory_formation_2d</a></span><span class="op">(</span><span class="va">form</span>, max_feeders <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_trajectory_formation_3d.html">plot_trajectory_formation_3d</a></span><span class="op">(</span><span class="va">form</span>, max_feeders <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
+<p><img src="trajectory-formation-c1g3.png" style="width:99.0%"><img src="trajectory-formation-3d-c1g3.png"></p>
 </div>
-<div class="section level2">
-<h2 id="main-path-analysis">Main Path Analysis<a class="anchor" aria-label="anchor" href="#main-path-analysis"></a>
-</h2>
-<p>Identify the key route through the citation network, revealing the
-most influential chain of documents over time.</p>
+<div class="section level3">
+<h3 id="self-sufficiency">Self-sufficiency<a class="anchor" aria-label="anchor" href="#self-sufficiency"></a>
+</h3>
+<p>How much of each living trajectory grew on its own versus being a
+confluence of others? <code><a href="../reference/sniff_trajectory_self_sufficiency.html">sniff_trajectory_self_sufficiency()</a></code>
+reports <code>1 - imported / size</code>: values near 1 mean the lineage
+grew endogenously; lower values mean it absorbed many documents from
+other communities.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">groups_key_route</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_key_route.html">sniff_key_route</a></span><span class="op">(</span><span class="va">groups</span>, scope <span class="op">=</span> <span class="st">"groups"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">groups_key_route</span><span class="op">[[</span><span class="st">"c1g3"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">plot</span></span>
-<span></span>
-<span><span class="va">groups_key_route</span><span class="op">[[</span><span class="st">"c1g3"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="key-route-c1g3.png" style="width:99.0%"></p>
+<code class="sourceCode R"><span><span class="va">ss</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_trajectory_self_sufficiency.html">sniff_trajectory_self_sufficiency</a></span><span class="op">(</span></span>
+<span>  all_detected   <span class="op">=</span> <span class="va">groups_detected</span>,</span>
+<span>  docs_per_group <span class="op">=</span> <span class="va">groups_cumulative_trajectories</span><span class="op">$</span><span class="va">docs_per_group</span>,</span>
+<span>  min_size       <span class="op">=</span> <span class="fl">50</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">key_route_c1g3_data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>document <span class="op">=</span> <span class="va">name</span>, <span class="va">name2</span>, title <span class="op">=</span> <span class="va">TI</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/text_transform.html" class="external-link">text_transform</a></span><span class="op">(</span></span>
-<span>    locations <span class="op">=</span> <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/cells_body.html" class="external-link">cells_body</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="va">document</span><span class="op">)</span>,</span>
-<span>    fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">'&lt;a href="https://openalex.org/{x}" target="_blank"&gt;{x}&lt;/a&gt;'</span><span class="op">)</span></span>
-<span>    <span class="op">}</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">self_sufficiency</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div id="agrpxoeeyr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>#agrpxoeeyr table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -4198,6 +4206,589 @@ most influential chain of documents over time.</p>
 </style>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead><tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="trajectory">trajectory</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="size">size</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="imported">imported</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="self_sufficiency">self_sufficiency</th>
+    </tr></thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g9::tr1</td>
+<td headers="size" class="gt_row gt_right">2169</td>
+<td headers="imported" class="gt_row gt_right">39</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.98</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g7::tr1</td>
+<td headers="size" class="gt_row gt_right">2547</td>
+<td headers="imported" class="gt_row gt_right">52</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.98</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g2::tr1</td>
+<td headers="size" class="gt_row gt_right">6316</td>
+<td headers="imported" class="gt_row gt_right">199</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.97</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g12::tr2</td>
+<td headers="size" class="gt_row gt_right">2070</td>
+<td headers="imported" class="gt_row gt_right">92</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.96</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g10::tr1</td>
+<td headers="size" class="gt_row gt_right">2024</td>
+<td headers="imported" class="gt_row gt_right">99</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.95</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g11::tr1</td>
+<td headers="size" class="gt_row gt_right">1604</td>
+<td headers="imported" class="gt_row gt_right">105</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.93</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g6::tr1</td>
+<td headers="size" class="gt_row gt_right">4467</td>
+<td headers="imported" class="gt_row gt_right">316</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.93</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g8::tr1</td>
+<td headers="size" class="gt_row gt_right">3933</td>
+<td headers="imported" class="gt_row gt_right">310</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.92</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g13::tr1</td>
+<td headers="size" class="gt_row gt_right">2679</td>
+<td headers="imported" class="gt_row gt_right">249</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.91</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g5::tr1</td>
+<td headers="size" class="gt_row gt_right">2852</td>
+<td headers="imported" class="gt_row gt_right">283</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.90</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g3::tr1</td>
+<td headers="size" class="gt_row gt_right">6159</td>
+<td headers="imported" class="gt_row gt_right">817</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.87</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g1::tr1</td>
+<td headers="size" class="gt_row gt_right">10204</td>
+<td headers="imported" class="gt_row gt_right">1751</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.83</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g15::tr4</td>
+<td headers="size" class="gt_row gt_right">1027</td>
+<td headers="imported" class="gt_row gt_right">256</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.75</td>
+</tr>
+<tr>
+<td headers="trajectory" class="gt_row gt_left">c1g4::tr1</td>
+<td headers="size" class="gt_row gt_right">4834</td>
+<td headers="imported" class="gt_row gt_right">2338</td>
+<td headers="self_sufficiency" class="gt_row gt_right">0.52</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="citation-growth-per-document">Citation growth per document<a class="anchor" aria-label="anchor" href="#citation-growth-per-document"></a>
+</h2>
+<p>Track how individual documents accumulate citations over time to
+identify fast-growing papers.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># ~11 min</span></span>
+<span><span class="va">groups_cumulative_citations</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_groups_cumulative_citations.html">sniff_groups_cumulative_citations</a></span><span class="op">(</span></span>
+<span>  <span class="va">groups</span>,</span>
+<span>  min_citations <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="main-path-analysis">Main Path Analysis<a class="anchor" aria-label="anchor" href="#main-path-analysis"></a>
+</h2>
+<p>Identify the key route through the citation network, revealing the
+most influential chain of documents over time.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">groups_key_route</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_key_route.html">sniff_key_route</a></span><span class="op">(</span><span class="va">groups</span>, scope <span class="op">=</span> <span class="st">"groups"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">groups_key_route</span><span class="op">[[</span><span class="st">"c1g3"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">plot</span></span>
+<span></span>
+<span><span class="va">groups_key_route</span><span class="op">[[</span><span class="st">"c1g3"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="key-route-c1g3.png" style="width:99.0%"></p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">key_route_c1g3_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>document <span class="op">=</span> <span class="va">name</span>, <span class="va">name2</span>, title <span class="op">=</span> <span class="va">TI</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/text_transform.html" class="external-link">text_transform</a></span><span class="op">(</span></span>
+<span>    locations <span class="op">=</span> <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/cells_body.html" class="external-link">cells_body</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="va">document</span><span class="op">)</span>,</span>
+<span>    fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">'&lt;a href="https://openalex.org/{x}" target="_blank"&gt;{x}&lt;/a&gt;'</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div id="rmpeluklzz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#rmpeluklzz table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#rmpeluklzz thead, #rmpeluklzz tbody, #rmpeluklzz tfoot, #rmpeluklzz tr, #rmpeluklzz td, #rmpeluklzz th {
+  border-style: none;
+}
+
+#rmpeluklzz p {
+  margin: 0;
+  padding: 0;
+}
+
+#rmpeluklzz .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#rmpeluklzz .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#rmpeluklzz .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#rmpeluklzz .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#rmpeluklzz .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#rmpeluklzz .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#rmpeluklzz .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#rmpeluklzz .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#rmpeluklzz .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#rmpeluklzz .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#rmpeluklzz .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#rmpeluklzz .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#rmpeluklzz .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#rmpeluklzz .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#rmpeluklzz .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rmpeluklzz .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#rmpeluklzz .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#rmpeluklzz .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#rmpeluklzz .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rmpeluklzz .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#rmpeluklzz .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rmpeluklzz .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#rmpeluklzz .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rmpeluklzz .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rmpeluklzz .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rmpeluklzz .gt_left {
+  text-align: left;
+}
+
+#rmpeluklzz .gt_center {
+  text-align: center;
+}
+
+#rmpeluklzz .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#rmpeluklzz .gt_font_normal {
+  font-weight: normal;
+}
+
+#rmpeluklzz .gt_font_bold {
+  font-weight: bold;
+}
+
+#rmpeluklzz .gt_font_italic {
+  font-style: italic;
+}
+
+#rmpeluklzz .gt_super {
+  font-size: 65%;
+}
+
+#rmpeluklzz .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#rmpeluklzz .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#rmpeluklzz .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#rmpeluklzz .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#rmpeluklzz .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#rmpeluklzz .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#rmpeluklzz .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#rmpeluklzz .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#rmpeluklzz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead><tr class="gt_col_headings">
 <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="document">document</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="name2">name2</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="title">title</th>
@@ -4432,24 +5023,24 @@ most influential chain of documents over time.</p>
 </h2>
 <p>Detect topics within a group using Structural Topic Modeling,
 creating sub-groups based on linguistic similarities.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Prepare STM data (~30 min)</span></span>
 <span><span class="va">groups_stm_prepare</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_groups_stm_prepare.html">sniff_groups_stm_prepare</a></span><span class="op">(</span></span>
 <span>  <span class="va">groups</span>,</span>
 <span>  group_to_stm <span class="op">=</span> <span class="st">"c1g3"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>17 topics</strong> is the best fit.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">groups_stm_prepare</span><span class="op">$</span><span class="va">plots</span><span class="op">[[</span><span class="st">'metrics_by_k'</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">groups_stm_prepare</span><span class="op">$</span><span class="va">plots</span><span class="op">[[</span><span class="st">'exclusivity_vs_coherence'</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run STM (~35 sec)</span></span>
 <span><span class="va">groups_stm_run</span> <span class="op">&lt;-</span> <span class="fu">birddog</span><span class="fu">::</span><span class="fu"><a href="../reference/sniff_groups_stm_run.html">sniff_groups_stm_run</a></span><span class="op">(</span></span>
 <span>  <span class="va">groups_stm_prepare</span>,</span>
 <span>  k_topics <span class="op">=</span> <span class="fl">17</span>,</span>
 <span>  n_top_documents <span class="op">=</span> <span class="fl">20</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">groups_stm_run</span><span class="op">$</span><span class="va">topic_proportion</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>topic_proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">topic_proportion</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -4470,7 +5061,7 @@ creating sub-groups based on linguistic similarities.</p>
 <div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.5.3 (2026-03-11)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
@@ -4495,7 +5086,7 @@ creating sub-groups based on linguistic similarities.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] birddog_1.0.6</span></span>
+<span><span class="co">#&gt; [1] birddog_1.0.7</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] gtable_0.3.6        xfun_0.56           bslib_0.10.0       </span></span>

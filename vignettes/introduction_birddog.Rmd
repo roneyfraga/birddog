@@ -400,6 +400,48 @@ birddog::plot_trajectory_destination(dest, color_by = "trajectory", min_prop = 0
 
 ![](trajectory-destination-c1g3.png){width=99%}
 
+### Which trajectories formed a living one
+
+The mirror of the previous analysis: instead of following a stagnant trajectory forward, stand at a living trajectory and ask **which trajectories fed into it**. `sniff_trajectory_formation()` (and the batch `sniff_trajectory_formations()`) returns, for a target trajectory, every other trajectory whose terminal cohort was absorbed into it -- the exact inverse of `sniff_trajectory_destination()`. `plot_trajectory_formation_2d()` draws the target as a cumulative "river" with each feeder merging at its handoff year; `plot_trajectory_formation_3d()` is the interactive plotly version (X = year, Y = feeder lane, Z = documents).
+
+```{r eval = FALSE, warning = FALSE}
+# which trajectories formed the main living trajectory c1g3 tr1?
+form <- birddog::sniff_trajectory_formation(
+  target         = "c1g3::tr1",
+  all_detected   = groups_detected,
+  docs_per_group = groups_cumulative_trajectories$docs_per_group
+)
+
+form$feeders                       # feeders with document counts and handoff years
+
+birddog::plot_trajectory_formation_2d(form, max_feeders = 8)
+birddog::plot_trajectory_formation_3d(form, max_feeders = 8)
+```
+
+![](trajectory-formation-c1g3.png){width=99%}
+![](trajectory-formation-3d-c1g3.png)
+
+### Self-sufficiency
+
+How much of each living trajectory grew on its own versus being a confluence of others? `sniff_trajectory_self_sufficiency()` reports `1 - imported / size`: values near 1 mean the lineage grew endogenously; lower values mean it absorbed many documents from other communities.
+
+```{r eval = FALSE}
+ss <- birddog::sniff_trajectory_self_sufficiency(
+  all_detected   = groups_detected,
+  docs_per_group = groups_cumulative_trajectories$docs_per_group,
+  min_size       = 50
+)
+```
+
+```{r include = FALSE, }
+self_sufficiency <- readRDS(file.path(local_data, "self_sufficiency.rds"))
+```
+
+```{r }
+self_sufficiency |>
+  gt::gt()
+```
+
 ## Citation growth per document
 
 Track how individual documents accumulate citations over time to identify fast-growing papers.

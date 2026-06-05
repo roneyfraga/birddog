@@ -13,7 +13,7 @@ trajectories and network context in lowlight style."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,8 @@ trajectories and network context in lowlight style.</p>
 <span>  lowlight_alpha <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  lowlight_color <span class="op">=</span> <span class="st">"#9AA5B1"</span>,</span>
 <span>  width_by_traj_size <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  group_id <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  group_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  descriptions <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -162,6 +163,14 @@ smaller trajectories are proportionally thinner (minimum 25% of full range).</p>
 <dt id="arg-group-id">group_id<a class="anchor" aria-label="anchor" href="#arg-group-id"></a></dt>
 <dd><p>Optional group identifier to display in the plot title
 (default: NULL). When provided, the title becomes "3D Trajectories - group_id".</p></dd>
+
+
+<dt id="arg-descriptions">descriptions<a class="anchor" aria-label="anchor" href="#arg-descriptions"></a></dt>
+<dd><p>Optional data frame of manual hover descriptions
+(default: NULL). Must have columns <code>id</code> (trajectory key as <code>"group:traj_id"</code>,
+e.g. <code>"c1g1:tr1"</code>; <code>"::"</code> is also accepted) and <code>text</code>. When supplied, the
+matching trajectory's end node and line show the description on hover;
+trajectories without an entry keep the default hover.</p></dd>
 
 </dl></div>
     <div class="section level2">
