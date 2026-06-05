@@ -14,7 +14,8 @@ plot_group_trajectories_2d(
   label_horizontal_position = 0,
   label_angle = 0,
   time_span = NA,
-  show_legend = TRUE
+  show_legend = TRUE,
+  color_by = c("py_deviation", "final_group_share")
 )
 }
 \arguments{
@@ -34,15 +35,26 @@ for nodes to be included (default: 0.2).}
 
 \item{label_type}{Type of labels to display on nodes ("size" for weighted size or "id" for group IDs).}
 
-\item{label_vertical_position}{Vertical adjustment for node labels (default: 0).}
+\item{label_vertical_position}{Kept for backward compatibility; no longer
+applied, as labels are auto-positioned (repelled) with a white halo so they
+stay readable over dark nodes and do not overlap.}
 
-\item{label_horizontal_position}{Horizontal adjustment for node labels (default: 0).}
+\item{label_horizontal_position}{Kept for backward compatibility; not applied
+(see \code{label_vertical_position}).}
 
-\item{label_angle}{Angle for node labels (default: 0).}
+\item{label_angle}{Kept for backward compatibility; not applied (labels are
+auto-positioned).}
 
 \item{time_span}{Optional vector of years to display; if \code{NA}, shows all (default: \code{NA}).}
 
 \item{show_legend}{Logical indicating whether to show the color legend (default: \code{TRUE}).}
+
+\item{color_by}{What the node color encodes: \code{"py_deviation"} (default)
+colors by the average publication-year deviation (\code{PY.sd});
+\code{"final_group_share"} colors each node by the share of its papers that
+belong to \code{group}'s last-year cluster (a plasma palette, 0-100\\%),
+showing how much of each earlier cluster funnels into the final group. The
+latter requires \code{docs_per_group} in \code{groups_cumulative_trajectories}.}
 }
 \value{
 A \code{ggplot2} object visualizing the technological trajectories.

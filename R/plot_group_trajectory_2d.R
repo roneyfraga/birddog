@@ -15,11 +15,21 @@
 #' @param prop_tracked_intra_group_treshold Minimum proportion of tracked intra-group documents
 #'   for nodes to be included (default: 0.2).
 #' @param label_type Type of labels to display on nodes ("size" for weighted size or "id" for group IDs).
-#' @param label_vertical_position Vertical adjustment for node labels (default: 0).
-#' @param label_horizontal_position Horizontal adjustment for node labels (default: 0).
-#' @param label_angle Angle for node labels (default: 0).
+#' @param label_vertical_position Kept for backward compatibility; no longer
+#'   applied, as labels are auto-positioned (repelled) with a white halo so they
+#'   stay readable over dark nodes and do not overlap.
+#' @param label_horizontal_position Kept for backward compatibility; not applied
+#'   (see \code{label_vertical_position}).
+#' @param label_angle Kept for backward compatibility; not applied (labels are
+#'   auto-positioned).
 #' @param time_span Optional vector of years to display; if \code{NA}, shows all (default: \code{NA}).
 #' @param show_legend Logical indicating whether to show the color legend (default: \code{TRUE}).
+#' @param color_by What the node color encodes: \code{"py_deviation"} (default)
+#'   colors by the average publication-year deviation (\code{PY.sd});
+#'   \code{"final_group_share"} colors each node by the share of its papers that
+#'   belong to \code{group}'s last-year cluster (a plasma palette, 0-100\%),
+#'   showing how much of each earlier cluster funnels into the final group. The
+#'   latter requires \code{docs_per_group} in \code{groups_cumulative_trajectories}.
 #'
 #' @return A \code{ggplot2} object visualizing the technological trajectories.
 #'
@@ -55,10 +65,14 @@ plot_group_trajectories_2d <- function(
   label_horizontal_position = 0,
   label_angle = 0,
   time_span = NA,
-  show_legend = TRUE) {
+  show_legend = TRUE,
+  color_by = c("py_deviation", "final_group_share")) {
+
+  color_by <- match.arg(color_by)
 
   groups_similarity <- groups_cumulative_trajectories[["groups_similarity"]]
   groups_attributes <- groups_cumulative_trajectories[["groups_attributes"]]
+  docs_per_group <- groups_cumulative_trajectories[["docs_per_group"]]
 
   # Validate inputs
   if (missing(groups_similarity) || missing(groups_attributes)) {
@@ -89,6 +103,15 @@ plot_group_trajectories_2d <- function(
     stop("prop_tracked_intra_group_treshold must be between 0 and 1")
   }
 
+  share_lookup <- NULL
+  if (color_by == "final_group_share") {
+    if (is.null(docs_per_group)) {
+      stop("color_by = 'final_group_share' requires 'docs_per_group' in groups_cumulative_trajectories",
+           call. = FALSE)
+    }
+    share_lookup <- .final_group_share_lookup(docs_per_group, group)
+  }
+
   tryCatch({
     # Create network based on Jaccard similarity
     groups_similarity[[group]] |>
@@ -107,7 +130,14 @@ plot_group_trajectories_2d <- function(
     net |>
       tidygraph::activate(nodes) |>
       dplyr::left_join(dados3, by = dplyr::join_by(name)) |>
-      dplyr::mutate(size = quantity_papers * prop_tracked_intra_group) |>
+      dplyr::mutate(
+        size = quantity_papers * prop_tracked_intra_group,
+        color_value = if (color_by == "final_group_share") {
+          unname(share_lookup[name])
+        } else {
+          round(PY.sd, 1)
+        }
+      ) |>
       dplyr::filter(prop_tracked_intra_group >= prop_tracked_intra_group_treshold, tracked_documents > 1) |>
       dplyr::arrange(dplyr::desc(network_until)) ->
       net2
@@ -135,8 +165,19 @@ plot_group_trajectories_2d <- function(
       }() ->
       sugi
 
-    # Set up color palette
-    viridis_colors <- viridis::viridis(10, option = "D", direction = -1)
+    # Color palette, scale and legend depend on color_by
+    if (color_by == "final_group_share") {
+      # plasma reversed: 100% = dark (core lineage stands out), few = light yellow
+      pal_colors <- viridis::viridis(10, option = "C", direction = -1)
+      legend_title <- paste0("Share of node papers in final ", group)
+      color_scale <- ggplot2::scale_colour_gradientn(
+        colors = pal_colors, limits = c(0, 1), labels = scales::label_percent()
+      )
+    } else {
+      pal_colors <- viridis::viridis(10, option = "D", direction = -1)
+      legend_title <- "Average Publication Year Deviation"
+      color_scale <- ggplot2::scale_colour_gradientn(colors = pal_colors)
+    }
 
     # Base plot
     p <- ggraph::ggraph(sugi) +
@@ -144,7 +185,7 @@ plot_group_trajectories_2d <- function(
       ggraph::geom_node_point(
         ggplot2::aes(
           size = quantity_papers * prop_tracked_intra_group,
-          color = round(PY.sd, 1)
+          color = color_value
         ),
         show.legend = show_legend,
         stroke = 4
@@ -176,38 +217,42 @@ plot_group_trajectories_2d <- function(
         )
       ) +
       ggplot2::coord_flip() +
-      ggplot2::scale_colour_gradientn(colors = viridis_colors) +
+      color_scale +
       ggplot2::guides(
         size = "none",
         edge_alpha = "none",
         colour = ggplot2::guide_colourbar(
           position = "bottom",
           direction = "horizontal",
-          title = "Average Publication Year Deviation"
+          title = legend_title,
+          title.position = "top",
+          barwidth = grid::unit(12, "cm"),
+          barheight = grid::unit(0.5, "cm")
         )
       ) +
       ggplot2::scale_size(range = c(0, 10))
 
     # Add appropriate labels
-    if (label_type == "id") {
-      p <- p +
-        ggraph::geom_node_text(
-          ggplot2::aes(label = name),
-          vjust = label_vertical_position,
-          hjust = label_horizontal_position,
-          angle = label_angle,
-          check_overlap = TRUE
-        )
+    label_aes <- if (label_type == "id") {
+      ggplot2::aes(label = name)
     } else {
-      p <- p +
-        ggraph::geom_node_text(
-          ggplot2::aes(label = round(quantity_papers * prop_tracked_intra_group)),
-          vjust = label_vertical_position,
-          hjust = label_horizontal_position,
-          angle = label_angle,
-          check_overlap = TRUE
-        )
+      ggplot2::aes(label = round(quantity_papers * prop_tracked_intra_group))
     }
+
+    # White halo (ggrepel) keeps labels readable over dark nodes in either
+    # colour mode; labels stay near their node and de-overlap each other.
+    # NB: nudge_x/nudge_y are NOT passed here -- with coord_flip they make
+    # ggrepel fling every label into a corner.
+    p <- p +
+      ggraph::geom_node_text(
+        label_aes,
+        repel = TRUE,
+        bg.color = "white",
+        bg.r = 0.18,
+        point.size = NA,
+        min.segment.length = grid::unit(Inf, "lines"),
+        max.overlaps = Inf
+      )
 
     # Final adjustments
     p +

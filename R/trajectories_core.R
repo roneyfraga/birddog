@@ -163,6 +163,32 @@ build_temporal_dag <- function(
   out
 }
 
+#' Share of each cluster's papers that end up in a group's final cluster
+#'
+#' For every year-group node in `docs_per_group`, the fraction of its documents
+#' that also belong to `group`'s last-year cluster. Captures how much of an
+#' earlier cluster funnels into the group as it stands in the final year.
+#'
+#' @param docs_per_group Membership tibble with `group_id`, `document_id`,
+#'   `network_until` and `group`.
+#' @param group Final-year group label (e.g. "c1g1").
+#' @return Named numeric vector keyed by `group_id`, each in `[0, 1]`.
+#' @keywords internal
+.final_group_share_lookup <- function(docs_per_group, group) {
+  grp <- docs_per_group[docs_per_group$group == group, , drop = FALSE]
+  if (nrow(grp) == 0) {
+    stop("group '", group, "' not found in docs_per_group", call. = FALSE)
+  }
+  final_year <- max(grp$network_until)
+  final_id <- paste0("y", final_year, group)
+  final_docs <- docs_per_group$document_id[docs_per_group$group_id == final_id]
+  vapply(
+    split(docs_per_group$document_id, docs_per_group$group_id),
+    function(d) mean(d %in% final_docs),
+    numeric(1)
+  )
+}
+
 #' @keywords internal
 .na_to_zero <- function(x) {
   x[is.na(x)] <- 0
