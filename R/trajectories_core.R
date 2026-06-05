@@ -101,6 +101,68 @@ build_temporal_dag <- function(
   as.integer(sub("^y(\\d{4}).*$", "\\1", x))
 }
 
+#' Document count per year-node
+#'
+#' @param docs_per_group Membership tibble with `group_id` and `document_id`.
+#' @return Named integer vector mapping node name (e.g. "y2018c1g16") to its
+#'   distinct document count.
+#' @keywords internal
+.node_size_lookup <- function(docs_per_group) {
+  u <- docs_per_group[!duplicated(docs_per_group[c("group_id", "document_id")]),
+                      "group_id", drop = TRUE]
+  tab <- table(u)
+  stats::setNames(as.integer(tab), names(tab))
+}
+
+#' Per-year cumulative size of a trajectory (papers)
+#'
+#' Counts the documents in each of a trajectory's year-nodes, one (year, size)
+#' row per year. Under cumulative clustering a node already holds every paper up
+#' to its year, so the node size is the trajectory's cumulative size that year;
+#' the series therefore ends at the terminal cohort size.
+#'
+#' @param nodes Character vector of node names (e.g. "y2018c1g16").
+#' @param node_size Named integer vector from [.node_size_lookup()].
+#' @return A tibble with integer columns `year` and `size`, ordered by year.
+#' @keywords internal
+.feeder_growth_series <- function(nodes, node_size) {
+  yr <- .extract_year(nodes)
+  sz <- as.integer(node_size[nodes])
+  sz[is.na(sz)] <- 0L
+  agg <- tapply(sz, yr, max)
+  tibble::tibble(year = as.integer(names(agg)), size = as.integer(agg))
+}
+
+#' Cumulative arrival of a feeder's contributed papers
+#'
+#' For the subset of papers that actually flow from a feeder into a target,
+#' counts them cumulatively by first appearance year. Monotone non-decreasing,
+#' ending at the number of contributed papers; if their last year precedes the
+#' handoff, a final point at `handoff_year` holds the full count.
+#'
+#' @param doc_ids Character vector of the contributed document ids.
+#' @param docs_per_group Membership tibble with `document_id`, `network_until`.
+#' @param handoff_year Integer year the feeder hands off into the target.
+#' @return A tibble with integer columns `year` and `size`, ordered by year.
+#' @keywords internal
+.contributed_arrival_series <- function(doc_ids, docs_per_group, handoff_year) {
+  n <- length(doc_ids)
+  if (n == 0) {
+    return(tibble::tibble(year = integer(), size = integer()))
+  }
+  sub <- docs_per_group[docs_per_group$document_id %in% doc_ids,
+                        c("document_id", "network_until")]
+  first_year <- tapply(sub$network_until, sub$document_id, min)
+  tab <- table(as.integer(first_year))
+  out <- tibble::tibble(year = as.integer(names(tab)),
+                        size = as.integer(cumsum(tab)))
+  if (out$year[nrow(out)] < handoff_year) {
+    out <- tibble::tibble(year = c(out$year, as.integer(handoff_year)),
+                          size = c(out$size, n))
+  }
+  out
+}
+
 #' @keywords internal
 .na_to_zero <- function(x) {
   x[is.na(x)] <- 0
