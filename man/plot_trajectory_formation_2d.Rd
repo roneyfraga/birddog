@@ -6,6 +6,7 @@
 \usage{
 plot_trajectory_formation_2d(
   formation,
+  feeder_curve = c("inflow", "size"),
   max_feeders = 8,
   title = NULL,
   label_size = 4.5
@@ -13,6 +14,16 @@ plot_trajectory_formation_2d(
 }
 \arguments{
 \item{formation}{Output of \code{\link[=sniff_trajectory_formation]{sniff_trajectory_formation()}}.}
+
+\item{feeder_curve}{What the feeder's growing width traces: \code{"inflow"}
+(default) is the cumulative arrival of just the papers that entered the
+target, a monotone curve ending at \code{n} on the river's scale; \code{"size"} is the
+feeder's measured cluster size per year, ending at \code{cohort_size} (its whole
+community, which can dwarf and shrink the river since the 2D scale is
+linear). Each feeder rises from zero at its start year to this end value, on
+the same proportional scale as the spine, so it grows like the target does.
+Mirrors the \code{feeder_curve} of \code{\link[=plot_trajectory_formation_3d]{plot_trajectory_formation_3d()}} (whose
+default is \code{"size"}, mitigated there by a log z-axis).}
 
 \item{max_feeders}{Maximum number of feeders to draw, taken by descending
 papers (default: 8). Feeders beyond this are summarised in the caption.}
@@ -26,11 +37,12 @@ A \code{ggplot} object.
 }
 \description{
 Draws the target trajectory as a central spine and each feeder as a parallel
-timeline that merges into the spine at its handoff year. The spine is a
-cumulative river: it widens smoothly as each drawn feeder joins, so by the final year
-its width reflects the total papers absorbed. Spine and feeder widths share
-one strictly proportional scale (width 0 at zero papers), so their thickness
-is directly comparable. It generalises \code{\link[=plot_trajectory_handoff]{plot_trajectory_handoff()}} (one
+timeline that grows along its length (see \code{feeder_curve}) and merges into the
+spine at its handoff year. The spine is a cumulative river: it widens smoothly
+as each drawn feeder joins, so by the final year its width reflects the total
+papers absorbed. Spine and feeder widths share one strictly proportional scale
+(width 0 at zero papers), so their thickness is directly comparable. It
+generalises \code{\link[=plot_trajectory_handoff]{plot_trajectory_handoff()}} (one
 source into one absorber) to many feeders converging on one trajectory,
 answering visually "which trajectories formed this one?".
 }

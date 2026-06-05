@@ -49,7 +49,8 @@ into \code{target}), \code{prop_of_source}, \code{prop_of_inflow}, \code{kept}, 
 list-columns of \code{year}/\code{size} tibbles: \code{size_curve} (the feeder's
 measured cluster size per year, ending at \code{cohort_size}) and
 \code{inflow_curve} (the cumulative arrival of just the \code{n} contributed
-papers, ending at \code{n} in \code{handoff_year}).}
+papers as they join the feeder's own year-nodes, within the feeder's
+lifespan, ending at \code{n} in \code{handoff_year}).}
 \item{total_inflow}{Total papers absorbed into \code{target} across all
 feeders.}
 \item{last_year}{The resolved final year.}

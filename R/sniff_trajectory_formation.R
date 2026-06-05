@@ -46,7 +46,8 @@
 #'     list-columns of `year`/`size` tibbles: `size_curve` (the feeder's
 #'     measured cluster size per year, ending at `cohort_size`) and
 #'     `inflow_curve` (the cumulative arrival of just the `n` contributed
-#'     papers, ending at `n` in `handoff_year`).}
+#'     papers as they join the feeder's own year-nodes, within the feeder's
+#'     lifespan, ending at `n` in `handoff_year`).}
 #'   \item{total_inflow}{Total papers absorbed into `target` across all
 #'     feeders.}
 #'   \item{last_year}{The resolved final year.}
@@ -153,7 +154,7 @@ sniff_trajectory_formation <- function(target,
         cohort_size = length(cohort), n = n_to_target,
         size_curve = list(.feeder_growth_series(nodes, node_size)),
         inflow_curve = list(.contributed_arrival_series(
-          contrib_docs, docs_per_group, terminal_year))
+          contrib_docs, nodes, docs_per_group, terminal_year))
       )
     }
   }

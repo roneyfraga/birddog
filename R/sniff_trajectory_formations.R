@@ -56,6 +56,7 @@ sniff_trajectory_formations <- function(all_detected, docs_per_group,
   # document assignments.
   rows <- list()
   growth_map <- list()   # source_key -> size_curve (depends only on source)
+  nodes_map <- list()    # source_key -> its trajectory node names
   inflow_docs <- list()  # "dest||source" -> contributed document ids
   for (g in names(all_detected)) {
     trs <- all_detected[[g]]$trajectories
@@ -73,6 +74,7 @@ sniff_trajectory_formations <- function(all_detected, docs_per_group,
       sk <- paste0(g, "::", trs$traj_id[i])
       if (is.null(growth_map[[sk]])) {
         growth_map[[sk]] <- .feeder_growth_series(nodes, node_size)
+        nodes_map[[sk]] <- nodes
       }
       for (dk in unique(a$dest_traj_key)) {
         inflow_docs[[paste0(dk, "||", sk)]] <- a$document_id[a$dest_traj_key == dk]
@@ -119,7 +121,7 @@ sniff_trajectory_formations <- function(all_detected, docs_per_group,
       inflow_curve = lapply(seq_len(nrow(fd)), function(r)
         .contributed_arrival_series(
           inflow_docs[[paste0(key, "||", fd$source_key[r])]],
-          docs_per_group, fd$handoff_year[r]))
+          nodes_map[[fd$source_key[r]]], docs_per_group, fd$handoff_year[r]))
     ) |>
       dplyr::arrange(dplyr::desc(.data$n), .data$source_key)
     list(target = key, target_info = target_info_of(key), feeders = feeders,
