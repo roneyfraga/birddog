@@ -199,3 +199,95 @@ sniff_trajectory_dag <- function(docs_per_group, min_group_size = 10,
   list(graph = g, nodes = nodes, edges = edges, births = births,
        last_year = max(dpg$network_until, na.rm = TRUE), docs_per_group = dpg)
 }
+
+#' Detect birth-anchored soft trajectories from the cumulative-clustering DAG
+#'
+#' Walks the principal line of every birth in [sniff_trajectory_dag()]: from each
+#' birth, follow the single heaviest successor to a final group. Lines that
+#' converge on a common node share every node from there on (the shared tail), so
+#' intermediate nodes can belong to several trajectories — the soft property. Each
+#' trajectory stays a single line `tr1…trN`, ranked by paper count.
+#'
+#' @param x A [sniff_trajectory_dag()] object, or a `docs_per_group` tibble / a
+#'   [sniff_groups_trajectories()] object (the DAG is then built internally).
+#' @param min_len Minimum number of distinct years for a kept trajectory (default 3).
+#' @param min_group_size,jaccard_min,k_out Passed to [sniff_trajectory_dag()] when
+#'   `x` is not already a DAG object.
+#'
+#' @return A list: `graph` (the scored DAG), `docs_per_group`, and `trajectories`,
+#'   a tibble sorted by descending `size` with columns `traj_id`, `terminal_group`,
+#'   `birth`, `start`, `end`, `length` (distinct years), `size` (distinct papers
+#'   across the line's nodes), `living` (reaches `last_year`), `terminal_node`,
+#'   `nodes` (list-col), `shares_tail_with` (list-col of other `traj_id`s sharing
+#'   the terminal node), and `merge_year` (year of the earliest node shared with
+#'   another trajectory, else `NA`).
+#'
+#' @seealso [sniff_trajectory_dag()], [sniff_trajectory_group_contribution()]
+#' @export
+#' @importFrom tibble tibble
+detect_soft_trajectories <- function(x, min_len = 3, min_group_size = 10,
+                                     jaccard_min = 0.05, k_out = 2) {
+  dag <- if (is.list(x) && !is.data.frame(x) &&
+             all(c("graph", "nodes", "edges", "births") %in% names(x))) {
+    x
+  } else {
+    sniff_trajectory_dag(x, min_group_size = min_group_size,
+                         jaccard_min = jaccard_min, k_out = k_out)
+  }
+
+  edges <- dag$edges
+  dpg <- dag$docs_per_group
+  last_year <- dag$last_year
+  succ <- .heaviest_successor(edges)
+  node_docs <- split(dpg$document_id, dpg$group_id)
+
+  empty <- tibble::tibble(
+    traj_id = character(), terminal_group = character(), birth = character(),
+    start = integer(), end = integer(), length = integer(), size = integer(),
+    living = logical(), terminal_node = character(),
+    nodes = list(), shares_tail_with = list(), merge_year = integer()
+  )
+
+  paths <- lapply(dag$births, .principal_line, succ = succ)
+  len <- vapply(paths, function(p) length(unique(.extract_year(p))), integer(1))
+  keep <- len >= min_len
+  if (!any(keep)) {
+    return(list(graph = dag$graph, trajectories = empty, docs_per_group = dpg))
+  }
+  paths <- paths[keep]
+  births <- dag$births[keep]
+
+  size <- vapply(paths, function(p)
+    length(unique(unlist(node_docs[p], use.names = FALSE))), integer(1))
+  start <- vapply(paths, function(p) min(.extract_year(p)), integer(1))
+  end <- vapply(paths, function(p) max(.extract_year(p)), integer(1))
+  length_v <- vapply(paths, function(p) length(unique(.extract_year(p))), integer(1))
+  terminal_node <- vapply(paths, function(p) p[which.max(.extract_year(p))], character(1))
+  terminal_group <- vapply(paths, .terminal_group, character(1))
+  living <- end >= last_year
+
+  ord <- order(-size, start, births)
+  paths <- paths[ord]; births <- births[ord]; size <- size[ord]
+  start <- start[ord]; end <- end[ord]; length_v <- length_v[ord]
+  terminal_node <- terminal_node[ord]; terminal_group <- terminal_group[ord]
+  living <- living[ord]
+  traj_id <- paste0("tr", seq_along(paths))
+
+  shares_tail_with <- lapply(seq_along(paths), function(i)
+    setdiff(traj_id[terminal_node == terminal_node[i]], traj_id[i]))
+
+  node_count <- table(unlist(paths))
+  merge_year <- vapply(seq_along(paths), function(i) {
+    shared <- paths[[i]][as.integer(node_count[paths[[i]]]) > 1]
+    if (length(shared) == 0) NA_integer_ else min(.extract_year(shared))
+  }, integer(1))
+
+  trajectories <- tibble::tibble(
+    traj_id = traj_id, terminal_group = terminal_group, birth = births,
+    start = start, end = end, length = length_v, size = size, living = living,
+    terminal_node = terminal_node, nodes = paths,
+    shares_tail_with = shares_tail_with, merge_year = merge_year
+  )
+
+  list(graph = dag$graph, trajectories = trajectories, docs_per_group = dpg)
+}
