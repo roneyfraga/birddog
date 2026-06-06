@@ -5,32 +5,28 @@
 \title{Plot the trajectory x group coupling as a heatmap}
 \usage{
 plot_trajectory_group_coupling(
-  contribution,
+  flow,
   fill = c("n_shared", "prop_of_group", "prop_of_traj"),
   mark_terminal = TRUE
 )
 }
 \arguments{
-\item{contribution}{Output of \code{\link[=sniff_trajectory_group_contribution]{sniff_trajectory_group_contribution()}}.}
+\item{flow}{A \code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} object.}
 
-\item{fill}{Tile-colour measure: \code{"n_shared"} (default, log colour),
-\code{"prop_of_group"}, or \code{"prop_of_traj"} (linear colour).}
+\item{fill}{\code{"n_shared"} (default, log), \code{"prop_of_group"}, or \code{"prop_of_traj"}.}
 
-\item{mark_terminal}{Outline each trajectory's terminal-group cell (default TRUE).}
+\item{mark_terminal}{Outline each trajectory's destination-group cell (default TRUE).}
 }
 \value{
 A ggplot object.
 }
 \description{
-A compact heatmap of the trajectory x group bipartite from
-\code{\link[=sniff_trajectory_group_contribution]{sniff_trajectory_group_contribution()}}: rows are trajectories (grouped by
-their terminal group), columns are final groups, fill is the coupling strength.
-The cell where a trajectory's terminal group meets its column is outlined, so
-the one-to-one terminal coupling (where each lineage ends) reads on top of the
-many-to-many contribution coupling (where its papers spread). Unlike
-\code{\link[=plot_trajectory_group_bipartite]{plot_trajectory_group_bipartite()}} (a two-column graph) this stays legible at
-full density and marks the terminal destination.
+A compact heatmap of how each flow trajectory's papers spread across the final
+groups. Rows are trajectories (grouped by destination group), columns are final
+groups, fill is the coupling strength; the cell at each trajectory's destination
+group is outlined. Computes the incidence internally from a
+\code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} object.
 }
 \seealso{
-\code{\link[=sniff_trajectory_group_contribution]{sniff_trajectory_group_contribution()}}, \code{\link[=plot_trajectory_group_bipartite]{plot_trajectory_group_bipartite()}}
+\code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}}
 }
