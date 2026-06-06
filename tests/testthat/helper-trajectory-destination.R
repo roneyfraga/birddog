@@ -1,3 +1,13 @@
+make_growth_dpg <- function() {
+  tibble::tibble(
+    group_id = c("y2000c1g1", "y2001c1g1", "y2001c1g1",
+                 "y2002c1g1", "y2002c1g1", "y2002c1g1", "y2002c1g1"),
+    document_id = c("w1", "w1", "w2", "w1", "w2", "w3", "w4"),
+    network_until = c(2000L, 2001L, 2001L, 2002L, 2002L, 2002L, 2002L),
+    group = rep("c1g1", 7)
+  )
+}
+
 # Fixture: a trajectory "tr3" whose terminal (dying) node is y2018c1g16,
 # tracked forward to the final year 2020. The 4 cohort papers split:
 # d1,d2 stay in c1g16; d3 moves to c1g10; d4 drifts to c1g1 then drops out.
