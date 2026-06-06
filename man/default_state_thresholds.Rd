@@ -11,10 +11,8 @@ A list: \code{emergence_growth} (default 0.15), \code{dormancy_growth} (0.02),
 \code{convergence_entropy} (a stopped/absorbed trajectory whose normalized
 destination entropy is below this converged, else diverged; default 0.5),
 \code{dormancy_share} (an absorbed trajectory whose terminal cohort drops at least
-this share is dormant; default 0.5), \code{formation_entropy} (0.7; used by the
-soon-removed group dynamics).
+this share is dormant; default 0.5).
 }
 \description{
-Knobs for \code{\link[=sniff_trajectory_dynamics]{sniff_trajectory_dynamics()}} and \code{\link[=sniff_group_dynamics]{sniff_group_dynamics()}}. Override
-by passing a modified list.
+Knobs for \code{\link[=sniff_trajectory_dynamics]{sniff_trajectory_dynamics()}}. Override by passing a modified list.
 }

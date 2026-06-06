@@ -1,22 +1,19 @@
 #' Default, overridable thresholds for dynamic-state classification
 #'
-#' Knobs for [sniff_trajectory_dynamics()] and [sniff_group_dynamics()]. Override
-#' by passing a modified list.
+#' Knobs for [sniff_trajectory_dynamics()]. Override by passing a modified list.
 #'
 #' @return A list: `emergence_growth` (default 0.15), `dormancy_growth` (0.02),
 #'   `convergence_entropy` (a stopped/absorbed trajectory whose normalized
 #'   destination entropy is below this converged, else diverged; default 0.5),
 #'   `dormancy_share` (an absorbed trajectory whose terminal cohort drops at least
-#'   this share is dormant; default 0.5), `formation_entropy` (0.7; used by the
-#'   soon-removed group dynamics).
+#'   this share is dormant; default 0.5).
 #' @export
 default_state_thresholds <- function() {
   list(
     emergence_growth = 0.15,
     dormancy_growth = 0.02,
     convergence_entropy = 0.5,
-    dormancy_share = 0.5,
-    formation_entropy = 0.7
+    dormancy_share = 0.5
   )
 }
 
@@ -29,21 +26,6 @@ default_state_thresholds <- function() {
   z <- (x - m) / s
   z[is.na(z)] <- 0
   z
-}
-
-#' Emergence / maturity / dormancy from a recent-growth value
-#'
-#' @param recent_growth Numeric (fractional growth over the recent window); `NA`
-#'   when the curve is too short to measure (treated as maturity).
-#' @param emergence_growth,dormancy_growth Thresholds from [default_state_thresholds()].
-#' @return Character vector of `"emergence"`, `"maturity"`, or `"dormancy"`.
-#' @keywords internal
-.classify_growth_phase <- function(recent_growth, emergence_growth, dormancy_growth) {
-  ifelse(
-    is.na(recent_growth), "maturity",
-    ifelse(recent_growth >= emergence_growth, "emergence",
-           ifelse(recent_growth <= dormancy_growth, "dormancy", "maturity"))
-  )
 }
 
 #' Normalized Shannon entropy of a terminal cohort's destination distribution
