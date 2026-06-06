@@ -106,3 +106,18 @@ make_group_formation_dpg <- function() {
     group = c("c1g1", "c1g1", "c1g2", "c1g2", rep("c1g1", 4), rep("c1g1", 4))
   )
 }
+
+# p1 lives in BOTH births' pre-merge nodes; the old global-merge logic counted it
+# twice. Final c1g1 = {p1,p2,p3}; greedy attribution gives the earliest tributary
+# {p1,p2} and the other {p3}, so total_inflow == 3 (distinct), not 4.
+make_group_formation_overlap_dpg <- function() {
+  tibble::tibble(
+    group_id = c("y2000c1g1", "y2000c1g1", "y2000c1g2", "y2000c1g2",
+                 rep("y2001c1g1", 3), rep("y2002c1g1", 3)),
+    document_id = c("p1", "p2", "p1", "p3",
+                    "p1", "p2", "p3", "p1", "p2", "p3"),
+    network_until = c(2000L, 2000L, 2000L, 2000L,
+                      rep(2001L, 3), rep(2002L, 3)),
+    group = c("c1g1", "c1g1", "c1g2", "c1g2", rep("c1g1", 3), rep("c1g1", 3))
+  )
+}

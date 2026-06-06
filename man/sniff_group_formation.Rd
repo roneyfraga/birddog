@@ -41,14 +41,16 @@ A list with \code{target} (the group), \code{target_info}
 \description{
 The inverse of \code{\link[=sniff_trajectory_group_contribution]{sniff_trajectory_group_contribution()}} read as a river: for one
 final \code{group}, the birth-lineages that terminate in it (its backbone), each
-drawn as a \emph{pre-merge tributary} — the independent segment of the lineage
-(nodes before its \code{merge_year}) that joins the group's shared backbone at the
-merge. Because nodes shared by two or more trajectories are post-merge for all
-of them, the pre-merge segments are disjoint, so tributaries partition the
-group's papers and the confluence sums to the group. The returned object has the
-same shape as \code{\link[=sniff_trajectory_formation]{sniff_trajectory_formation()}}, so \code{\link[=plot_trajectory_formation_2d]{plot_trajectory_formation_2d()}}
-/ \code{\link[=plot_trajectory_formation_3d]{plot_trajectory_formation_3d()}} (and the \code{\link[=plot_group_formation_2d]{plot_group_formation_2d()}} wrappers)
-render it directly, with the group as the spine.
+drawn as a \emph{pre-merge tributary} — its segment before it joins the group's shared
+backbone (the nodes shared among the group's own terminating trajectories). Each
+final paper is attributed to the earliest-starting tributary that carried it
+before the merge, so the tributaries partition the group's papers with no
+soft-overlap double count; papers that only ever appear in the shared backbone are
+the unattributed core, so \verb{total_inflow <= |final(group)|}. The returned object
+has the same shape as \code{\link[=sniff_trajectory_formation]{sniff_trajectory_formation()}}, so
+\code{\link[=plot_trajectory_formation_2d]{plot_trajectory_formation_2d()}} / \code{\link[=plot_trajectory_formation_3d]{plot_trajectory_formation_3d()}} (and the
+\code{\link[=plot_group_formation_2d]{plot_group_formation_2d()}} wrappers) render it directly, with the group as the
+spine.
 }
 \seealso{
 \code{\link[=sniff_trajectory_group_contribution]{sniff_trajectory_group_contribution()}}, \code{\link[=plot_group_formation_2d]{plot_group_formation_2d()}},

@@ -2,14 +2,16 @@
 #'
 #' The inverse of [sniff_trajectory_group_contribution()] read as a river: for one
 #' final `group`, the birth-lineages that terminate in it (its backbone), each
-#' drawn as a *pre-merge tributary* — the independent segment of the lineage
-#' (nodes before its `merge_year`) that joins the group's shared backbone at the
-#' merge. Because nodes shared by two or more trajectories are post-merge for all
-#' of them, the pre-merge segments are disjoint, so tributaries partition the
-#' group's papers and the confluence sums to the group. The returned object has the
-#' same shape as [sniff_trajectory_formation()], so [plot_trajectory_formation_2d()]
-#' / [plot_trajectory_formation_3d()] (and the [plot_group_formation_2d()] wrappers)
-#' render it directly, with the group as the spine.
+#' drawn as a *pre-merge tributary* — its segment before it joins the group's shared
+#' backbone (the nodes shared among the group's own terminating trajectories). Each
+#' final paper is attributed to the earliest-starting tributary that carried it
+#' before the merge, so the tributaries partition the group's papers with no
+#' soft-overlap double count; papers that only ever appear in the shared backbone are
+#' the unattributed core, so `total_inflow <= |final(group)|`. The returned object
+#' has the same shape as [sniff_trajectory_formation()], so
+#' [plot_trajectory_formation_2d()] / [plot_trajectory_formation_3d()] (and the
+#' [plot_group_formation_2d()] wrappers) render it directly, with the group as the
+#' spine.
 #'
 #' @param group A single final-group label (e.g. `"c1g1"`).
 #' @param x A [detect_soft_trajectories()] object, or a `docs_per_group` tibble /
@@ -68,25 +70,47 @@ sniff_group_formation <- function(group, x, docs_per_group = NULL,
   node_docs <- split(docs_per_group$document_id, docs_per_group$group_id)
   final_id <- paste0("y", last_year, group)
   g_final <- unique(docs_per_group$document_id[docs_per_group$group_id == final_id])
+  if (length(g_final) == 0) {
+    stop("group '", group, "' has no final-year (", last_year,
+         ") cluster; it is not a final group", call. = FALSE)
+  }
 
+  # Sharing is computed WITHIN this group's terminating trajectories (local), not
+  # from the global merge_year (which an unrelated lineage can pull early). A node
+  # in more than one of these paths is the group's shared backbone; a trajectory's
+  # tributary is its segment before it joins that backbone. The earliest-starting
+  # lineage claims a shared pre-merge paper first, so the per-tributary
+  # contributions partition g_final (no soft-overlap double count); papers that
+  # only ever appear in the shared backbone are the unattributed core.
+  local_count <- table(unlist(fset$nodes))
+  ord <- order(fset$start, fset$traj_id)
+  fset <- fset[ord, , drop = FALSE]
+
+  claimed <- character(0)
   feeders_list <- list()
   for (i in seq_len(nrow(fset))) {
     nodes <- fset$nodes[[i]]
-    my <- fset$merge_year[i]
-    pre <- if (is.na(my)) nodes else nodes[.extract_year(nodes) < my]
-    if (length(pre) == 0) pre <- nodes[which.min(.extract_year(nodes))]
-    handoff <- if (is.na(my)) fset$end[i] else my
+    yrs <- .extract_year(nodes)
+    shared_local <- nodes[as.integer(local_count[nodes]) > 1]
+    if (length(shared_local) == 0) {
+      handoff <- fset$end[i]
+      pre <- nodes
+    } else {
+      handoff <- min(.extract_year(shared_local))
+      pre <- nodes[yrs < handoff]
+      if (length(pre) == 0) pre <- nodes[which.min(yrs)]
+    }
     docs <- unique(unlist(node_docs[pre], use.names = FALSE))
-    contrib <- intersect(g_final, docs)
-    n <- length(contrib)
-    if (n == 0) next
+    contrib <- setdiff(intersect(g_final, docs), claimed)
+    if (length(contrib) == 0) next
+    claimed <- c(claimed, contrib)
     feeders_list[[length(feeders_list) + 1]] <- tibble::tibble(
       source_key = fset$traj_id[i],
       source_group = group,
       start_year = fset$start[i],
       handoff_year = as.integer(handoff),
       cohort_size = length(docs),
-      n = n,
+      n = length(contrib),
       size_curve = list(.feeder_growth_series(pre, node_size)),
       inflow_curve = list(.contributed_arrival_series(contrib, pre, docs_per_group, handoff))
     )

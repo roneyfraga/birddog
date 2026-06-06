@@ -23,3 +23,12 @@ test_that("sniff_group_formation errors for a group no trajectory terminates in"
   r <- detect_soft_trajectories(make_group_formation_dpg(), min_len = 3, min_group_size = 1)
   expect_error(sniff_group_formation("c1g99", r), "no trajectory terminates")
 })
+
+test_that("sniff_group_formation does not double-count soft-overlap papers", {
+  r <- detect_soft_trajectories(make_group_formation_overlap_dpg(),
+                                min_len = 3, min_group_size = 1)
+  gf <- sniff_group_formation("c1g1", r, min_papers = 1, min_prop = 0)
+  expect_equal(gf$total_inflow, 3L)                 # 3 distinct papers, not 4
+  expect_setequal(gf$feeders$n, c(2L, 1L))          # earliest tributary claims p1
+  expect_equal(gf$feeders$n[gf$feeders$source_key == "tr1"], 2L)
+})
