@@ -68,6 +68,24 @@
   stats::setNames(e$to, e$from)
 }
 
+#' Principal line: walk a node to its terminal via heaviest successors
+#'
+#' @param birth A node name to start from.
+#' @param succ Named vector from [.heaviest_successor()].
+#' @return Character vector of node names from `birth` to its sink, in order.
+#' @keywords internal
+.principal_line <- function(birth, succ) {
+  path <- birth
+  cur <- birth
+  repeat {
+    nxt <- unname(succ[cur])
+    if (is.na(nxt) || nxt %in% path) break   # sink or (impossible) cycle guard
+    path <- c(path, nxt)
+    cur <- nxt
+  }
+  path
+}
+
 #' Terminal group label reached by following heaviest successors forward
 #'
 #' @param nodes Character vector of node names (e.g. `"y2000c1g1"`).
