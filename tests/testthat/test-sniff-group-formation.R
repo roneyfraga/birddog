@@ -1,18 +1,3 @@
-# Two births (A {w1,w2}, B {w3,w4}) merge at y2001c1g1 into a shared tail ending
-# at c1g1 in 2002. Each is a pre-merge tributary: A brings {w1,w2}, B brings
-# {w3,w4}; together they partition c1g1's final papers {w1,w2,w3,w4}.
-make_group_formation_dpg <- function() {
-  tibble::tibble(
-    group_id = c("y2000c1g1", "y2000c1g1", "y2000c1g2", "y2000c1g2",
-                 rep("y2001c1g1", 4), rep("y2002c1g1", 4)),
-    document_id = c("w1", "w2", "w3", "w4", "w1", "w2", "w3", "w4",
-                    "w1", "w2", "w3", "w4"),
-    network_until = c(2000L, 2000L, 2000L, 2000L,
-                      rep(2001L, 4), rep(2002L, 4)),
-    group = c("c1g1", "c1g1", "c1g2", "c1g2", rep("c1g1", 4), rep("c1g1", 4))
-  )
-}
-
 test_that("sniff_group_formation builds the confluence in the formation contract", {
   r <- detect_soft_trajectories(make_group_formation_dpg(), min_len = 3, min_group_size = 1)
   gf <- sniff_group_formation("c1g1", r, min_papers = 1, min_prop = 0)

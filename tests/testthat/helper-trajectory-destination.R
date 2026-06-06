@@ -91,3 +91,18 @@ make_contribution_fixture <- function() {
     docs_per_group = dpg
   )
 }
+
+# Fixture for sniff_group_formation / plot_group_formation tests.
+# Two births (A {w1,w2} in c1g1, B {w3,w4} in c1g2) merge at y2001c1g1 into a
+# shared tail ending at c1g1 in 2002.
+make_group_formation_dpg <- function() {
+  tibble::tibble(
+    group_id = c("y2000c1g1", "y2000c1g1", "y2000c1g2", "y2000c1g2",
+                 rep("y2001c1g1", 4), rep("y2002c1g1", 4)),
+    document_id = c("w1", "w2", "w3", "w4", "w1", "w2", "w3", "w4",
+                    "w1", "w2", "w3", "w4"),
+    network_until = c(2000L, 2000L, 2000L, 2000L,
+                      rep(2001L, 4), rep(2002L, 4)),
+    group = c("c1g1", "c1g1", "c1g2", "c1g2", rep("c1g1", 4), rep("c1g1", 4))
+  )
+}
