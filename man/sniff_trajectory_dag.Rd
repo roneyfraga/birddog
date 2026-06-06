@@ -40,5 +40,5 @@ is the first-class object the soft trajectories and group-formation views are
 read from.
 }
 \seealso{
-\code{\link[=detect_soft_trajectories]{detect_soft_trajectories()}}, \code{\link[=plot_trajectory_dag]{plot_trajectory_dag()}}
+\code{\link[=plot_trajectory_dag]{plot_trajectory_dag()}}
 }

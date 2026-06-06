@@ -34,5 +34,5 @@ paper count, and births ringed. Uses the year-aware Sugiyama layout from
 \code{\link[=sniff_trajectory_dag]{sniff_trajectory_dag()}}'s graph.
 }
 \seealso{
-\code{\link[=sniff_trajectory_dag]{sniff_trajectory_dag()}}, \code{\link[=detect_soft_trajectories]{detect_soft_trajectories()}}
+\code{\link[=sniff_trajectory_dag]{sniff_trajectory_dag()}}
 }

@@ -12,7 +12,7 @@
 #' @param show_legend Show the colour legend (default `FALSE`; 18 final groups
 #'   make a busy legend).
 #' @return A `ggplot` object.
-#' @seealso [sniff_trajectory_dag()], [detect_soft_trajectories()]
+#' @seealso [sniff_trajectory_dag()]
 #' @export
 #' @importFrom ggraph ggraph geom_edge_link geom_node_point scale_edge_alpha
 #' @importFrom ggplot2 aes scale_size scale_x_continuous labs theme_minimal theme

@@ -13,10 +13,6 @@ test_that(".build_global_edges links consecutive-year clusters by Jaccard", {
   expect_equal(e$documents, 3L)
 })
 
-test_that(".terminal_group reads the last-year node's label", {
-  expect_equal(.terminal_group(c("y2000c1g3", "y2002c1g7", "y2001c1g5")), "c1g7")
-})
-
 test_that(".heaviest_successor keeps one strongest successor per node", {
   e <- tibble::tibble(
     from = c("y2000c1g1", "y2000c1g1"), to = c("y2001c1g1", "y2001c1g2"),
