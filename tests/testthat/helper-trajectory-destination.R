@@ -159,3 +159,30 @@ make_dead_line_dpg <- function() {
     group = c(rep("c1g1", 9), rep("c1g2", 3))
   )
 }
+
+# Transitive absorption fixture: A absorbed by B (non-central), B absorbed by C
+# (central). Used in flow-formation tests.
+make_flow_tree_dpg <- function() {
+  tibble::tibble(
+    group_id = c(
+      rep("y2000c1g1", 2),                 # birth A {p1,p2}
+      rep("y2000c1g2", 3),                 # birth B {p3,p4,p5}
+      rep("y2001c1g2", 4),                 # B absorbs A: {p3,p4,p5,p1}
+      rep("y2000c1g3", 4),                 # birth C {q1..q4}
+      rep("y2001c1g3", 4),                 # C continues
+      rep("y2002c1g3", 6),                 # C absorbs B-line: {q1..q4,p3,p4}
+      rep("y2003c1g3", 6)),                # final
+    document_id = c(
+      "p1", "p2",
+      "p3", "p4", "p5",
+      "p3", "p4", "p5", "p1",
+      "q1", "q2", "q3", "q4",
+      "q1", "q2", "q3", "q4",
+      "q1", "q2", "q3", "q4", "p3", "p4",
+      "q1", "q2", "q3", "q4", "p3", "p4"),
+    network_until = c(2000L, 2000L,  2000L, 2000L, 2000L,  rep(2001L, 4),
+                      rep(2000L, 4), rep(2001L, 4), rep(2002L, 6), rep(2003L, 6)),
+    group = c("c1g1", "c1g1",  "c1g2", "c1g2", "c1g2",  rep("c1g2", 4),
+              rep("c1g3", 4), rep("c1g3", 4), rep("c1g3", 6), rep("c1g3", 6))
+  )
+}

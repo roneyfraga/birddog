@@ -2,91 +2,26 @@
 % Please edit documentation in R/sniff_trajectory_formation.R
 \name{sniff_trajectory_formation}
 \alias{sniff_trajectory_formation}
-\title{Track which trajectories fed into a given trajectory}
+\title{Trajectories that fed into a target (confluence)}
 \usage{
-sniff_trajectory_formation(
-  target,
-  all_detected,
-  docs_per_group,
-  last_year = NULL,
-  min_papers = 5,
-  min_prop = 0.05
-)
+sniff_trajectory_formation(x, ...)
 }
 \arguments{
-\item{target}{Trajectory key \code{"group::traj_id"} to find the feeders of (e.g.
-\code{"c1g10::tr1"}).}
+\item{x}{A \code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} object, or a legacy target key string.}
 
-\item{all_detected}{Named list of \code{\link[=detect_main_trajectories]{detect_main_trajectories()}} outputs, one
-per group, keyed by group id (the same object passed as \code{all_detected} to
-\code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}).}
-
-\item{docs_per_group}{A tibble mapping documents to group-year nodes, as in
-\code{groups_cumulative_trajectories$docs_per_group} (columns \code{group_id},
-\code{document_id}, \code{network_until}, \code{group}).}
-
-\item{last_year}{Final year of the analysis (default: the maximum
-\code{network_until} in \code{docs_per_group}). Trajectories reaching \code{last_year} are
-living and cannot be feeders.}
-
-\item{min_papers}{Minimum papers a source must hand into \code{target} to be kept
-(default: 5). Smaller flows are still returned with \code{kept = FALSE}.}
-
-\item{min_prop}{Minimum share of the source's own terminal cohort that must
-flow into \code{target} to be kept (default: 0.05). Guards against counting
-incidental overlaps as real tributaries.}
+\item{...}{For the flow object: \code{target} (a \code{traj_id}), then \code{min_papers},
+\code{min_prop}. For the legacy string: \code{all_detected}, \code{docs_per_group}, ... .}
 }
 \value{
-A list with:
-\describe{
-\item{target}{The target trajectory key.}
-\item{target_info}{List \code{group}, \code{traj_id}, \code{start}, \code{end}, and \code{size} (the
-target trajectory's own paper count, i.e. its terminal node size).}
-\item{feeders}{Tibble, one row per feeder, sorted by descending papers:
-\code{source_key}, \code{source_group}, \code{source_traj}, \code{start_year},
-\code{handoff_year} (the source's terminal year), \code{cohort_size}, \code{n} (papers
-into \code{target}), \code{prop_of_source}, \code{prop_of_inflow}, \code{kept}, and two
-list-columns of \code{year}/\code{size} tibbles: \code{size_curve} (the feeder's
-measured cluster size per year, ending at \code{cohort_size}) and
-\code{inflow_curve} (the cumulative arrival of just the \code{n} contributed
-papers as they join the feeder's own year-nodes, within the feeder's
-lifespan, ending at \code{n} in \code{handoff_year}).}
-\item{total_inflow}{Total papers absorbed into \code{target} across all
-feeders.}
-\item{last_year}{The resolved final year.}
-}
+A \code{formation} list (\code{target}, \code{target_info}, \code{feeders}, \code{total_inflow},
+\code{last_year}).
 }
 \description{
-The inverse of \code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}. Instead of following one
-dying trajectory forward to where its papers go, this takes a target
-trajectory and finds every other trajectory whose terminal cohort was
-absorbed into it. In the river analogy, \code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}
-follows a tributary downstream; this stands at the main river and lists the
-tributaries that formed it.
-}
-\details{
-A source trajectory is a \emph{direct feeder} of \code{target} when, after the source
-stops (its terminal year), the dominant carrier of some of its terminal
-cohort papers is \code{target}. Attribution uses the same dominant-assignment
-rule as \code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}, so feeders are the exact inverse of
-destinations: if \code{sniff_trajectory_destination()} reports source S handing
-off to \code{target}, then S appears here as a feeder of \code{target}.
-
-Group labels (\code{c1g1}, ...) are size ranks recomputed every cumulative year,
-so feeders are resolved by document identity, never by label.
-}
-\examples{
-\dontrun{
-f <- sniff_trajectory_formation(
-  "c1g10::tr1",
-  all_detected = groups_detected_trajectories,
-  docs_per_group = groups_cumulative_trajectories$docs_per_group
-)
-f$feeders
-plot_trajectory_formation_2d(f)
-}
-
+Dispatches on \code{x}: a \code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} object returns the target
+trajectory's direct tributaries (its children in the confluence tree); a legacy
+\code{"group::traj_id"} string keeps the per-group behavior. The result has the same
+shape in both cases, so \code{\link[=plot_trajectory_formation_2d]{plot_trajectory_formation_2d()}} renders it.
 }
 \seealso{
-\code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}, \code{\link[=plot_trajectory_formation_2d]{plot_trajectory_formation_2d()}}
+\code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}}, \code{\link[=plot_trajectory_formation_2d]{plot_trajectory_formation_2d()}}
 }
