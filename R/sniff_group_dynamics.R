@@ -18,7 +18,9 @@
 #'
 #' @return A tibble, one row per final group, sorted by descending `recent_growth`:
 #'   `group`, `size`, `start`, `end`, `span`, `median_pub_year`, `recent_growth`,
-#'   `phase`, and (with `contribution`) `source_entropy`, `n_sources`, `formation`.
+#'   `phase`, and (with `contribution`) `source_entropy`, `n_sources`, `formation`,
+#'   `group_role` (`"terminus"` when at least one trajectory terminates in the group,
+#'   `"crossroads"` otherwise).
 #'
 #' @seealso [sniff_trajectory_dynamics()], [sniff_trajectory_group_contribution()]
 #' @export
@@ -72,6 +74,8 @@ sniff_group_dynamics <- function(docs_per_group, contribution = NULL,
       is.na(norm_ent) | norm_ent < thresholds$formation_entropy,
       "convergent", "divergent"
     )
+    terminus <- unique(contribution$trajectories$terminal_group)
+    gd$group_role <- ifelse(gd$group %in% terminus, "terminus", "crossroads")
   }
   dplyr::arrange(gd, dplyr::desc(.data$recent_growth))
 }

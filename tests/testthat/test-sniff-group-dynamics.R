@@ -6,6 +6,8 @@ test_that("sniff_group_dynamics returns phase and (with contribution) formation"
   expect_true(all(c("source_entropy", "n_sources", "formation") %in% names(gd)))
   expect_true(all(gd$phase %in% c("emergence", "maturity", "dormancy")))
   expect_true(all(gd$formation %in% c("convergent", "divergent")))
+  expect_true("group_role" %in% names(gd))
+  expect_true(all(gd$group_role %in% c("terminus", "crossroads")))
 })
 
 test_that("sniff_group_dynamics works without a contribution", {

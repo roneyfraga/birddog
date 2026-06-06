@@ -29,7 +29,9 @@ measured (default 3).}
 \value{
 A tibble, one row per final group, sorted by descending \code{recent_growth}:
 \code{group}, \code{size}, \code{start}, \code{end}, \code{span}, \code{median_pub_year}, \code{recent_growth},
-\code{phase}, and (with \code{contribution}) \code{source_entropy}, \code{n_sources}, \code{formation}.
+\code{phase}, and (with \code{contribution}) \code{source_entropy}, \code{n_sources}, \code{formation},
+\code{group_role} (\code{"terminus"} when at least one trajectory terminates in the group,
+\code{"crossroads"} otherwise).
 }
 \description{
 For each final-year group, builds its production curve (cumulative count of its
