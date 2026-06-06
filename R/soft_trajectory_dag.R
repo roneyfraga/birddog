@@ -54,6 +54,40 @@
     dplyr::ungroup()
 }
 
+#' Heaviest single successor per node
+#'
+#' @param edges Tibble from [.build_global_edges()] (`from`, `to`, `weight`,
+#'   `documents`), already top-`k_out` per source.
+#' @return Named character vector mapping each `from` node to its single heaviest
+#'   successor (max `weight`, tie-break max `documents`).
+#' @keywords internal
+.heaviest_successor <- function(edges) {
+  if (nrow(edges) == 0) return(stats::setNames(character(0), character(0)))
+  e <- edges[order(edges$from, -edges$weight, -edges$documents), , drop = FALSE]
+  e <- e[!duplicated(e$from), , drop = FALSE]
+  stats::setNames(e$to, e$from)
+}
+
+#' Terminal group label reached by following heaviest successors forward
+#'
+#' @param nodes Character vector of node names (e.g. `"y2000c1g1"`).
+#' @param succ Named vector from [.heaviest_successor()].
+#' @return Character vector of terminal group labels, one per input node.
+#' @keywords internal
+.forward_terminal_group <- function(nodes, succ) {
+  vapply(nodes, function(n) {
+    cur <- n
+    seen <- character(0)
+    repeat {
+      seen <- c(seen, cur)
+      nxt <- unname(succ[cur])
+      if (is.na(nxt) || nxt %in% seen) break   # sink or cycle guard
+      cur <- nxt
+    }
+    sub("^y[0-9]{4}", "", cur)
+  }, character(1), USE.NAMES = FALSE)
+}
+
 #' Terminal (last-year) group label of a trajectory's node set
 #'
 #' @param nodes Character vector of node names (e.g. `"y2018c1g16"`).

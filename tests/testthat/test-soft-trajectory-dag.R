@@ -16,3 +16,18 @@ test_that(".build_global_edges links consecutive-year clusters by Jaccard", {
 test_that(".terminal_group reads the last-year node's label", {
   expect_equal(.terminal_group(c("y2000c1g3", "y2002c1g7", "y2001c1g5")), "c1g7")
 })
+
+test_that(".heaviest_successor keeps one strongest successor per node", {
+  e <- tibble::tibble(
+    from = c("y2000c1g1", "y2000c1g1"), to = c("y2001c1g1", "y2001c1g2"),
+    weight = c(0.6, 0.3), documents = c(6L, 3L)
+  )
+  s <- .heaviest_successor(e)
+  expect_equal(unname(s["y2000c1g1"]), "y2001c1g1")
+})
+
+test_that(".forward_terminal_group walks to the sink", {
+  s <- c(y2000c1g1 = "y2001c1g1", y2001c1g1 = "y2002c1g4")  # sink y2002c1g4
+  expect_equal(.forward_terminal_group(c("y2000c1g1", "y2002c1g4"), s),
+               c("c1g4", "c1g4"))
+})
