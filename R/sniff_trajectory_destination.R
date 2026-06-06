@@ -51,6 +51,18 @@ sniff_trajectory_destination <- function(x, ...) {
                                 prop = n / length(cohort))
   destination <- dplyr::arrange(destination, dplyr::desc(.data$n))
 
+  source_info <- list(group = NA_character_, traj_id = traj_id,
+                      start = trow$start, end = trow$end,
+                      cohort_size = length(cohort))
+  continuation_info <- NULL
+  if (!is.na(trow$absorbed_into)) {
+    arow <- tr[tr$traj_id == trow$absorbed_into, ]
+    a_docs <- unique(unlist(node_docs[arow$nodes[[1]]], use.names = FALSE))
+    continuation_info <- list(group = NA_character_, traj_id = arow$traj_id,
+                              start = arow$start, end = arow$end,
+                              n_papers = length(intersect(cohort, a_docs)))
+  }
+
   list(
     target = traj_id,
     target_info = list(traj_id = traj_id, type = trow$type, group = trow$group,
@@ -61,7 +73,9 @@ sniff_trajectory_destination <- function(x, ...) {
     cohort_size = length(cohort),
     dormant_share = dropped / length(cohort),
     continuation_traj = trow$absorbed_into,
-    last_year = last_year
+    last_year = last_year,
+    source_info = source_info,
+    continuation_info = continuation_info
   )
 }
 

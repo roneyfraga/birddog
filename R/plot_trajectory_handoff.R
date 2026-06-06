@@ -42,8 +42,12 @@ plot_trajectory_handoff <- function(destination, title = NULL, label_size = 5.5)
   abs_ <- destination$continuation_info
   handoff_year <- src$end
 
-  src_label <- paste(src$group %||% "source", src$traj_id)
-  abs_label <- paste(abs_$group, abs_$traj_id)
+  src_label <- if (is.null(src$group) || is.na(src$group) || src$group == "") {
+    src$traj_id
+  } else paste(src$group, src$traj_id)
+  abs_label <- if (is.null(abs_$group) || is.na(abs_$group) || abs_$group == "") {
+    abs_$traj_id
+  } else paste(abs_$group, abs_$traj_id)
 
   seg <- tibble::tibble(
     role = c("stagnant (source)", "absorbing (living)"),
