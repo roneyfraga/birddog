@@ -68,6 +68,20 @@
   stats::setNames(e$to, e$from)
 }
 
+#' Heaviest single predecessor per node
+#'
+#' @param edges Tibble from [.build_global_edges()] (`from`, `to`, `weight`,
+#'   `documents`).
+#' @return Named character vector mapping each `to` node to its single heaviest
+#'   predecessor (max `weight`, tie-break max `documents`).
+#' @keywords internal
+.heaviest_predecessor <- function(edges) {
+  if (nrow(edges) == 0) return(stats::setNames(character(0), character(0)))
+  e <- edges[order(edges$to, -edges$weight, -edges$documents), , drop = FALSE]
+  e <- e[!duplicated(e$to), , drop = FALSE]
+  stats::setNames(e$from, e$to)
+}
+
 #' Principal line: walk a node to its terminal via heaviest successors
 #'
 #' @param birth A node name to start from.
