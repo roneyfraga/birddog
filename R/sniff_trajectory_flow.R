@@ -111,7 +111,7 @@ sniff_trajectory_flow <- function(x, min_group_size = 10, jaccard_min = 0.05,
       row <- trajectories[trajectories$traj_id == cur, ]
       if (row$type == "central") return(if (want == "group") row$group else d)
       nxt <- row$absorbed_into
-      if (is.na(nxt) || nxt %in% seen) return(if (want == "group") NA_character_ else d)
+      if (is.na(nxt) || nxt %in% seen) return(if (want == "group") NA_character_ else NA_integer_)
       seen <- c(seen, cur); cur <- nxt; d <- d + 1L
     }
   }
