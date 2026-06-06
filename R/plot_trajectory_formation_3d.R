@@ -98,7 +98,11 @@ plot_trajectory_formation_3d <- function(formation,
 
   ti <- formation$target_info
   last_year <- formation$last_year
-  target_label <- paste0(ti$group, "::", ti$traj_id)
+  target_label <- if (is.null(ti$group) || is.na(ti$group) || ti$group == "") {
+    ti$traj_id
+  } else {
+    paste0(ti$group, "::", ti$traj_id)
+  }
   k <- nrow(feeders)
   feeders$lane <- seq.int(k, 1L)   # strongest feeder on the highest lane
 

@@ -74,7 +74,11 @@ plot_trajectory_formation_2d <- function(formation,
 
   ti <- formation$target_info
   last_year <- formation$last_year
-  target_label <- paste0(ti$group, "::", ti$traj_id)
+  target_label <- if (is.null(ti$group) || is.na(ti$group) || ti$group == "") {
+    ti$traj_id
+  } else {
+    paste0(ti$group, "::", ti$traj_id)
+  }
   # name with the main trajectory's paper count on a line below
   target_text <- if (!is.null(ti$size)) {
     paste0(target_label, "\n(", ti$size, ")")
