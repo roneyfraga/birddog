@@ -1,4 +1,56 @@
-#' Self-sufficiency of each trajectory (endogenous growth vs absorption)
+#' Self-sufficiency of each central trajectory
+#'
+#' Dispatches on `x`. For a [sniff_trajectory_flow()] object, returns each central
+#' trajectory's endogenous fraction: the share of its spine papers NOT also carried by
+#' any of its absorbed tributaries (1 = fully endogenous, ~0 = a confluence of
+#' tributaries).
+#'
+#' @param x A [sniff_trajectory_flow()] object, or a legacy detected named list.
+#' @param ... For the flow object: `min_size` (default 30). For legacy:
+#'   `docs_per_group, min_size, ...`.
+#' @return A tibble (`central`, `group`, `size`, `inflow`, `self_sufficiency`),
+#'   sorted by descending `self_sufficiency`.
+#' @seealso [sniff_trajectory_flow()], [sniff_trajectory_destination()]
+#' @export
+sniff_trajectory_self_sufficiency <- function(x, ...) {
+  if (is.list(x) && !is.data.frame(x) && !is.null(x$trajectories) &&
+      is.data.frame(x$trajectories) && "absorbed_into" %in% names(x$trajectories)) {
+    .self_sufficiency_from_flow(x, ...)
+  } else {
+    .self_sufficiency_legacy(x, ...)
+  }
+}
+
+#' @keywords internal
+#' @importFrom dplyr bind_rows arrange desc
+#' @importFrom tibble tibble
+#' @importFrom rlang .data
+.self_sufficiency_from_flow <- function(flow, min_size = 30) {
+  tr <- flow$trajectories
+  dpg <- flow$docs_per_group
+  node_docs <- split(dpg$document_id, dpg$group_id)
+  centrals <- tr[tr$type == "central", , drop = FALSE]
+
+  rows <- vector("list", nrow(centrals))
+  for (i in seq_len(nrow(centrals))) {
+    g <- centrals$group[i]
+    c_docs <- unique(unlist(node_docs[centrals$nodes[[i]]], use.names = FALSE))
+    trib <- tr[tr$type == "absorbed" & !is.na(tr$group) & tr$group == g, , drop = FALSE]
+    trib_docs <- if (nrow(trib) > 0) {
+      unique(unlist(node_docs[unlist(trib$nodes, use.names = FALSE)], use.names = FALSE))
+    } else character(0)
+    inflow <- length(intersect(c_docs, trib_docs))
+    rows[[i]] <- tibble::tibble(
+      central = centrals$traj_id[i], group = g, size = length(c_docs),
+      inflow = inflow, self_sufficiency = 1 - inflow / length(c_docs)
+    )
+  }
+  ss <- dplyr::bind_rows(rows)
+  ss <- ss[ss$size >= min_size, , drop = FALSE]
+  dplyr::arrange(ss, dplyr::desc(.data$self_sufficiency))
+}
+
+#' Self-sufficiency of each trajectory (endogenous growth vs absorption) (legacy)
 #'
 #' Ranks trajectories by how much they grew on their own versus by absorbing
 #' papers handed off from trajectories in *other* groups. For every trajectory it
@@ -33,26 +85,16 @@
 #'   `inflow_external`, `self_sufficiency` (= 1 - inflow_external / size),
 #'   `living`.
 #'
-#' @examples
-#' \dontrun{
-#' ss <- sniff_trajectory_self_sufficiency(
-#'   groups_detected_trajectories,
-#'   groups_cumulative_trajectories$docs_per_group
-#' )
-#' dplyr::filter(ss, living)   # the surviving main trajectories
-#' }
-#'
-#' @seealso [sniff_trajectory_formation()], [sniff_trajectory_destination()]
+#' @keywords internal
 #'
 #' @importFrom dplyr filter mutate arrange desc bind_rows group_by summarise
 #' @importFrom dplyr left_join n_distinct
 #' @importFrom tibble tibble
 #' @importFrom rlang .data
-#' @export
-sniff_trajectory_self_sufficiency <- function(all_detected,
-                                              docs_per_group,
-                                              last_year = NULL,
-                                              min_size = 1L) {
+.self_sufficiency_legacy <- function(all_detected,
+                                     docs_per_group,
+                                     last_year = NULL,
+                                     min_size = 1L) {
   if (!is.list(all_detected) || is.null(names(all_detected))) {
     stop("'all_detected' must be a named list of detect_main_trajectories() outputs", call. = FALSE)
   }

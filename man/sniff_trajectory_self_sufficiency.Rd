@@ -2,65 +2,26 @@
 % Please edit documentation in R/sniff_trajectory_self_sufficiency.R
 \name{sniff_trajectory_self_sufficiency}
 \alias{sniff_trajectory_self_sufficiency}
-\title{Self-sufficiency of each trajectory (endogenous growth vs absorption)}
+\title{Self-sufficiency of each central trajectory}
 \usage{
-sniff_trajectory_self_sufficiency(
-  all_detected,
-  docs_per_group,
-  last_year = NULL,
-  min_size = 1L
-)
+sniff_trajectory_self_sufficiency(x, ...)
 }
 \arguments{
-\item{all_detected}{Named list of \code{\link[=detect_main_trajectories]{detect_main_trajectories()}} outputs, one
-per group, keyed by group id.}
+\item{x}{A \code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} object, or a legacy detected named list.}
 
-\item{docs_per_group}{Per-year membership tibble, as in
-\code{groups_cumulative_trajectories$docs_per_group} (columns \code{group_id},
-\code{document_id}, \code{network_until}, \code{group}).}
-
-\item{last_year}{Final year (default: the maximum \code{network_until}).
-Trajectories reaching it are flagged \code{living}.}
-
-\item{min_size}{Drop trajectories with fewer than this many papers (default:
-1), removing tiny spurs whose index is not meaningful.}
+\item{...}{For the flow object: \code{min_size} (default 30). For legacy:
+\verb{docs_per_group, min_size, ...}.}
 }
 \value{
-A tibble, one row per trajectory, sorted by descending
-\code{self_sufficiency}: \code{key}, \code{group}, \code{traj_id}, \code{size}, \code{inflow_internal},
-\code{inflow_external}, \code{self_sufficiency} (= 1 - inflow_external / size),
-\code{living}.
+A tibble (\code{central}, \code{group}, \code{size}, \code{inflow}, \code{self_sufficiency}),
+sorted by descending \code{self_sufficiency}.
 }
 \description{
-Ranks trajectories by how much they grew on their own versus by absorbing
-papers handed off from trajectories in \emph{other} groups. For every trajectory it
-compares its size (unique papers across its nodes) with the unique papers it
-imported from external feeders. It is the cross-trajectory aggregate of
-\code{\link[=sniff_trajectory_formation]{sniff_trajectory_formation()}}: self-sufficiency near 1 means the community
-formed endogenously; near 0 means it is largely a confluence of other
-communities.
-}
-\details{
-Imported papers are counted as a unique set per trajectory (not as a sum of
-handoff weights), so a paper absorbed via several feeders is counted once and
-the index always lies in \verb{[0, 1]}. Feeders from the \emph{same} group (a group
-consolidating its own sub-lineages) count as internal, not as external
-dependence.
-
-Secondary trajectories that stop early often receive no inflow and so score a
-trivial 1. The meaningful comparison is usually among the surviving
-trajectories: filter the result on \code{living}.
-}
-\examples{
-\dontrun{
-ss <- sniff_trajectory_self_sufficiency(
-  groups_detected_trajectories,
-  groups_cumulative_trajectories$docs_per_group
-)
-dplyr::filter(ss, living)   # the surviving main trajectories
-}
-
+Dispatches on \code{x}. For a \code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} object, returns each central
+trajectory's endogenous fraction: the share of its spine papers NOT also carried by
+any of its absorbed tributaries (1 = fully endogenous, ~0 = a confluence of
+tributaries).
 }
 \seealso{
-\code{\link[=sniff_trajectory_formation]{sniff_trajectory_formation()}}, \code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}
+\code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}}, \code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}
 }
