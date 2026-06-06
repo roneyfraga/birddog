@@ -1,18 +1,21 @@
-#' Default, overridable thresholds for v2 dynamic-state classification
+#' Default, overridable thresholds for dynamic-state classification
 #'
 #' Knobs for [sniff_trajectory_dynamics()] and [sniff_group_dynamics()]. Override
 #' by passing a modified list.
 #'
-#' @return A list: `emergence_growth` (recent growth at or above this is emerging;
-#'   default 0.15), `dormancy_growth` (recent growth at or below this is dormant,
-#'   i.e. alive but stalled; default 0.02), `formation_entropy` (a final group
-#'   whose normalized feeder `source_entropy` is at or above this has a divergent
-#'   formation; default 0.7).
+#' @return A list: `emergence_growth` (default 0.15), `dormancy_growth` (0.02),
+#'   `convergence_entropy` (a stopped/absorbed trajectory whose normalized
+#'   destination entropy is below this converged, else diverged; default 0.5),
+#'   `dormancy_share` (an absorbed trajectory whose terminal cohort drops at least
+#'   this share is dormant; default 0.5), `formation_entropy` (0.7; used by the
+#'   soon-removed group dynamics).
 #' @export
 default_state_thresholds <- function() {
   list(
     emergence_growth = 0.15,
     dormancy_growth = 0.02,
+    convergence_entropy = 0.5,
+    dormancy_share = 0.5,
     formation_entropy = 0.7
   )
 }
@@ -43,56 +46,75 @@ default_state_thresholds <- function() {
   )
 }
 
-#' Growth and convergence dynamics of v2 soft trajectories
+#' Normalized Shannon entropy of a terminal cohort's destination distribution
+#' @keywords internal
+.dest_entropy_norm <- function(destination) {
+  d <- destination[destination$g_final != "(dropped)" & destination$n > 0, , drop = FALSE]
+  if (nrow(d) <= 1) return(0)
+  p <- d$n / sum(d$n)
+  -sum(p * log(p)) / log(nrow(d))
+}
+
+#' Five-state classifier for flow trajectories
 #'
-#' For each [detect_soft_trajectories()] trajectory, measures its size-curve
-#' growth and age (the growth axis) and whether it merged into a shared backbone
-#' (the convergence axis). Continuous columns are always returned; `growth_phase`
-#' is the tunable overlay. Since every v2 trajectory is living, there is no
-#' dormancy-by-death: `dormancy` here means alive but stalled (recent growth at or
-#' below `dormancy_growth`).
+#' Central trajectories split into emergence/maturity/dormancy by growth; absorbed
+#' ones into convergence/divergence by their terminal cohort's destination entropy,
+#' or dormancy when the cohort mostly vanishes or the lineage is extinct.
+#' @keywords internal
+.classify_flow_state <- function(dyn, thresholds) {
+  th <- thresholds
+  vapply(seq_len(nrow(dyn)), function(i) {
+    if (identical(dyn$type[i], "central")) {
+      rg <- dyn$recent_growth[i]
+      if (!is.na(rg) && rg >= th$emergence_growth) "emergence"
+      else if (is.na(rg) || rg <= th$dormancy_growth) "dormancy"
+      else "maturity"
+    } else {
+      if (is.na(dyn$group[i])) {
+        "dormancy"                                   # extinct: no destination
+      } else if (!is.na(dyn$dormant_share[i]) && dyn$dormant_share[i] >= th$dormancy_share) {
+        "dormancy"
+      } else if (is.na(dyn$dest_entropy[i]) || dyn$dest_entropy[i] < th$convergence_entropy) {
+        "convergence"
+      } else {
+        "divergence"
+      }
+    }
+  }, character(1))
+}
+
+#' Dynamic-state indicators and 5-state classification for flow trajectories
 #'
-#' @details Because trajectories share their tail after `merge_year`, the
-#'   `recent_growth` and `growth_phase` of trajectories that merged into the same
-#'   backbone reflect that shared backbone, not each lineage independently.
+#' For each [sniff_trajectory_flow()] trajectory: a forward lens (size-curve growth
+#' and age) and, for absorbed trajectories, a backward lens (where its terminal
+#' cohort goes, via [sniff_trajectory_destination()]). Central trajectories are
+#' emergence/maturity/dormancy by growth; absorbed are convergence/divergence by
+#' destination entropy (or dormancy if their cohort vanishes / they are extinct).
 #'
-#' @param detected A [detect_soft_trajectories()] object.
-#' @param docs_per_group Per-year membership tibble. Defaults to
-#'   `detected$docs_per_group`.
+#' @param flow A [sniff_trajectory_flow()] object.
 #' @param thresholds A [default_state_thresholds()]-shaped list (default).
-#' @param growth_window Number of recent year-to-year steps over which
-#'   `recent_growth` is measured (default 3); a shorter curve is measured whole.
-#' @param last_year Final year (default: max `network_until`).
+#' @param growth_window Curve points over which `recent_growth` is measured (default 3).
 #'
-#' @return A tibble, one row per trajectory, sorted by descending
-#'   `emergence_score`: `traj_id`, `terminal_group`, `birth`, `start`, `end`,
-#'   `age` (the trajectory's lived span, `end - start + 1`), `size`,
-#'   `recent_growth`, `growth_phase`,
-#'   `converges` (merged into a shared backbone), `merge_year`, `emergence_score`
-#'   (`zscore(-age) + zscore(recent_growth)`: young and growing).
+#' @return A tibble, one row per trajectory, sorted by descending `emergence_score`:
+#'   `traj_id`, `type`, `group`, `start`, `end`, `age`, `size`, `recent_growth`,
+#'   `dest_entropy`, `dormant_share`, `emergence_score`, `state`.
 #'
-#' @seealso [sniff_group_dynamics()], [default_state_thresholds()]
+#' @seealso [sniff_trajectory_flow()], [sniff_trajectory_destination()],
+#'   [default_state_thresholds()]
 #' @export
 #' @importFrom dplyr bind_rows arrange desc
 #' @importFrom tibble tibble
 #' @importFrom rlang .data
-sniff_trajectory_dynamics <- function(detected, docs_per_group = NULL,
-                                      thresholds = NULL, growth_window = 3,
-                                      last_year = NULL) {
-  if (is.null(docs_per_group)) docs_per_group <- detected$docs_per_group
-  required_cols <- c("group_id", "document_id", "network_until", "group")
-  if (!is.data.frame(docs_per_group) || !all(required_cols %in% names(docs_per_group))) {
-    stop("'docs_per_group' must contain columns: ",
-         paste(required_cols, collapse = ", "), call. = FALSE)
+sniff_trajectory_dynamics <- function(flow, thresholds = NULL, growth_window = 3) {
+  if (!is.list(flow) || is.null(flow$trajectories) || !is.data.frame(flow$trajectories) ||
+      !"absorbed_into" %in% names(flow$trajectories)) {
+    stop("'flow' must be a sniff_trajectory_flow() object", call. = FALSE)
   }
   if (is.null(thresholds)) thresholds <- default_state_thresholds()
-  tr <- detected$trajectories
-  if (is.null(tr) || nrow(tr) == 0) {
-    stop("'detected' contains no trajectories", call. = FALSE)
-  }
-  if (is.null(last_year)) last_year <- max(docs_per_group$network_until, na.rm = TRUE)
+  tr <- flow$trajectories
+  dpg <- flow$docs_per_group
+  node_size <- .node_size_lookup(dpg)
 
-  node_size <- .node_size_lookup(docs_per_group)
   rows <- vector("list", nrow(tr))
   for (i in seq_len(nrow(tr))) {
     gs <- .feeder_growth_series(tr$nodes[[i]], node_size)
@@ -102,18 +124,25 @@ sniff_trajectory_dynamics <- function(detected, docs_per_group = NULL,
     s_ref <- if (n > 0) gs$size[ref] else 0
     s_end <- if (n > 0) gs$size[n] else 0
     recent_growth <- if (s_ref > 0) (s_end - s_ref) / s_ref else NA_real_
+
+    dest_entropy <- NA_real_
+    dormant_share <- NA_real_
+    if (identical(tr$type[i], "absorbed") && !is.na(tr$group[i])) {
+      dd <- sniff_trajectory_destination(flow, tr$traj_id[i])
+      dest_entropy <- .dest_entropy_norm(dd$destination)
+      dormant_share <- dd$dormant_share
+    }
     rows[[i]] <- tibble::tibble(
-      traj_id = tr$traj_id[i], terminal_group = tr$terminal_group[i],
-      birth = tr$birth[i], start = tr$start[i], end = tr$end[i],
+      traj_id = tr$traj_id[i], type = tr$type[i], group = tr$group[i],
+      start = tr$start[i], end = tr$end[i],
       age = tr$end[i] - tr$start[i] + 1L, size = size,
-      recent_growth = recent_growth,
-      growth_phase = .classify_growth_phase(
-        recent_growth, thresholds$emergence_growth, thresholds$dormancy_growth),
-      converges = !is.na(tr$merge_year[i]), merge_year = tr$merge_year[i]
+      recent_growth = recent_growth, dest_entropy = dest_entropy,
+      dormant_share = dormant_share
     )
   }
   dyn <- dplyr::bind_rows(rows)
   dyn$emergence_score <- .zscore(-dyn$age) + .zscore(.na_to_zero(dyn$recent_growth))
+  dyn$state <- .classify_flow_state(dyn, thresholds)
   dplyr::arrange(dyn, dplyr::desc(.data$emergence_score))
 }
 

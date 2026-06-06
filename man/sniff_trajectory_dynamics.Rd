@@ -2,50 +2,30 @@
 % Please edit documentation in R/sniff_trajectory_dynamics.R
 \name{sniff_trajectory_dynamics}
 \alias{sniff_trajectory_dynamics}
-\title{Growth and convergence dynamics of v2 soft trajectories}
+\title{Dynamic-state indicators and 5-state classification for flow trajectories}
 \usage{
-sniff_trajectory_dynamics(
-  detected,
-  docs_per_group = NULL,
-  thresholds = NULL,
-  growth_window = 3,
-  last_year = NULL
-)
+sniff_trajectory_dynamics(flow, thresholds = NULL, growth_window = 3)
 }
 \arguments{
-\item{detected}{A \code{\link[=detect_soft_trajectories]{detect_soft_trajectories()}} object.}
-
-\item{docs_per_group}{Per-year membership tibble. Defaults to
-\code{detected$docs_per_group}.}
+\item{flow}{A \code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} object.}
 
 \item{thresholds}{A \code{\link[=default_state_thresholds]{default_state_thresholds()}}-shaped list (default).}
 
-\item{growth_window}{Number of recent year-to-year steps over which
-\code{recent_growth} is measured (default 3); a shorter curve is measured whole.}
-
-\item{last_year}{Final year (default: max \code{network_until}).}
+\item{growth_window}{Curve points over which \code{recent_growth} is measured (default 3).}
 }
 \value{
-A tibble, one row per trajectory, sorted by descending
-\code{emergence_score}: \code{traj_id}, \code{terminal_group}, \code{birth}, \code{start}, \code{end},
-\code{age} (the trajectory's lived span, \code{end - start + 1}), \code{size},
-\code{recent_growth}, \code{growth_phase},
-\code{converges} (merged into a shared backbone), \code{merge_year}, \code{emergence_score}
-(\code{zscore(-age) + zscore(recent_growth)}: young and growing).
+A tibble, one row per trajectory, sorted by descending \code{emergence_score}:
+\code{traj_id}, \code{type}, \code{group}, \code{start}, \code{end}, \code{age}, \code{size}, \code{recent_growth},
+\code{dest_entropy}, \code{dormant_share}, \code{emergence_score}, \code{state}.
 }
 \description{
-For each \code{\link[=detect_soft_trajectories]{detect_soft_trajectories()}} trajectory, measures its size-curve
-growth and age (the growth axis) and whether it merged into a shared backbone
-(the convergence axis). Continuous columns are always returned; \code{growth_phase}
-is the tunable overlay. Since every v2 trajectory is living, there is no
-dormancy-by-death: \code{dormancy} here means alive but stalled (recent growth at or
-below \code{dormancy_growth}).
-}
-\details{
-Because trajectories share their tail after \code{merge_year}, the
-\code{recent_growth} and \code{growth_phase} of trajectories that merged into the same
-backbone reflect that shared backbone, not each lineage independently.
+For each \code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}} trajectory: a forward lens (size-curve growth
+and age) and, for absorbed trajectories, a backward lens (where its terminal
+cohort goes, via \code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}}). Central trajectories are
+emergence/maturity/dormancy by growth; absorbed are convergence/divergence by
+destination entropy (or dormancy if their cohort vanishes / they are extinct).
 }
 \seealso{
-\code{\link[=sniff_group_dynamics]{sniff_group_dynamics()}}, \code{\link[=default_state_thresholds]{default_state_thresholds()}}
+\code{\link[=sniff_trajectory_flow]{sniff_trajectory_flow()}}, \code{\link[=sniff_trajectory_destination]{sniff_trajectory_destination()}},
+\code{\link[=default_state_thresholds]{default_state_thresholds()}}
 }

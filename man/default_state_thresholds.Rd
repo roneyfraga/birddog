@@ -2,16 +2,17 @@
 % Please edit documentation in R/sniff_trajectory_dynamics.R
 \name{default_state_thresholds}
 \alias{default_state_thresholds}
-\title{Default, overridable thresholds for v2 dynamic-state classification}
+\title{Default, overridable thresholds for dynamic-state classification}
 \usage{
 default_state_thresholds()
 }
 \value{
-A list: \code{emergence_growth} (recent growth at or above this is emerging;
-default 0.15), \code{dormancy_growth} (recent growth at or below this is dormant,
-i.e. alive but stalled; default 0.02), \code{formation_entropy} (a final group
-whose normalized feeder \code{source_entropy} is at or above this has a divergent
-formation; default 0.7).
+A list: \code{emergence_growth} (default 0.15), \code{dormancy_growth} (0.02),
+\code{convergence_entropy} (a stopped/absorbed trajectory whose normalized
+destination entropy is below this converged, else diverged; default 0.5),
+\code{dormancy_share} (an absorbed trajectory whose terminal cohort drops at least
+this share is dormant; default 0.5), \code{formation_entropy} (0.7; used by the
+soon-removed group dynamics).
 }
 \description{
 Knobs for \code{\link[=sniff_trajectory_dynamics]{sniff_trajectory_dynamics()}} and \code{\link[=sniff_group_dynamics]{sniff_group_dynamics()}}. Override

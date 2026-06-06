@@ -1,40 +1,34 @@
-test_that("sniff_trajectory_dynamics marks a growing solo lineage as emergence", {
-  r <- detect_soft_trajectories(make_growth_dpg(), min_len = 3, min_group_size = 1)
-  dyn <- sniff_trajectory_dynamics(r)
-  expect_equal(nrow(dyn), 1L)
-  expect_equal(dyn$growth_phase, "emergence")     # size 1 -> 4 over the window
-  expect_false(dyn$converges)                      # solo: no merge
-  expect_true(is.na(dyn$merge_year))
-  expect_equal(dyn$age, 3L)                         # 2002 - 2000 + 1
-  expect_true(all(c("traj_id", "terminal_group", "age", "recent_growth",
-                    "growth_phase", "converges", "emergence_score") %in% names(dyn)))
-})
-
-test_that("sniff_trajectory_dynamics flags converging lineages", {
-  r <- detect_soft_trajectories(make_group_formation_dpg(), min_len = 3, min_group_size = 1)
-  dyn <- sniff_trajectory_dynamics(r)
-  expect_true(all(dyn$converges))                  # tr1 and tr2 merge
-  expect_true(all(dyn$merge_year == 2001L))
-})
-
-test_that("default_state_thresholds carries the v2 knobs", {
+test_that("default_state_thresholds carries the flow knobs", {
   th <- default_state_thresholds()
-  expect_named(th, c("emergence_growth", "dormancy_growth", "formation_entropy"))
+  expect_true(all(c("emergence_growth", "dormancy_growth", "convergence_entropy",
+                    "dormancy_share") %in% names(th)))
   expect_true(th$dormancy_growth < th$emergence_growth)
 })
 
-test_that(".classify_growth_phase splits emergence / maturity / dormancy", {
-  expect_equal(.classify_growth_phase(0.30, 0.15, 0.02), "emergence")
-  expect_equal(.classify_growth_phase(0.08, 0.15, 0.02), "maturity")
-  expect_equal(.classify_growth_phase(0.01, 0.15, 0.02), "dormancy")
-  expect_equal(.classify_growth_phase(NA_real_, 0.15, 0.02), "maturity")
+test_that(".classify_flow_state covers the five states", {
+  th <- default_state_thresholds()
+  d <- tibble::tibble(
+    type = c("central", "central", "central", "absorbed", "absorbed", "absorbed"),
+    group = c("c1g1", "c1g1", "c1g1", "c1g2", "c1g3", NA),
+    recent_growth = c(0.30, 0.05, 0.00, NA, NA, NA),
+    dest_entropy = c(NA, NA, NA, 0.20, 0.90, NA),
+    dormant_share = c(NA, NA, NA, 0.10, 0.10, NA)
+  )
+  expect_equal(.classify_flow_state(d, th),
+               c("emergence", "maturity", "dormancy", "convergence", "divergence", "dormancy"))
 })
 
-test_that("sniff_trajectory_dynamics ages a dried-up line by its own end, not last_year", {
-  r <- detect_soft_trajectories(make_dead_line_dpg(), min_len = 3, min_group_size = 1)
-  dyn <- sniff_trajectory_dynamics(r)
-  expect_equal(nrow(dyn), 1L)                         # only the 3-yr c1g1 chain survives
-  expect_false(r$trajectories$living[1])              # end 2002 < last_year 2003
-  expect_equal(dyn$end, 2002L)
-  expect_equal(dyn$age, 3L)                           # end - start + 1, NOT last_year-based 4
+test_that("sniff_trajectory_dynamics runs on a flow object", {
+  fl <- sniff_trajectory_flow(make_flow_simple_dpg(), min_group_size = 1)
+  dyn <- sniff_trajectory_dynamics(fl)
+  expect_true(all(c("traj_id", "type", "group", "age", "recent_growth",
+                    "dest_entropy", "dormant_share", "emergence_score", "state") %in%
+                  names(dyn)))
+  expect_true(all(dyn$state %in% c("emergence", "maturity", "dormancy",
+                                   "convergence", "divergence")))
+  expect_equal(dyn$state[dyn$traj_id == "tr::c1g1"], "emergence")  # growing central
+})
+
+test_that("sniff_trajectory_dynamics rejects a non-flow object", {
+  expect_error(sniff_trajectory_dynamics(list()), "sniff_trajectory_flow")
 })
