@@ -291,3 +291,68 @@ detect_soft_trajectories <- function(x, min_len = 3, min_group_size = 10,
 
   list(graph = dag$graph, trajectories = trajectories, docs_per_group = dpg)
 }
+
+#' Normalize detected trajectories into one flat pool
+#'
+#' Accepts either a [detect_soft_trajectories()] / [detect_global_trajectories()]
+#' object (a single `trajectories` tibble carrying `terminal_group`) or a legacy
+#' named list of [detect_main_trajectories()] outputs keyed by group. Returns a
+#' tibble with `key`, `group`, `traj_id`, `nodes`, `start`, `end`.
+#'
+#' @param all_detected A global trajectory object or a named list of per-group
+#'   `detect_main_trajectories()` outputs.
+#' @return A tibble `key`, `group`, `traj_id`, `nodes` (list-col), `start`, `end`.
+#' @keywords internal
+#' @importFrom tibble tibble
+#' @importFrom dplyr bind_rows
+.flatten_trajectories <- function(all_detected) {
+  is_global <- is.list(all_detected) &&
+    !is.null(all_detected$trajectories) &&
+    is.data.frame(all_detected$trajectories) &&
+    "terminal_group" %in% names(all_detected$trajectories)
+
+  if (is_global) {
+    tr <- all_detected$trajectories
+    if (nrow(tr) == 0) {
+      return(tibble::tibble(key = character(), group = character(),
+                            traj_id = character(), nodes = list(),
+                            start = integer(), end = integer()))
+    }
+    return(tibble::tibble(
+      key = tr$traj_id,
+      group = tr$terminal_group,
+      traj_id = tr$traj_id,
+      nodes = tr$nodes,
+      start = vapply(tr$nodes, function(n) min(.extract_year(n)), integer(1)),
+      end = vapply(tr$nodes, function(n) max(.extract_year(n)), integer(1))
+    ))
+  }
+
+  if (!is.list(all_detected) || is.null(names(all_detected))) {
+    stop("'all_detected' must be a named list of detect_main_trajectories() ",
+         "outputs or a detect_global_trajectories() object", call. = FALSE)
+  }
+  rows <- list()
+  for (g in names(all_detected)) {
+    trs <- all_detected[[g]]$trajectories
+    if (is.null(trs) || nrow(trs) == 0) next
+    for (i in seq_len(nrow(trs))) {
+      nodes <- trs$nodes[[i]]
+      yrs <- .extract_year(nodes)
+      rows[[length(rows) + 1]] <- tibble::tibble(
+        key = paste0(g, "::", trs$traj_id[i]),
+        group = g,
+        traj_id = trs$traj_id[i],
+        nodes = list(nodes),
+        start = min(yrs),
+        end = max(yrs)
+      )
+    }
+  }
+  if (length(rows) == 0) {
+    return(tibble::tibble(key = character(), group = character(),
+                          traj_id = character(), nodes = list(),
+                          start = integer(), end = integer()))
+  }
+  dplyr::bind_rows(rows)
+}
