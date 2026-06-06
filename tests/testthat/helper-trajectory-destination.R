@@ -132,6 +132,22 @@ make_group_formation_overlap_dpg <- function() {
   )
 }
 
+# Birth A's heaviest line ends in c1g1; c1g2 (final, 2002) is fed by A but NO
+# trajectory terminates in it (it is a crossroads group). A carries c1g2's final
+# papers w4,w5 in its early nodes, so universal formation attributes them to A.
+make_crossroads_dpg <- function() {
+  tibble::tibble(
+    group_id = c(rep("y2000c1g1", 4), rep("y2001c1g1", 5),
+                 rep("y2002c1g1", 3), rep("y2002c1g2", 2)),
+    document_id = c("w1", "w2", "w3", "w4",
+                    "w1", "w2", "w3", "w4", "w5",
+                    "w1", "w2", "w3",
+                    "w4", "w5"),
+    network_until = c(rep(2000L, 4), rep(2001L, 5), rep(2002L, 3), rep(2002L, 2)),
+    group = c(rep("c1g1", 4), rep("c1g1", 5), rep("c1g1", 3), rep("c1g2", 2))
+  )
+}
+
 # A c1g1 chain that dries up at 2002 while an unconnected 2003 cluster pushes
 # last_year to 2003, so the chain has end (2002) < last_year (2003): living = FALSE.
 make_dead_line_dpg <- function() {

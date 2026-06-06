@@ -22,35 +22,33 @@ sniff_group_formation(
 \item{docs_per_group}{Per-year membership tibble. Defaults to
 \code{x$docs_per_group} when \code{x} is a detected object.}
 
-\item{min_papers}{Minimum papers a tributary must bring to be kept (default 5).}
+\item{min_papers}{Minimum papers a trajectory must bring to be kept (default 5).}
 
-\item{min_prop}{Minimum share of the tributary's own pre-merge cohort that must
-reach the group to be kept (default 0.05).}
+\item{min_prop}{Minimum share of the trajectory's own cohort that must reach the
+group to be kept (default 0.05).}
 
 \item{last_year}{Final year (default: max \code{network_until}).}
 }
 \value{
 A list with \code{target} (the group), \code{target_info}
 (\code{group}, \code{traj_id = "all"}, \code{start}, \verb{size = |final(group)|}), \code{feeders}
-(one row per tributary, sorted by descending papers: \code{source_key} (the
-\code{traj_id}), \code{source_group}, \code{start_year}, \code{handoff_year} (the merge year),
-\code{cohort_size} (pre-merge papers), \code{n} (pre-merge papers reaching the group),
-\code{prop_of_source}, \code{prop_of_inflow}, \code{kept}, and the \code{size_curve} /
+(one row per contributing trajectory, sorted by descending papers:
+\code{source_key} (the \code{traj_id}), \code{source_group}, \code{start_year},
+\code{handoff_year} (median intro year for attributed papers), \code{cohort_size}
+(trajectory papers present in this group across all years), \code{n} (attributed
+papers), \code{prop_of_source}, \code{prop_of_inflow}, \code{kept}, and the \code{size_curve} /
 \code{inflow_curve} list-columns), \code{total_inflow}, and \code{last_year}.
 }
 \description{
-The inverse of \code{\link[=sniff_trajectory_group_contribution]{sniff_trajectory_group_contribution()}} read as a river: for one
-final \code{group}, the birth-lineages that terminate in it (its backbone), each
-drawn as a \emph{pre-merge tributary} — its segment before it joins the group's shared
-backbone (the nodes shared among the group's own terminating trajectories). Each
-final paper is attributed to the earliest-starting tributary that carried it
-before the merge, so the tributaries partition the group's papers with no
-soft-overlap double count; papers that only ever appear in the shared backbone are
-the unattributed core, so \verb{total_inflow <= |final(group)|}. The returned object
-has the same shape as \code{\link[=sniff_trajectory_formation]{sniff_trajectory_formation()}}, so
-\code{\link[=plot_trajectory_formation_2d]{plot_trajectory_formation_2d()}} / \code{\link[=plot_trajectory_formation_3d]{plot_trajectory_formation_3d()}} (and the
-\code{\link[=plot_group_formation_2d]{plot_group_formation_2d()}} wrappers) render it directly, with the group as the
-spine.
+For one final \code{group}, attributes each of its final papers to the trajectory
+that carried it \emph{earliest} (earliest-carrier attribution). This covers all final
+groups, including crossroads groups that no trajectory terminates in. Each paper
+is assigned to exactly one trajectory (the earliest carrier; ties broken by
+trajectory birth year then id), so the feeders partition the group's papers with
+no double count. The returned object has the same shape as
+\code{\link[=sniff_trajectory_formation]{sniff_trajectory_formation()}}, so \code{\link[=plot_trajectory_formation_2d]{plot_trajectory_formation_2d()}} /
+\code{\link[=plot_trajectory_formation_3d]{plot_trajectory_formation_3d()}} (and the \code{\link[=plot_group_formation_2d]{plot_group_formation_2d()}} wrappers)
+render it directly, with the group as the spine.
 }
 \seealso{
 \code{\link[=sniff_trajectory_group_contribution]{sniff_trajectory_group_contribution()}}, \code{\link[=plot_group_formation_2d]{plot_group_formation_2d()}},
