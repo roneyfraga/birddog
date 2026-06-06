@@ -29,3 +29,12 @@ test_that(".classify_growth_phase splits emergence / maturity / dormancy", {
   expect_equal(.classify_growth_phase(0.01, 0.15, 0.02), "dormancy")
   expect_equal(.classify_growth_phase(NA_real_, 0.15, 0.02), "maturity")
 })
+
+test_that("sniff_trajectory_dynamics ages a dried-up line by its own end, not last_year", {
+  r <- detect_soft_trajectories(make_dead_line_dpg(), min_len = 3, min_group_size = 1)
+  dyn <- sniff_trajectory_dynamics(r)
+  expect_equal(nrow(dyn), 1L)                         # only the 3-yr c1g1 chain survives
+  expect_false(r$trajectories$living[1])              # end 2002 < last_year 2003
+  expect_equal(dyn$end, 2002L)
+  expect_equal(dyn$age, 3L)                           # end - start + 1, NOT last_year-based 4
+})

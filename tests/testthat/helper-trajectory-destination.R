@@ -131,3 +131,15 @@ make_group_formation_overlap_dpg <- function() {
     group = c("c1g1", "c1g1", "c1g2", "c1g2", rep("c1g1", 3), rep("c1g1", 3))
   )
 }
+
+# A c1g1 chain that dries up at 2002 while an unconnected 2003 cluster pushes
+# last_year to 2003, so the chain has end (2002) < last_year (2003): living = FALSE.
+make_dead_line_dpg <- function() {
+  tibble::tibble(
+    group_id = c(rep("y2000c1g1", 3), rep("y2001c1g1", 3), rep("y2002c1g1", 3),
+                 rep("y2003c1g2", 3)),
+    document_id = c(rep(c("w1", "w2", "w3"), 3), "w7", "w8", "w9"),
+    network_until = c(rep(2000L, 3), rep(2001L, 3), rep(2002L, 3), rep(2003L, 3)),
+    group = c(rep("c1g1", 9), rep("c1g2", 3))
+  )
+}

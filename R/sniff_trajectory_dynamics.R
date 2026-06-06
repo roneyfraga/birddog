@@ -52,17 +52,22 @@ default_state_thresholds <- function() {
 #' dormancy-by-death: `dormancy` here means alive but stalled (recent growth at or
 #' below `dormancy_growth`).
 #'
+#' @details Because trajectories share their tail after `merge_year`, the
+#'   `recent_growth` and `growth_phase` of trajectories that merged into the same
+#'   backbone reflect that shared backbone, not each lineage independently.
+#'
 #' @param detected A [detect_soft_trajectories()] object.
 #' @param docs_per_group Per-year membership tibble. Defaults to
 #'   `detected$docs_per_group`.
 #' @param thresholds A [default_state_thresholds()]-shaped list (default).
-#' @param growth_window Number of curve points (present years) over which
+#' @param growth_window Number of recent year-to-year steps over which
 #'   `recent_growth` is measured (default 3); a shorter curve is measured whole.
 #' @param last_year Final year (default: max `network_until`).
 #'
 #' @return A tibble, one row per trajectory, sorted by descending
 #'   `emergence_score`: `traj_id`, `terminal_group`, `birth`, `start`, `end`,
-#'   `age` (years since birth), `size`, `recent_growth`, `growth_phase`,
+#'   `age` (the trajectory's lived span, `end - start + 1`), `size`,
+#'   `recent_growth`, `growth_phase`,
 #'   `converges` (merged into a shared backbone), `merge_year`, `emergence_score`
 #'   (`zscore(-age) + zscore(recent_growth)`: young and growing).
 #'
@@ -100,7 +105,7 @@ sniff_trajectory_dynamics <- function(detected, docs_per_group = NULL,
     rows[[i]] <- tibble::tibble(
       traj_id = tr$traj_id[i], terminal_group = tr$terminal_group[i],
       birth = tr$birth[i], start = tr$start[i], end = tr$end[i],
-      age = last_year - tr$start[i] + 1L, size = size,
+      age = tr$end[i] - tr$start[i] + 1L, size = size,
       recent_growth = recent_growth,
       growth_phase = .classify_growth_phase(
         recent_growth, thresholds$emergence_growth, thresholds$dormancy_growth),

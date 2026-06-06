@@ -20,7 +20,7 @@ sniff_trajectory_dynamics(
 
 \item{thresholds}{A \code{\link[=default_state_thresholds]{default_state_thresholds()}}-shaped list (default).}
 
-\item{growth_window}{Number of curve points (present years) over which
+\item{growth_window}{Number of recent year-to-year steps over which
 \code{recent_growth} is measured (default 3); a shorter curve is measured whole.}
 
 \item{last_year}{Final year (default: max \code{network_until}).}
@@ -28,7 +28,8 @@ sniff_trajectory_dynamics(
 \value{
 A tibble, one row per trajectory, sorted by descending
 \code{emergence_score}: \code{traj_id}, \code{terminal_group}, \code{birth}, \code{start}, \code{end},
-\code{age} (years since birth), \code{size}, \code{recent_growth}, \code{growth_phase},
+\code{age} (the trajectory's lived span, \code{end - start + 1}), \code{size},
+\code{recent_growth}, \code{growth_phase},
 \code{converges} (merged into a shared backbone), \code{merge_year}, \code{emergence_score}
 (\code{zscore(-age) + zscore(recent_growth)}: young and growing).
 }
@@ -39,6 +40,11 @@ growth and age (the growth axis) and whether it merged into a shared backbone
 is the tunable overlay. Since every v2 trajectory is living, there is no
 dormancy-by-death: \code{dormancy} here means alive but stalled (recent growth at or
 below \code{dormancy_growth}).
+}
+\details{
+Because trajectories share their tail after \code{merge_year}, the
+\code{recent_growth} and \code{growth_phase} of trajectories that merged into the same
+backbone reflect that shared backbone, not each lineage independently.
 }
 \seealso{
 \code{\link[=sniff_group_dynamics]{sniff_group_dynamics()}}, \code{\link[=default_state_thresholds]{default_state_thresholds()}}
