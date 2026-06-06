@@ -1,4 +1,71 @@
-#' Track where an incomplete trajectory's papers end up
+#' Where a trajectory's terminal cohort goes
+#'
+#' Dispatches on `x`: a [sniff_trajectory_flow()] object returns the destination of
+#' `traj_id`'s terminal cohort (its per-final-group split and dormant share) plus its
+#' immediate absorber and ultimate destination; a legacy detected object keeps the
+#' per-group behavior.
+#'
+#' @param x A [sniff_trajectory_flow()] object, or a legacy detected object.
+#' @param ... For the flow object: `traj_id`. For legacy: `traj_id, docs_per_group, ...`.
+#' @return A list (`target`, `target_info`, `destination`, `cohort_size`,
+#'   `dormant_share`, `continuation_traj`, `last_year`).
+#' @seealso [sniff_trajectory_flow()], [sniff_trajectory_self_sufficiency()]
+#' @export
+sniff_trajectory_destination <- function(x, ...) {
+  if (is.list(x) && !is.data.frame(x) && !is.null(x$trajectories) &&
+      is.data.frame(x$trajectories) && "absorbed_into" %in% names(x$trajectories)) {
+    .destination_from_flow(x, ...)
+  } else {
+    .destination_legacy(x, ...)
+  }
+}
+
+#' @keywords internal
+#' @importFrom dplyr arrange desc
+#' @importFrom tibble tibble
+#' @importFrom rlang .data
+.destination_from_flow <- function(flow, traj_id) {
+  tr <- flow$trajectories
+  if (!is.character(traj_id) || length(traj_id) != 1 || !(traj_id %in% tr$traj_id)) {
+    stop("'traj_id' must be a single trajectory id present in the flow object",
+         call. = FALSE)
+  }
+  trow <- tr[tr$traj_id == traj_id, ]
+  dpg <- flow$docs_per_group
+  last_year <- flow$last_year
+  node_docs <- split(dpg$document_id, dpg$group_id)
+
+  fin <- dpg[dpg$network_until == last_year, c("document_id", "group"), drop = FALSE]
+  fin <- fin[!duplicated(fin$document_id), , drop = FALSE]
+  doc_final <- stats::setNames(fin$group, fin$document_id)
+
+  nodes <- trow$nodes[[1]]
+  terminal_node <- nodes[which.max(.extract_year(nodes))]
+  cohort <- unique(node_docs[[terminal_node]])
+  fg <- unname(doc_final[cohort])
+  dropped <- sum(is.na(fg))
+  tab <- table(fg[!is.na(fg)])
+  g_final <- names(tab); n <- as.integer(tab)
+  if (dropped > 0) { g_final <- c(g_final, "(dropped)"); n <- c(n, dropped) }
+  destination <- tibble::tibble(g_final = g_final, n = n,
+                                prop = n / length(cohort))
+  destination <- dplyr::arrange(destination, dplyr::desc(.data$n))
+
+  list(
+    target = traj_id,
+    target_info = list(traj_id = traj_id, type = trow$type, group = trow$group,
+                       start = trow$start, end = trow$end, size = trow$size,
+                       absorbed_into = trow$absorbed_into,
+                       absorption_year = trow$absorption_year),
+    destination = destination,
+    cohort_size = length(cohort),
+    dormant_share = dropped / length(cohort),
+    continuation_traj = trow$absorbed_into,
+    last_year = last_year
+  )
+}
+
+#' Track where an incomplete trajectory's papers end up (legacy)
 #'
 #' In cumulative clustering a paper is never removed from the network, so a
 #' trajectory that stops before the last year (a "dying" trajectory detected by
@@ -55,31 +122,18 @@
 #'     start, end), used by [plot_trajectory_handoff()].}
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' detected <- detect_main_trajectories(groups_cumulative_trajectories, "c1g10")
-#' dest <- sniff_trajectory_destination(
-#'   detected,
-#'   traj_id = "tr3",
-#'   docs_per_group = groups_cumulative_trajectories$docs_per_group
-#' )
-#' dest$destination
-#' plot_trajectory_destination(dest)
-#' }
-#'
-#' @seealso [detect_main_trajectories()], [plot_trajectory_destination()]
+#' @keywords internal
 #'
 #' @importFrom dplyr filter mutate select left_join count arrange desc group_by
 #' @importFrom dplyr ungroup lead slice_max pull coalesce distinct n
 #' @importFrom tibble tibble
 #' @importFrom tidyr expand_grid
-#' @export
-sniff_trajectory_destination <- function(detected,
-                                         traj_id,
-                                         docs_per_group,
-                                         last_year = NULL,
-                                         all_detected = NULL,
-                                         group = NULL) {
+.destination_legacy <- function(detected,
+                                traj_id,
+                                docs_per_group,
+                                last_year = NULL,
+                                all_detected = NULL,
+                                group = NULL) {
   # Input validation
   if (!is.list(detected) || is.null(detected$trajectories)) {
     stop("'detected' must be the output of detect_main_trajectories()", call. = FALSE)

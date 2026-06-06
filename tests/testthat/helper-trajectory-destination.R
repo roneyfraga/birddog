@@ -160,6 +160,19 @@ make_dead_line_dpg <- function() {
   )
 }
 
+# Simple fixture: one central spine (c1g1) + one tributary (c1g2) absorbed at
+# the merge. Used in flow-destination and flow-self-sufficiency tests.
+make_flow_simple_dpg <- function() {
+  tibble::tibble(
+    group_id = c(rep("y2000c1g1", 3), rep("y2001c1g1", 4), rep("y2002c1g1", 4),
+                 rep("y2000c1g2", 2)),
+    document_id = c("w1", "w2", "w3",  "w1", "w2", "w3", "w4",
+                    "w1", "w2", "w3", "w4",  "w4", "w5"),
+    network_until = c(rep(2000L, 3), rep(2001L, 4), rep(2002L, 4), rep(2000L, 2)),
+    group = c(rep("c1g1", 3), rep("c1g1", 4), rep("c1g1", 4), rep("c1g2", 2))
+  )
+}
+
 # Transitive absorption fixture: A absorbed by B (non-central), B absorbed by C
 # (central). Used in flow-formation tests.
 make_flow_tree_dpg <- function() {
