@@ -33,7 +33,7 @@
 #'   [plot_trajectory_formation_2d()]
 #'
 #' @export
-#' @importFrom dplyr bind_rows arrange desc count distinct left_join
+#' @importFrom dplyr bind_rows arrange desc count distinct
 #' @importFrom tibble tibble
 #' @importFrom rlang .data
 #' @importFrom stats median setNames
