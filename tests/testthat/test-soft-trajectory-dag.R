@@ -31,3 +31,28 @@ test_that(".forward_terminal_group walks to the sink", {
   expect_equal(.forward_terminal_group(c("y2000c1g1", "y2002c1g4"), s),
                c("c1g4", "c1g4"))
 })
+
+test_that("sniff_trajectory_dag assembles nodes, edges, births", {
+  dpg <- tibble::tibble(
+    group_id = c(rep("y2000c1g1", 3), rep("y2001c1g1", 3), rep("y2002c1g1", 3)),
+    document_id = c(paste0("w", 1:3), paste0("w", 1:3), paste0("w", 1:3)),
+    network_until = c(rep(2000L, 3), rep(2001L, 3), rep(2002L, 3)),
+    group = rep("c1g1", 9)
+  )
+  d <- sniff_trajectory_dag(dpg, min_group_size = 1)
+  expect_setequal(d$nodes$name, c("y2000c1g1", "y2001c1g1", "y2002c1g1"))
+  expect_equal(d$births, "y2000c1g1")                 # only the first year is a birth
+  expect_true(all(d$nodes$terminal_group == "c1g1"))  # every node funnels to c1g1
+  expect_equal(d$last_year, 2002L)
+  expect_s3_class(d$nodes, "tbl_df")
+  expect_true(igraph::is_igraph(d$graph))
+})
+
+test_that("sniff_trajectory_dag accepts a sniff_groups_trajectories-shaped list", {
+  dpg <- tibble::tibble(
+    group_id = c("y2000c1g1", "y2000c1g1"), document_id = c("w1", "w2"),
+    network_until = c(2000L, 2000L), group = c("c1g1", "c1g1")
+  )
+  d <- sniff_trajectory_dag(list(docs_per_group = dpg), min_group_size = 1)
+  expect_equal(d$births, "y2000c1g1")
+})
