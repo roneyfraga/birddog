@@ -53,3 +53,41 @@ make_destination_fixture <- function() {
 
   list(detected = detected, docs_per_group = docs_per_group, all_detected = all_detected)
 }
+
+# Global object for the trajectory x group bipartite. Final year 2020, final
+# groups c1g1 = {d1,d2,d3}, c1g2 = {d4,d5}. tr1 -> all c1g1; tr2 -> all c1g2;
+# tr3 is an extinct lineage (terminal_group c1g3, not a final group) whose papers
+# split d1 -> c1g1, d4 -> c1g2, d6 -> dropped. Nodes are disjoint across tr1/2/3.
+make_contribution_fixture <- function() {
+  dpg <- tibble::tribble(
+    ~group_id,    ~document_id, ~network_until, ~group,
+    "y2020c1g1",  "d1",         2020,           "c1g1",
+    "y2020c1g1",  "d2",         2020,           "c1g1",
+    "y2020c1g1",  "d3",         2020,           "c1g1",
+    "y2020c1g2",  "d4",         2020,           "c1g2",
+    "y2020c1g2",  "d5",         2020,           "c1g2",
+    "y2019c1g1",  "d1",         2019,           "c1g1",
+    "y2019c1g1",  "d2",         2019,           "c1g1",
+    "y2019c1g2",  "d4",         2019,           "c1g2",
+    "y2019c1g2",  "d5",         2019,           "c1g2",
+    "y2018c1g3",  "d1",         2018,           "c1g3",
+    "y2018c1g3",  "d4",         2018,           "c1g3",
+    "y2018c1g3",  "d6",         2018,           "c1g3",
+    "y2019c1g3",  "d1",         2019,           "c1g3",
+    "y2019c1g3",  "d4",         2019,           "c1g3",
+    "y2019c1g3",  "d6",         2019,           "c1g3"
+  )
+  list(
+    graph = NULL,
+    trajectories = tibble::tibble(
+      traj_id        = c("tr1", "tr2", "tr3"),
+      terminal_group = c("c1g1", "c1g2", "c1g3"),
+      nodes = list(
+        c("y2019c1g1", "y2020c1g1"),
+        c("y2019c1g2", "y2020c1g2"),
+        c("y2018c1g3", "y2019c1g3")
+      )
+    ),
+    docs_per_group = dpg
+  )
+}
