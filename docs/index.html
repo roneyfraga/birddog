@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,12 +76,12 @@
 <p>Install the stable version from <a href="https://cran.r-project.org/package=birddog" class="external-link">CRAN</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"birddog"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://roneyfraga.com/birddog/" class="external-link">birddog</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://roneyfraga.com/birddog/">birddog</a></span><span class="op">)</span></span></code></pre></div>
 <p>Or the development version from <a href="https://github.com/roneyfraga/birddog/" class="external-link">GitHub</a>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"roneyfraga/birddog"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://roneyfraga.com/birddog/" class="external-link">birddog</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://roneyfraga.com/birddog/">birddog</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
@@ -126,6 +126,12 @@
 </li>
 <li>
 <code><a href="reference/sniff_groups_cumulative_citations.html">sniff_groups_cumulative_citations()</a></code> – per-document citation growth</li>
+<li>
+<code><a href="reference/sniff_groups_influence.html">sniff_groups_influence()</a></code> – directed citation influence between groups: cross-citation matrix, debt / audience / Salton / surprise indices, net flow, and source / broker / sink roles</li>
+<li>
+<code><a href="reference/plot_groups_influence_matrix.html">plot_groups_influence_matrix()</a></code> – directed influence heatmap, the asymmetric twin of the confluence matrix</li>
+<li>
+<code><a href="reference/plot_groups_influence_network.html">plot_groups_influence_network()</a></code> – net-influence spine (who, on balance, leads whom)</li>
 </ul>
 </div>
 <div class="section level3">
@@ -133,43 +139,79 @@
 </h3>
 <ul>
 <li>
-<code><a href="reference/sniff_citations_cycle_time.html">sniff_citations_cycle_time()</a></code> – measures the pace of change (Kayal
-<ol start="1999" style="list-style-type: decimal">
-<li></li>
-</ol>
-</li>
+<code><a href="reference/sniff_cct.html">sniff_cct()</a></code> – measures the pace of change (Kayal 1999)</li>
 <li>
 <code><a href="reference/sniff_entropy.html">sniff_entropy()</a></code> – normalized Shannon entropy for keyword diversity (Shannon 1948; Pielou 1966)</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="trajectories">Trajectories<a class="anchor" aria-label="anchor" href="#trajectories"></a>
+<h3 id="trajectory-detection">Trajectory detection<a class="anchor" aria-label="anchor" href="#trajectory-detection"></a>
 </h3>
 <ul>
 <li>
 <code><a href="reference/sniff_groups_cumulative.html">sniff_groups_cumulative()</a></code> – cumulative clusterization over time</li>
 <li>
-<code><a href="reference/sniff_groups_trajectories.html">sniff_groups_trajectories()</a></code> – Jaccard similarity DAG across years</li>
+<code><a href="reference/sniff_groups_lineage.html">sniff_groups_lineage()</a></code> – Jaccard similarity DAG across years</li>
 <li>
-<code><a href="reference/plot_group_trajectories_2d.html">plot_group_trajectories_2d()</a></code> / <code><a href="reference/plot_group_trajectories_3d.html">plot_group_trajectories_3d()</a></code> – node-based trajectory plots</li>
+<code><a href="reference/plot_groups_lineage_2d.html">plot_groups_lineage_2d()</a></code> / <code><a href="reference/plot_groups_lineage_3d.html">plot_groups_lineage_3d()</a></code> – node-based lineage plots</li>
 <li>
-<code><a href="reference/detect_main_trajectories.html">detect_main_trajectories()</a></code> – top-N disjoint paths via dynamic programming</li>
+<code><a href="reference/sniff_trajectory_dag.html">sniff_trajectory_dag()</a></code> / <code><a href="reference/plot_trajectory_dag.html">plot_trajectory_dag()</a></code> – temporal DAG of cluster-year nodes across the whole history (<code><a href="reference/plot_trajectory_dag_interactive.html">plot_trajectory_dag_interactive()</a></code> for the plotly view); <code>similarity = "coupling"</code> routes the DAG by shared references instead of document overlap</li>
 <li>
-<code><a href="reference/filter_trajectories.html">filter_trajectories()</a></code> – filter and rank detected trajectories</li>
+<code><a href="reference/sniff_trajectory_braid.html">sniff_trajectory_braid()</a></code> – decompose the DAG into trajectories: one central per final group (<code>tr::cNgN</code>) plus the absorbed tributaries that merge into it (<code>trN</code>)</li>
 <li>
-<code><a href="reference/plot_group_trajectories_lines_2d.html">plot_group_trajectories_lines_2d()</a></code> / <code><a href="reference/plot_group_trajectories_lines_3d.html">plot_group_trajectories_lines_3d()</a></code> – variable-width line plots</li>
+<code><a href="reference/sniff_trajectory_channel.html">sniff_trajectory_channel()</a></code> – sibling detector that routes one global optimal-path backbone per final group (potential-routed), an alternative decomposition of the same DAG</li>
 <li>
-<code><a href="reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code> – track where an incomplete trajectory’s papers go, by group and by absorbing trajectory</li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> – focus a flow on a watershed or a predicate while it stays a valid flow (<code>subset(flow, target = "tr::c1g1")</code>)</li>
 <li>
-<code><a href="reference/plot_trajectory_destination.html">plot_trajectory_destination()</a></code> – variable-width lines (Sugiyama time layout) of where the papers go, coloured by destination group or trajectory</li>
+<code><a href="reference/is_flow.html">is_flow()</a></code> / <code><a href="reference/validate_flow.html">validate_flow()</a></code> – test and validate the <code>birddog_flow</code> object contract</li>
 <li>
-<code><a href="reference/plot_trajectory_handoff.html">plot_trajectory_handoff()</a></code> – timeline of the stagnant trajectory and the one that absorbed it</li>
+<code><a href="reference/sniff_trajectory_coherence.html">sniff_trajectory_coherence()</a></code> – score how content-coherent a flow’s partition is, with a silhouette over an independent content signal</li>
 <li>
-<code><a href="reference/sniff_trajectory_formation.html">sniff_trajectory_formation()</a></code> / <code><a href="reference/sniff_trajectory_formations.html">sniff_trajectory_formations()</a></code> – the inverse of destination: which trajectories fed into a target (its feeders), for one target or all at once</li>
+<code><a href="reference/sniff_trajectory_comparison.html">sniff_trajectory_comparison()</a></code> – compare two detectors head-to-head by content coherence, reporting the contested nodes</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="trajectory-analysis">Trajectory analysis<a class="anchor" aria-label="anchor" href="#trajectory-analysis"></a>
+</h3>
+<ul>
 <li>
-<code><a href="reference/plot_trajectory_formation_2d.html">plot_trajectory_formation_2d()</a></code> / <code><a href="reference/plot_trajectory_formation_3d.html">plot_trajectory_formation_3d()</a></code> – confluence of feeders into a target trajectory (2D river timeline / interactive 3D)</li>
+<code><a href="reference/sniff_trajectory_dynamics.html">sniff_trajectory_dynamics()</a></code> – per-trajectory dynamic-state indicators and life-cycle classification (emergence index, staying power, reach), with optional CCT, entropy, hubs and community lenses joined in</li>
+<li>
+<code><a href="reference/sniff_trajectory_cct.html">sniff_trajectory_cct()</a></code> – per-year citation cycle time (renewal pace) along each trajectory</li>
+<li>
+<code><a href="reference/sniff_trajectory_entropy.html">sniff_trajectory_entropy()</a></code> – per-year keyword diversity (Pielou’s J’) along each trajectory</li>
+<li>
+<code><a href="reference/sniff_trajectory_hubs.html">sniff_trajectory_hubs()</a></code> – hub roles aggregated to each trajectory (provincial vs bridging)</li>
+<li>
+<code><a href="reference/sniff_trajectory_community.html">sniff_trajectory_community()</a></code> – community breadth (distinct authors) of each trajectory</li>
+<li>
+<code><a href="reference/sniff_trajectory_emergence_owners.html">sniff_trajectory_emergence_owners()</a></code> – the authors who own each living trajectory’s emergence</li>
 <li>
 <code><a href="reference/sniff_trajectory_self_sufficiency.html">sniff_trajectory_self_sufficiency()</a></code> – per-trajectory endogenous-growth index (<code>1 - imported / size</code>)</li>
+<li>
+<code><a href="reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code> – track where a dying trajectory’s papers go, naming the trajectory that absorbed it</li>
+<li>
+<code><a href="reference/sniff_trajectory_formation.html">sniff_trajectory_formation()</a></code> – the inverse of destination: which trajectories fed into a target (its feeders)</li>
+<li>
+<code><a href="reference/sniff_trajectory_contribution.html">sniff_trajectory_contribution()</a></code> – documents an intermediate trajectory contributes to a target in a given year</li>
+<li>
+<code><a href="reference/sniff_trajectory_confluence.html">sniff_trajectory_confluence()</a></code> – render-ready confluence forest of the soft DAG (how the central trajectories form)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="trajectory-plots">Trajectory plots<a class="anchor" aria-label="anchor" href="#trajectory-plots"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/plot_trajectory_dynamics.html">plot_trajectory_dynamics()</a></code> / <code><a href="reference/plot_trajectory_dynamics_interactive.html">plot_trajectory_dynamics_interactive()</a></code> – strategic map of trajectory dynamic states</li>
+<li>
+<code><a href="reference/plot_trajectory_confluence.html">plot_trajectory_confluence()</a></code> / <code><a href="reference/plot_trajectory_confluence_interactive.html">plot_trajectory_confluence_interactive()</a></code> / <code><a href="reference/plot_trajectory_confluence_matrix.html">plot_trajectory_confluence_matrix()</a></code> – braided-river confluence of the central trajectories</li>
+<li>
+<code><a href="reference/plot_trajectory_formation.html">plot_trajectory_formation()</a></code> – confluence of feeders into a target trajectory (cumulative river timeline)</li>
+<li>
+<code><a href="reference/plot_trajectory_dispersion.html">plot_trajectory_dispersion()</a></code> – timeline of the stagnant trajectory and the one that absorbed it</li>
+<li>
+<code><a href="reference/plot_trajectory_lines_2d.html">plot_trajectory_lines_2d()</a></code> / <code><a href="reference/plot_trajectory_lines_3d.html">plot_trajectory_lines_3d()</a></code> – variable-width trajectory line plots on a time layout</li>
 </ul>
 </div>
 <div class="section level3">
@@ -242,6 +284,12 @@
 </ul>
 </div>
 
+<div class="community">
+<h2 data-toc-skip>Community</h2>
+<ul class="list-unstyled">
+<li><a href="CONTRIBUTING.html">Contributing guide</a></li>
+</ul>
+</div>
 
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
@@ -269,7 +317,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

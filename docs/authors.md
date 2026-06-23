@@ -13,13 +13,13 @@ Source:
 [`DESCRIPTION`](https://github.com/roneyfraga/birddog/blob/HEAD/DESCRIPTION)
 
 Souza RF (2026). *birddog: Sniffing Emergence and Trajectories in
-Academic Papers and Patents*. R package version 1.0.5,
-<http://roneyfraga.com/birddog/>.
+Academic Papers and Patents*. R package version 2.0.0,
+<https://roneyfraga.com/birddog/>.
 
     @Manual{,
       title = {birddog: Sniffing Emergence and Trajectories in Academic Papers and Patents},
       author = {Roney Fraga Souza},
       year = {2026},
-      note = {R package version 1.0.5},
-      url = {http://roneyfraga.com/birddog/},
+      note = {R package version 2.0.0},
+      url = {https://roneyfraga.com/birddog/},
     }

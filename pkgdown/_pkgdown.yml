@@ -14,8 +14,6 @@ template:
     # texto e fundo no claro
     bg: "#ffffff"
     fg: "#2B2B2B"
-  qssets:
-    - extra.css
 
 navbar:
   title: "<img src='logo.png' alt='birddog' style='height:24px;vertical-align:middle;margin-right:.4rem'> birddog"
@@ -30,4 +28,35 @@ navbar:
           href: https://roneyfraga.com/birddog-class
         - text: AI Chat Assistant (biogas)
           href: https://roneyfraga.com/birddog-chat
+
+reference:
+  - title: Ingest
+    contents: [read_openalex, read_wos, get_openalex_fields]
+  - title: Network and groups (stock)
+    contents: [sniff_network, sniff_components, sniff_groups,
+               sniff_groups_cumulative, sniff_groups_lineage,
+               sniff_groups_attributes, sniff_groups_cumulative_citations,
+               sniff_groups_hubs, sniff_groups_influence, is_influence]
+  - title: Group content
+    contents: [sniff_groups_keywords, sniff_groups_terms,
+               sniff_groups_stm_prepare, sniff_groups_stm_run]
+  - title: Indicators
+    contents: [sniff_cct, sniff_entropy, sniff_key_route,
+               data_state_thresholds, fixed_state_thresholds]
+  - title: Trajectory detection (flow)
+    contents: [sniff_trajectory_dag, sniff_trajectory_braid,
+               sniff_trajectory_channel, is_flow,
+               validate_flow, subset.birddog_flow,
+               sniff_trajectory_coherence, sniff_trajectory_comparison]
+  - title: Trajectory analysis
+    contents: [sniff_trajectory_dynamics, sniff_trajectory_cct,
+               sniff_trajectory_entropy, sniff_trajectory_hubs,
+               sniff_trajectory_community, sniff_trajectory_emergence_owners,
+               sniff_trajectory_self_sufficiency, sniff_trajectory_destination,
+               sniff_trajectory_formation, sniff_trajectory_contribution,
+               sniff_trajectory_confluence]
+  - title: Visualization
+    contents: [starts_with("plot_")]
+  - title: Utilities
+    contents: [mixed_sort, birddog-package]
 

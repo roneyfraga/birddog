@@ -389,14 +389,81 @@ groups_hubs |>
 | c1g1 | [W2276289647](https://openalex.org/W2276289647) | 292 | 131 | 59 | 3.90 | 0.76 | R7 |
 | c1g8 | [W1912164921](https://openalex.org/W1912164921) | 488 | 132 | 34 | 3.82 | 0.85 | R7 |
 
-## Indexes: Citations Cycle Time
+### Group influence
+
+[`sniff_groups_influence()`](https://roneyfraga.com/birddog/reference/sniff_groups_influence.md)
+lifts the internal citations to the group level and measures how much
+each group’s output flows into every other’s. Influence is directional –
+if group B’s papers cite group A’s, knowledge flows A to B – so the
+cross-citation matrix is asymmetric, the directed twin of the confluence
+matrix. Each ordered pair carries four size-corrected indices (debt,
+audience, Salton, surprise); the net flow (citations one way minus the
+reciprocal) and the balance (received minus made) classify every group
+as a source, a broker or a sink.
+
+``` r
+influence <- birddog::sniff_groups_influence(groups)
+
+influence$groups |>
+  gt::gt()
+```
+
+| group | received | made  | balance | role   |
+|-------|----------|-------|---------|--------|
+| c1g6  | 15071    | 12833 | 2238    | source |
+| c1g3  | 21641    | 19449 | 2192    | source |
+| c1g4  | 27778    | 27130 | 648     | source |
+| c1g1  | 47818    | 47256 | 562     | source |
+| c1g5  | 10840    | 10567 | 273     | source |
+| c1g16 | 131      | 135   | -4      | sink   |
+| c1g17 | 73       | 79    | -6      | sink   |
+| c1g10 | 6645     | 6661  | -16     | sink   |
+| c1g15 | 1104     | 1128  | -24     | sink   |
+| c1g13 | 2278     | 2349  | -71     | sink   |
+| c1g11 | 1621     | 1733  | -112    | sink   |
+| c1g14 | 3006     | 3631  | -625    | sink   |
+| c1g9  | 8796     | 9536  | -740    | sink   |
+| c1g12 | 3803     | 4757  | -954    | sink   |
+| c1g2  | 26410    | 27426 | -1016   | sink   |
+| c1g8  | 8601     | 9660  | -1059   | sink   |
+| c1g7  | 10493    | 11779 | -1286   | sink   |
+
+[`plot_groups_influence_matrix()`](https://roneyfraga.com/birddog/reference/plot_groups_influence_matrix.md)
+is the directed counterpart of
+[`plot_trajectory_confluence_matrix()`](https://roneyfraga.com/birddog/reference/plot_trajectory_confluence_matrix.md):
+rows are the citing group (“is influenced”), columns the cited group
+(“the influencer”), and a cell and its mirror across the diagonal are
+the two directions of one pair. Because intra-group citation dominates,
+`self = FALSE` drops the diagonal and sharpens the between-group
+surprise.
+
+``` r
+influence_between <- birddog::sniff_groups_influence(groups, self = FALSE)
+
+birddog::plot_groups_influence_matrix(influence_between, fill = "surprise", x_angle = 45)
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-30-1.png)
+
+[`plot_groups_influence_network()`](https://roneyfraga.com/birddog/reference/plot_groups_influence_network.md)
+renders the same net flow as a node-link spine rather than a matrix: an
+arrow from each source to the group it leads, with nodes coloured by
+role and edges weighted by the net flow – the backbone view that
+complements the cell-by-cell matrix above.
+
+## Indexes
+
+`birddog` tracks each group’s pace of change and thematic spread as
+year-by-year indexes.
+
+### Citation Cycle Time
 
 Measure the pace of change in each group by tracking how old the cited
 references are over time.
 
 ``` r
 # ~1.5 min
-groups_cct <- birddog::sniff_citations_cycle_time(
+groups_cct <- birddog::sniff_cct(
   groups,
   scope = "groups",
   start_year = 2000,
@@ -408,7 +475,7 @@ groups_cct$plots[["c1g3"]]
 
 ![](cct-c1g3.png)
 
-## Indexes: Entropy
+### Entropy
 
 Track keyword diversity within each group over time. Increasing entropy
 signals thematic diversification; decreasing entropy signals
@@ -427,66 +494,421 @@ groups_entropy$plots[["c1g3"]]
 
 ![](entropy-c1g3.png)
 
-## Group trajectories
+## Group lineage
 
-Track how research communities evolve over time by building cumulative
-networks at each year and following groups through consecutive periods.
+Groups are a stock: each year’s community is recomputed from scratch. To
+trace how a community evolves, `birddog` builds cumulative networks year
+by year and tracks each final-year group backwards through the earlier
+cuts.
 
 ``` r
 # ~2 min
 groups_cumulative <- birddog::sniff_groups_cumulative(groups)
 ```
 
+[`plot_groups_map()`](https://roneyfraga.com/birddog/reference/plot_groups_map.md)
+lays out the final cumulative network and colours every document by its
+group.
+
+``` r
+birddog::plot_groups_map(groups_cumulative)
+```
+
+![](groups-map.png)
+
+[`sniff_groups_lineage()`](https://roneyfraga.com/birddog/reference/sniff_groups_lineage.md)
+tracks each final-year group backwards through the cumulative cuts;
+[`plot_groups_lineage_2d()`](https://roneyfraga.com/birddog/reference/plot_groups_lineage_2d.md)
+and
+[`plot_groups_lineage_3d()`](https://roneyfraga.com/birddog/reference/plot_groups_lineage_3d.md)
+draw one group’s lineage at a time.
+
 ``` r
 suppressMessages({
-  groups_cumulative_trajectories <- birddog::sniff_groups_trajectories(groups_cumulative)
+  groups_lineage <- birddog::sniff_groups_lineage(groups_cumulative)
 })
 
-birddog::plot_group_trajectories_2d(
-  groups_cumulative_trajectories,
+birddog::plot_groups_lineage_2d(
+  groups_lineage,
   group = "c1g3",
   label_vertical_position = -2
 )
 
-birddog::plot_group_trajectories_3d(
-  groups_cumulative_trajectories,
+birddog::plot_groups_lineage_3d(
+  groups_lineage,
   group = "c1g3"
 )
 ```
 
-![](group-evolution-2d-c1g3.png)![](group-evolution-3d-c1g3.png)
+![](group-lineage-2d-c1g3.png)![](group-lineage-3d-c1g3.png)
 
-### Trajectory detection and variable-width lines
+## Trajectories
 
-Automatically detect the highest-scoring temporal paths within a group
-using dynamic programming, then display them as variable-width lines
-that grow with cumulative paper counts.
+The lineage view follows one group at a time. Trajectories are a flow:
+[`sniff_trajectory_dag()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_dag.md)
+reads the whole cumulative-clustering history at once and builds the
+temporal DAG of cluster-year nodes.
 
 ``` r
-traj_data <- birddog::detect_main_trajectories(
-  groups_cumulative_trajectories,
-  group = "c1g3"
+dag <- birddog::sniff_trajectory_dag(groups_lineage)
+
+dag
+#> <birddog_dag> 410 group-year nodes, 537 edges, 1993-2025
+```
+
+[`plot_groups_per_year()`](https://roneyfraga.com/birddog/reference/plot_groups_per_year.md)
+counts the groups alive in each yearly cut;
+[`plot_trajectory_dag()`](https://roneyfraga.com/birddog/reference/plot_trajectory_dag.md)
+draws the full node-and-edge DAG.
+
+``` r
+birddog::plot_groups_per_year(dag)
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-40-1.png)
+
+``` r
+
+birddog::plot_trajectory_dag(dag)
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-40-2.png)
+
+### Braid
+
+[`sniff_trajectory_braid()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_braid.md)
+decomposes that DAG into trajectories. A trajectory that reaches the
+final year is **central** (one per final group, named `tr::c1g1`,
+`tr::c1g2`, and so on). Every other trajectory is **intermediate**
+(`tr1` … `trN`, stored as `type == "absorbed"`): it merges into a
+central one before the end. Groups are stock, trajectories are flow.
+
+``` r
+braid <- birddog::sniff_trajectory_braid(dag)
+
+braid
+#> <birddog_flow> 17 central + 68 absorbed trajectories, last year 2025
+#> # A tibble: 5 × 4
+#>   traj_id  start   end  size
+#>   <chr>    <int> <int> <int>
+#> 1 tr::c1g1  2010  2025  9933
+#> 2 tr::c1g2  2007  2025  6327
+#> 3 tr::c1g3  2017  2025  4985
+#> 4 tr::c1g4  2006  2025  4834
+#> 5 tr::c1g6  2001  2025  4467
+```
+
+`braid$trajectories` has one row per trajectory. Absorption is
+transitive, so the intermediate trajectories form a confluence tree
+under the centrals.
+
+[`subset()`](https://rdrr.io/r/base/subset.html) focuses a flow on a
+watershed – a central trajectory and its whole tributary subtree – or on
+any predicate over `braid$trajectories`, and the result is still a valid
+flow (the pruning call is recorded and shown when you print it).
+
+``` r
+# keep the central of group c1g3 and every trajectory that feeds it
+watershed <- subset(braid, target = "tr::c1g3")
+
+watershed
+#> <birddog_flow> 1 central + 2 absorbed trajectories, last year 2025
+#> (pruned: subset.birddog_flow(braid, target = "tr::c1g3"))
+#> # A tibble: 1 × 4
+#>   traj_id  start   end  size
+#>   <chr>    <int> <int> <int>
+#> 1 tr::c1g3  2017  2025  4985
+```
+
+### Channel
+
+[`sniff_trajectory_channel()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_channel.md)
+is a sibling detector over the same DAG. Instead of braiding tributaries
+into each central, it routes one global optimal-path backbone per final
+group, an alternative decomposition that keeps the same `birddog_flow`
+contract.
+
+``` r
+channel <- birddog::sniff_trajectory_channel(dag)
+
+channel
+#> <birddog_flow> 17 central + 84 absorbed trajectories, last year 2025
+#> # A tibble: 5 × 4
+#>   traj_id  start   end  size
+#>   <chr>    <int> <int> <int>
+#> 1 tr::c1g1  2024  2025  6692
+#> 2 tr::c1g2  2016  2025  5631
+#> 3 tr::c1g3  2021  2025  4381
+#> 4 tr::c1g4  2020  2025  4321
+#> 5 tr::c1g6  2017  2025  3953
+```
+
+### Confluence
+
+[`sniff_trajectory_confluence()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_confluence.md)
+turns the flow into render-ready data and
+[`plot_trajectory_confluence()`](https://roneyfraga.com/birddog/reference/plot_trajectory_confluence.md)
+draws the whole forest: each central trajectory is a river, each
+intermediate trajectory a tributary merging in at its handoff year.
+
+``` r
+conf <- birddog::sniff_trajectory_confluence(braid)
+
+birddog::plot_trajectory_confluence(conf, target = c('tr::c1g1', 'tr::c1g2', 'tr::c1g3'))
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-44-1.png)
+
+### Trajectory lines
+
+[`plot_trajectory_lines_2d()`](https://roneyfraga.com/birddog/reference/plot_trajectory_lines_2d.md)
+is the line counterpart of the confluence delta: every trajectory is a
+variable-width line on the year-aware Sugiyama layout, widening with the
+documents it accumulates. Targeting a central draws it and the
+trajectories that feed it; the legend reports how many papers of each
+feeder’s terminal cohort reached the final group. Where
+`plot_trajectory_confluence(conf, target = ...)` keeps only the direct
+tributaries (`depth = 1`), the lines view follows the whole tributary
+subtree – feeders and feeders of feeders – so a targeted central shows
+more lines here than in the confluence delta. Open the delta to every
+depth with
+`plot_trajectory_confluence(conf, target = "tr::c1g3", depth = Inf)`.
+
+``` r
+birddog::plot_trajectory_lines_2d(braid, target = "tr::c1g3")
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-45-1.png)
+
+[`plot_trajectory_lines_3d()`](https://roneyfraga.com/birddog/reference/plot_trajectory_lines_3d.md)
+is the interactive plotly version of the same view: x = year, y = route
+(the Sugiyama branching coordinate), z = cumulative tracked documents.
+
+``` r
+birddog::plot_trajectory_lines_3d(braid, target = "tr::c1g3")
+```
+
+![](trajectories-lines-3d-c1g3.png)
+
+### Where an intermediate trajectory’s papers go
+
+A trajectory can stop before the final year, but with cumulative
+clustering its papers never leave the network: they are re-grouped each
+year.
+[`sniff_trajectory_destination()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_destination.md)
+follows a trajectory’s terminal cohort forward and reports where the
+papers land, split by final group. Here `tr9` (2011-2017, handed off in
+2018) is mostly captured by group `c1g3`: 336 of its 502 terminal papers
+end in `c1g3`’s final community, and none drop out of the network.
+
+``` r
+# where do the papers of trajectory tr9 go?
+dest <- birddog::sniff_trajectory_destination(braid, source = "tr9")
+
+dest$destination
+#> # A tibble: 13 × 3
+#>    g_final     n    prop
+#>    <chr>   <int>   <dbl>
+#>  1 c1g3      336 0.669  
+#>  2 c1g1       60 0.120  
+#>  3 c1g6       39 0.0777 
+#>  4 c1g5       16 0.0319 
+#>  5 c1g13      13 0.0259 
+#>  6 c1g2       13 0.0259 
+#>  7 c1g15       6 0.0120 
+#>  8 c1g4        6 0.0120 
+#>  9 c1g11       5 0.00996
+#> 10 c1g12       2 0.00398
+#> 11 c1g14       2 0.00398
+#> 12 c1g8        2 0.00398
+#> 13 c1g9        2 0.00398
+
+birddog::plot_trajectory_dispersion(dest)
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-47-1.png)
+
+### Which trajectories formed a central one
+
+The mirror of the previous analysis: stand at a central trajectory and
+ask which trajectories fed into it.
+[`sniff_trajectory_formation()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_formation.md)
+returns the target’s direct tributaries in the confluence tree.
+[`plot_trajectory_formation()`](https://roneyfraga.com/birddog/reference/plot_trajectory_formation.md)
+draws the target as a cumulative river with each feeder merging at its
+handoff year. Two feeders formed `tr::c1g3`: `tr9`, handed off in 2018,
+and `tr14`, handed off in 2022; the labels count each feeder’s papers
+that sit in the target’s final community.
+
+``` r
+# which trajectories formed the central trajectory of group c1g3?
+form <- birddog::sniff_trajectory_formation(braid, target = "tr::c1g3")
+
+form$feeders
+#> # A tibble: 2 × 12
+#>   source_key source_group start_year handoff_year cohort_size     n n_dest
+#>   <chr>      <chr>             <int>        <int>       <int> <int>  <int>
+#> 1 tr9        c1g3               2011         2018         851   851    336
+#> 2 tr14       c1g3               2021         2022         586   246    475
+#> # ℹ 5 more variables: size_curve <list>, inflow_curve <list>,
+#> #   prop_of_source <dbl>, prop_of_inflow <dbl>, kept <lgl>
+
+birddog::plot_trajectory_formation(form, max_feeders = 8)
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-48-1.png)
+
+### Documents transferred
+
+[`sniff_trajectory_destination()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_destination.md)
+and
+[`sniff_trajectory_formation()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_formation.md)
+count the papers that crossed;
+[`sniff_trajectory_contribution()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_contribution.md)
+lists them. Given an intermediate trajectory, the year of its terminal
+cohort, and a central target, it returns one row per document with
+`in_target` flagging those that reached the target’s final-year
+community.
+
+``` r
+# the terminal-cohort year of tr9 (its last node)
+yr <- max(as.integer(sub("^y(\\d{4}).*", "\\1",
+  braid$trajectories$nodes[[which(braid$trajectories$traj_id == "tr9")]])))
+
+contrib <- birddog::sniff_trajectory_contribution(
+  braid,
+  source = "tr9",
+  year = yr,
+  target = "tr::c1g3"
 )
 
-traj_filtered <- birddog::filter_trajectories(
-  traj_data$trajectories,
-  top_n = 3
-)
+contrib |>
+  dplyr::summarise(documents = dplyr::n(), in_target = sum(in_target))
+#> # A tibble: 1 × 2
+#>   documents in_target
+#>       <int>     <int>
+#> 1       502       336
+```
 
-birddog::plot_group_trajectories_lines_2d(
-  traj_data = traj_data,
-  traj_filtered = traj_filtered,
-  title = "c1g3"
-)
+### Self-sufficiency
 
-birddog::plot_group_trajectories_lines_3d(
-  traj_data = traj_data,
-  traj_filtered = traj_filtered,
-  group_id = "c1g3"
+How much of each central trajectory grew on its own versus being a
+confluence of others?
+[`sniff_trajectory_self_sufficiency()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_self_sufficiency.md)
+reports the share of each central trajectory’s final-year community that
+was not delivered by an intermediate tributary: values near 1 mean the
+lineage grew endogenously; lower values mean it absorbed many documents
+from other communities.
+
+``` r
+ss <- birddog::sniff_trajectory_self_sufficiency(braid)
+
+ss |>
+  dplyr::mutate(self_sufficiency = round(self_sufficiency, 2)) |>
+  dplyr::slice_head(n = 10) |>
+  gt::gt()
+```
+
+| central   | group | final_size | inflow | self_sufficiency |
+|-----------|-------|------------|--------|------------------|
+| tr::c1g17 | c1g17 | 31         | 0      | 1.00             |
+| tr::c1g4  | c1g4  | 2893       | 113    | 0.96             |
+| tr::c1g7  | c1g7  | 1588       | 84     | 0.95             |
+| tr::c1g9  | c1g9  | 1289       | 72     | 0.94             |
+| tr::c1g5  | c1g5  | 1937       | 203    | 0.90             |
+| tr::c1g10 | c1g10 | 924        | 102    | 0.89             |
+| tr::c1g11 | c1g11 | 853        | 132    | 0.85             |
+| tr::c1g6  | c1g6  | 1805       | 333    | 0.82             |
+| tr::c1g2  | c1g2  | 4157       | 981    | 0.76             |
+| tr::c1g13 | c1g13 | 598        | 178    | 0.70             |
+
+### Trajectory dynamics
+
+[`sniff_trajectory_dynamics()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_dynamics.md)
+computes growth, novelty, recruitment and destination indicators per
+trajectory, then classifies each one into a dynamic state. Emergence: a
+central trajectory growing fast with a high share of recent papers.
+Convergence: an intermediate trajectory whose terminal cohort
+concentrates in a single central one. Divergence: an intermediate
+trajectory whose cohort scatters across several. Dormancy: a central
+trajectory that stalled, or an intermediate one whose cohort mostly
+drops out of the network. Central trajectories in between are classified
+as maturity.
+
+``` r
+dyn <- birddog::sniff_trajectory_dynamics(braid)
+
+birddog::plot_trajectory_dynamics(dyn)
+```
+
+![](introduction_birddog_files/figure-html/unnamed-chunk-51-1.png)
+
+### Per-trajectory lenses
+
+[`sniff_trajectory_dynamics()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_dynamics.md)
+left-joins optional lenses, each recomputed from the trajectory’s own
+documents and supplied as a per-year list-column: renewal pace
+([`sniff_trajectory_cct()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_cct.md)),
+keyword diversity
+([`sniff_trajectory_entropy()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_entropy.md))
+and hub roles
+([`sniff_trajectory_hubs()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_hubs.md)).
+They are built from the corpus fields keyed by document id.
+
+``` r
+keywords <- M |>
+  dplyr::transmute(document_id = SR, keyword = DE) |>
+  tidyr::separate_rows(keyword, sep = ";") |>
+  dplyr::mutate(keyword = trimws(keyword)) |>
+  dplyr::filter(keyword != "")
+
+references <- M |>
+  dplyr::transmute(document_id = SR, PY, CR) |>
+  tidyr::separate_rows(CR, sep = ";") |>
+  dplyr::mutate(CR = trimws(CR)) |>
+  dplyr::filter(CR != "") |>
+  dplyr::left_join(
+    dplyr::distinct(groups_cct$tracked_cr_py, CR, .keep_all = TRUE), by = "CR") |>
+  dplyr::filter(!is.na(CR_PY), PY > CR_PY) |>
+  dplyr::transmute(document_id, ref_age = PY - CR_PY)
+
+dyn <- birddog::sniff_trajectory_dynamics(
+  braid,
+  cct = birddog::sniff_trajectory_cct(braid, references),
+  entropy = birddog::sniff_trajectory_entropy(braid, keywords),
+  hubs = birddog::sniff_trajectory_hubs(braid, groups_hubs)
 )
 ```
 
-![](group_trajectories_lines_2d-c1g3.png)![](group_trajectories_lines_3d-c1g3.png)
+[`sniff_trajectory_emergence_owners()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_emergence_owners.md)
+then credits each central trajectory’s emergence to its authors,
+surfacing the field’s leaders.
+
+``` r
+authors <- M |>
+  dplyr::transmute(document_id = SR, author = AU) |>
+  tidyr::separate_rows(author, sep = ";") |>
+  dplyr::mutate(author = trimws(author)) |>
+  dplyr::filter(author != "")
+
+birddog::sniff_trajectory_emergence_owners(braid, dyn, authors) |>
+  dplyr::mutate(total = round(total, 2), norm = round(norm, 2)) |>
+  dplyr::slice_head(n = 10) |>
+  gt::gt()
+```
+
+| author                       | total  | ndocs | norm  |
+|------------------------------|--------|-------|-------|
+| İRINI ANGELIDAKI             | 401.99 | 261   | 24.88 |
+| MARCIN DĘBOWSKI              | 301.32 | 154   | 24.28 |
+| MARCIN ZIELIŃSKI             | 300.96 | 149   | 24.66 |
+| RAÚL MUÑOZ                   | 300.00 | 175   | 22.68 |
+| BUDIYONO BUDIYONO            | 228.35 | 101   | 22.72 |
+| REGINA MAMBELI BARROS        | 215.19 | 75    | 24.85 |
+| IVAN FELIPE SILVA DOS SANTOS | 202.50 | 69    | 24.38 |
+| MOHAMMAD J. TAHERZADEH       | 196.98 | 89    | 20.88 |
+| KEIKHOSRO KARIMI             | 179.71 | 67    | 21.95 |
+| VILIS DUBROVSKIS             | 176.00 | 100   | 17.60 |
 
 ## Citation growth per document
 
@@ -653,7 +1075,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] birddog_1.0.5
+#> [1] birddog_2.0.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] gtable_0.3.6        xfun_0.56           bslib_0.10.0       
@@ -672,17 +1094,17 @@ sessionInfo()
 #> [40] tidyr_1.3.1         MASS_7.3-65         cachem_1.1.0       
 #> [43] viridis_0.6.5       commonmark_2.0.0    tidyselect_1.2.1   
 #> [46] digest_0.6.39       stringi_1.8.7       dplyr_1.2.0        
-#> [49] purrr_1.2.1         polyclip_1.10-7     fastmap_1.2.0      
-#> [52] grid_4.5.2          cli_3.6.5           magrittr_2.0.4     
-#> [55] dichromat_2.0-0.1   ggraph_2.2.2        tidygraph_1.3.1    
-#> [58] utf8_1.2.6          withr_3.0.2         scales_1.4.0       
-#> [61] rmarkdown_2.30      httr_1.4.7          igraph_2.2.1       
-#> [64] otel_0.2.0          gridExtra_2.3       ragg_1.5.0         
-#> [67] memoise_2.0.1       evaluate_1.0.5      knitr_1.51         
-#> [70] viridisLite_0.4.3   markdown_2.0        rlang_1.1.7        
-#> [73] Rcpp_1.1.1          glue_1.8.0          tweenr_2.0.3       
-#> [76] xml2_1.5.2          jsonlite_2.0.0      R6_2.6.1           
-#> [79] systemfonts_1.3.1   fs_1.6.7
+#> [49] purrr_1.2.1         labeling_0.4.3      polyclip_1.10-7    
+#> [52] fastmap_1.2.0       grid_4.5.2          cli_3.6.5          
+#> [55] magrittr_2.0.4      dichromat_2.0-0.1   ggraph_2.2.2       
+#> [58] tidygraph_1.3.1     utf8_1.2.6          withr_3.0.2        
+#> [61] scales_1.4.0        rmarkdown_2.30      httr_1.4.7         
+#> [64] igraph_2.2.1        otel_0.2.0          gridExtra_2.3      
+#> [67] ragg_1.5.0          memoise_2.0.1       evaluate_1.0.5     
+#> [70] knitr_1.51          viridisLite_0.4.3   markdown_2.0       
+#> [73] rlang_1.1.7         Rcpp_1.1.1          glue_1.8.0         
+#> [76] tweenr_2.0.3        xml2_1.5.2          jsonlite_2.0.0     
+#> [79] R6_2.6.1            systemfonts_1.3.1   fs_1.6.7
 ```
 
 ## Hardware

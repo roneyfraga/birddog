@@ -51,6 +51,7 @@
 #'
 #' @seealso \code{\link{sniff_components}()} for creating the input network components
 #' @rdname sniff_groups
+#' @family groups (stock)
 #' @export
 #' @importFrom igraph vertex_attr_names cluster_louvain as_undirected cluster_walktrap cluster_edge_betweenness cluster_fast_greedy cluster_leiden V
 #' @importFrom tidygraph as_tbl_graph activate

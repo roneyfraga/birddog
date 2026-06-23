@@ -57,6 +57,7 @@
 #' @importFrom stats setNames quantile
 #' @importFrom utils tail
 #' @importFrom rlang .data
+#' @family groups (stock)
 #' @export
 
 sniff_groups_cumulative_citations <- function(groups, min_citations = 5) {

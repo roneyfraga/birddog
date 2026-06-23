@@ -56,6 +56,18 @@ The function classifies papers into hub categories based on:
 
 - R7: Boundary-spanning hubs (Zi \>= 2.5 and Pi \> 0.75)
 
+## See also
+
+Other groups (stock):
+[`sniff_components()`](https://roneyfraga.com/birddog/reference/sniff_components.md),
+[`sniff_groups()`](https://roneyfraga.com/birddog/reference/sniff_groups.md),
+[`sniff_groups_attributes()`](https://roneyfraga.com/birddog/reference/sniff_groups_attributes.md),
+[`sniff_groups_cumulative()`](https://roneyfraga.com/birddog/reference/sniff_groups_cumulative.md),
+[`sniff_groups_cumulative_citations()`](https://roneyfraga.com/birddog/reference/sniff_groups_cumulative_citations.md),
+[`sniff_groups_influence()`](https://roneyfraga.com/birddog/reference/sniff_groups_influence.md),
+[`sniff_groups_lineage()`](https://roneyfraga.com/birddog/reference/sniff_groups_lineage.md),
+[`sniff_network()`](https://roneyfraga.com/birddog/reference/sniff_network.md)
+
 ## Examples
 
 ``` r

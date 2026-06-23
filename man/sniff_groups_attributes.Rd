@@ -64,3 +64,15 @@ groups_attributes$regression
 }
 
 }
+\seealso{
+Other groups (stock): 
+\code{\link{sniff_components}()},
+\code{\link{sniff_groups}()},
+\code{\link{sniff_groups_cumulative}()},
+\code{\link{sniff_groups_cumulative_citations}()},
+\code{\link{sniff_groups_hubs}()},
+\code{\link{sniff_groups_influence}()},
+\code{\link{sniff_groups_lineage}()},
+\code{\link{sniff_network}()}
+}
+\concept{groups (stock)}

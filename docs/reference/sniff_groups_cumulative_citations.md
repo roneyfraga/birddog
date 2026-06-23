@@ -71,6 +71,18 @@ For each research group, the function:
 
 Works with both Web of Science (WOS) and OpenAlex data formats.
 
+## See also
+
+Other groups (stock):
+[`sniff_components()`](https://roneyfraga.com/birddog/reference/sniff_components.md),
+[`sniff_groups()`](https://roneyfraga.com/birddog/reference/sniff_groups.md),
+[`sniff_groups_attributes()`](https://roneyfraga.com/birddog/reference/sniff_groups_attributes.md),
+[`sniff_groups_cumulative()`](https://roneyfraga.com/birddog/reference/sniff_groups_cumulative.md),
+[`sniff_groups_hubs()`](https://roneyfraga.com/birddog/reference/sniff_groups_hubs.md),
+[`sniff_groups_influence()`](https://roneyfraga.com/birddog/reference/sniff_groups_influence.md),
+[`sniff_groups_lineage()`](https://roneyfraga.com/birddog/reference/sniff_groups_lineage.md),
+[`sniff_network()`](https://roneyfraga.com/birddog/reference/sniff_network.md)
+
 ## Examples
 
 ``` r

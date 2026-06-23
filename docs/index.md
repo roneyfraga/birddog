@@ -54,34 +54,113 @@ library(birddog)
   2005. 
 - [`sniff_groups_cumulative_citations()`](https://roneyfraga.com/birddog/reference/sniff_groups_cumulative_citations.md)
   – per-document citation growth
+- [`sniff_groups_influence()`](https://roneyfraga.com/birddog/reference/sniff_groups_influence.md)
+  – directed citation influence between groups: cross-citation matrix,
+  debt / audience / Salton / surprise indices, net flow, and source /
+  broker / sink roles
+- [`plot_groups_influence_matrix()`](https://roneyfraga.com/birddog/reference/plot_groups_influence_matrix.md)
+  – directed influence heatmap, the asymmetric twin of the confluence
+  matrix
+- [`plot_groups_influence_network()`](https://roneyfraga.com/birddog/reference/plot_groups_influence_network.md)
+  – net-influence spine (who, on balance, leads whom)
 
 ### Indexes
 
-- [`sniff_citations_cycle_time()`](https://roneyfraga.com/birddog/reference/sniff_citations_cycle_time.md)
-  – measures the pace of change (Kayal
-  1999. 
+- [`sniff_cct()`](https://roneyfraga.com/birddog/reference/sniff_cct.md)
+  – measures the pace of change (Kayal 1999)
 - [`sniff_entropy()`](https://roneyfraga.com/birddog/reference/sniff_entropy.md)
   – normalized Shannon entropy for keyword diversity (Shannon 1948;
   Pielou 1966)
 
-### Trajectories
+### Trajectory detection
 
 - [`sniff_groups_cumulative()`](https://roneyfraga.com/birddog/reference/sniff_groups_cumulative.md)
   – cumulative clusterization over time
-- [`sniff_groups_trajectories()`](https://roneyfraga.com/birddog/reference/sniff_groups_trajectories.md)
+- [`sniff_groups_lineage()`](https://roneyfraga.com/birddog/reference/sniff_groups_lineage.md)
   – Jaccard similarity DAG across years
-- [`plot_group_trajectories_2d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_2d.md)
+- [`plot_groups_lineage_2d()`](https://roneyfraga.com/birddog/reference/plot_groups_lineage_2d.md)
   /
-  [`plot_group_trajectories_3d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_3d.md)
-  – node-based trajectory plots
-- [`detect_main_trajectories()`](https://roneyfraga.com/birddog/reference/detect_main_trajectories.md)
-  – top-N disjoint paths via dynamic programming
-- [`filter_trajectories()`](https://roneyfraga.com/birddog/reference/filter_trajectories.md)
-  – filter and rank detected trajectories
-- [`plot_group_trajectories_lines_2d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_lines_2d.md)
+  [`plot_groups_lineage_3d()`](https://roneyfraga.com/birddog/reference/plot_groups_lineage_3d.md)
+  – node-based lineage plots
+- [`sniff_trajectory_dag()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_dag.md)
   /
-  [`plot_group_trajectories_lines_3d()`](https://roneyfraga.com/birddog/reference/plot_group_trajectories_lines_3d.md)
-  – variable-width line plots
+  [`plot_trajectory_dag()`](https://roneyfraga.com/birddog/reference/plot_trajectory_dag.md)
+  – temporal DAG of cluster-year nodes across the whole history
+  ([`plot_trajectory_dag_interactive()`](https://roneyfraga.com/birddog/reference/plot_trajectory_dag_interactive.md)
+  for the plotly view); `similarity = "coupling"` routes the DAG by
+  shared references instead of document overlap
+- [`sniff_trajectory_braid()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_braid.md)
+  – decompose the DAG into trajectories: one central per final group
+  (`tr::cNgN`) plus the absorbed tributaries that merge into it (`trN`)
+- [`sniff_trajectory_channel()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_channel.md)
+  – sibling detector that routes one global optimal-path backbone per
+  final group (potential-routed), an alternative decomposition of the
+  same DAG
+- [`subset()`](https://rdrr.io/r/base/subset.html) – focus a flow on a
+  watershed or a predicate while it stays a valid flow
+  (`subset(flow, target = "tr::c1g1")`)
+- [`is_flow()`](https://roneyfraga.com/birddog/reference/is_flow.md) /
+  [`validate_flow()`](https://roneyfraga.com/birddog/reference/validate_flow.md)
+  – test and validate the `birddog_flow` object contract
+- [`sniff_trajectory_coherence()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_coherence.md)
+  – score how content-coherent a flow’s partition is, with a silhouette
+  over an independent content signal
+- [`sniff_trajectory_comparison()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_comparison.md)
+  – compare two detectors head-to-head by content coherence, reporting
+  the contested nodes
+
+### Trajectory analysis
+
+- [`sniff_trajectory_dynamics()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_dynamics.md)
+  – per-trajectory dynamic-state indicators and life-cycle
+  classification (emergence index, staying power, reach), with optional
+  CCT, entropy, hubs and community lenses joined in
+- [`sniff_trajectory_cct()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_cct.md)
+  – per-year citation cycle time (renewal pace) along each trajectory
+- [`sniff_trajectory_entropy()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_entropy.md)
+  – per-year keyword diversity (Pielou’s J’) along each trajectory
+- [`sniff_trajectory_hubs()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_hubs.md)
+  – hub roles aggregated to each trajectory (provincial vs bridging)
+- [`sniff_trajectory_community()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_community.md)
+  – community breadth (distinct authors) of each trajectory
+- [`sniff_trajectory_emergence_owners()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_emergence_owners.md)
+  – the authors who own each living trajectory’s emergence
+- [`sniff_trajectory_self_sufficiency()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_self_sufficiency.md)
+  – per-trajectory endogenous-growth index (`1 - imported / size`)
+- [`sniff_trajectory_destination()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_destination.md)
+  – track where a dying trajectory’s papers go, naming the trajectory
+  that absorbed it
+- [`sniff_trajectory_formation()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_formation.md)
+  – the inverse of destination: which trajectories fed into a target
+  (its feeders)
+- [`sniff_trajectory_contribution()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_contribution.md)
+  – documents an intermediate trajectory contributes to a target in a
+  given year
+- [`sniff_trajectory_confluence()`](https://roneyfraga.com/birddog/reference/sniff_trajectory_confluence.md)
+  – render-ready confluence forest of the soft DAG (how the central
+  trajectories form)
+
+### Trajectory plots
+
+- [`plot_trajectory_dynamics()`](https://roneyfraga.com/birddog/reference/plot_trajectory_dynamics.md)
+  /
+  [`plot_trajectory_dynamics_interactive()`](https://roneyfraga.com/birddog/reference/plot_trajectory_dynamics_interactive.md)
+  – strategic map of trajectory dynamic states
+- [`plot_trajectory_confluence()`](https://roneyfraga.com/birddog/reference/plot_trajectory_confluence.md)
+  /
+  [`plot_trajectory_confluence_interactive()`](https://roneyfraga.com/birddog/reference/plot_trajectory_confluence_interactive.md)
+  /
+  [`plot_trajectory_confluence_matrix()`](https://roneyfraga.com/birddog/reference/plot_trajectory_confluence_matrix.md)
+  – braided-river confluence of the central trajectories
+- [`plot_trajectory_formation()`](https://roneyfraga.com/birddog/reference/plot_trajectory_formation.md)
+  – confluence of feeders into a target trajectory (cumulative river
+  timeline)
+- [`plot_trajectory_dispersion()`](https://roneyfraga.com/birddog/reference/plot_trajectory_dispersion.md)
+  – timeline of the stagnant trajectory and the one that absorbed it
+- [`plot_trajectory_lines_2d()`](https://roneyfraga.com/birddog/reference/plot_trajectory_lines_2d.md)
+  /
+  [`plot_trajectory_lines_3d()`](https://roneyfraga.com/birddog/reference/plot_trajectory_lines_3d.md)
+  – variable-width trajectory line plots on a time layout
 
 ### Main path analysis
 

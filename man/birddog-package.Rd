@@ -19,6 +19,38 @@ citation-based networks, identifies groups, and summarizes their dynamics.
 }
 }
 
+\section{Pipeline}{
+
+\code{read_openalex()}/\code{read_wos()} -> \code{sniff_network()} -> \code{sniff_components()} ->
+\code{sniff_groups_cumulative()} -> \code{sniff_groups_lineage()} ->
+\code{sniff_trajectory_dag()} -> \code{sniff_trajectory_braid()} -> analysis
+(\code{sniff_trajectory_confluence()}, \verb{_formation()}, \verb{_destination()},
+\verb{_contribution()}, \verb{_self_sufficiency()}, \verb{_cct()}, \verb{_entropy()}, \verb{_hubs()},
+\verb{_dynamics()}), each paired with a \verb{plot_*} function. Focus an analysis with
+\code{subset(flow, ...)}. "Flow" names the object kind, not an algorithm (stock
+vs flow: groups are stock, trajectories are flow): every detector returns a
+flow, and alternative detectors (\verb{sniff_trajectory_<algo>()}) return the
+same contract, checked by \code{validate_flow()}.
+}
+
+\section{Label grammar}{
+
+\code{cNgN} is a group (component N, group N); \verb{y<YYYY><cNgN>} is a group-year
+node; \verb{tr::<cNgN>} is a central trajectory (reaches the last year, one per
+final group); \code{tr1..trN} are absorbed trajectories. This grammar is part of
+the public API and only changes at major versions.
+}
+
+\section{Theoretical background}{
+
+Trajectories are detected as system-level objects (Dosi, 1982): disjoint
+chains in the temporal DAG of cumulative clusterings. A trajectory that stops
+being detected loses its identity, not its papers; tracking its terminal
+cohort to the last year classifies the outcome as convergence (one
+destination), divergence (many), or dormancy (none) — with emergence
+indicators on the living chains (Rotolo et al., 2015; Carley et al., 2017).
+}
+
 \seealso{
 Useful links:
 \itemize{

@@ -7,27 +7,21 @@ test_that(".na_to_zero replaces NA with 0", {
   expect_equal(birddog:::.na_to_zero(c(1, NA, 3, NA)), c(1, 0, 3, 0))
 })
 
-test_that("filter_trajectories respects top_n", {
-  tr <- tibble::tibble(
-    traj_id = paste0("tr", 1:5),
-    score = c(10, 8, 6, 4, 2),
-    length = c(5L, 4L, 3L, 3L, 2L)
+test_that(".contributed_arrival_series counts arrival within the feeder's nodes", {
+  # Doc "x" appears in a 2015 cluster outside the feeder, then joins the feeder
+  # node y2018c1g16 in 2018. Its arrival INTO the feeder is 2018, so the curve
+  # must use 2018 (the feeder's lifespan), not 2015 (its corpus first-appearance,
+  # a cumulative-clustering artifact).
+  dpg <- tibble::tribble(
+    ~group_id,    ~document_id, ~network_until, ~group,
+    "y2015c1g7",  "x",          2015,           "c1g7",
+    "y2018c1g16", "x",          2018,           "c1g16",
+    "y2018c1g16", "y",          2018,           "c1g16"
   )
+  nodes <- c("y2017c1g16", "y2018c1g16")
 
-  result <- filter_trajectories(tr, top_n = 2)
-  expect_equal(nrow(result), 2)
-  expect_equal(result$score, c(10, 8))
-})
+  out <- birddog:::.contributed_arrival_series(c("x", "y"), nodes, dpg, 2018)
 
-test_that("filter_trajectories applies min_score and min_length", {
-  tr <- tibble::tibble(
-    traj_id = paste0("tr", 1:5),
-    score = c(10, 8, 6, 4, 2),
-    length = c(5L, 4L, 3L, 3L, 2L)
-  )
-
-  result <- filter_trajectories(tr, top_n = NULL, min_score = 5, min_length = 3)
-  expect_true(all(result$score >= 5))
-  expect_true(all(result$length >= 3))
-  expect_equal(nrow(result), 3)
+  expect_equal(out$year, 2018L)   # not 2015
+  expect_equal(out$size, 2L)
 })

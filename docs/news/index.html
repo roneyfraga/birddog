@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">birddog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,19 +39,92 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.0" id="birddog-200">birddog 2.0.0<a class="anchor" aria-label="anchor" href="#birddog-200"></a></h2>
+<p>birddog 2.0.0 makes <code><a href="../reference/sniff_trajectory_braid.html">sniff_trajectory_braid()</a></code> the single canonical trajectory detector and is a pre-launch reset: the dynamic-programming (DP) per-group detector is REMOVED, not deprecated (the package had not been publicized; this is the one hard break — future removals will go through a deprecation window). Why removed: the DP routes leak across groups (nodes that globally belong to other centrals), the main route duplicates the flow trunk, and the genuine tributary chaining is already explicit in <code>flow$tree</code>. The last 1.x state is preserved at git tag <code>v1.0.7</code> and in the CRAN archive.</p>
+<div class="section level3">
+<h3 id="renamed-2-0-0">Renamed<a class="anchor" aria-label="anchor" href="#renamed-2-0-0"></a></h3>
+<ul><li>
+<code>sniff_trajectory_flow()</code> is now <code><a href="../reference/sniff_trajectory_braid.html">sniff_trajectory_braid()</a></code>. “Flow” names only the object kind (the <code>birddog_flow</code> returned by every detector, validated by <code><a href="../reference/is_flow.html">is_flow()</a></code> / <code><a href="../reference/validate_flow.html">validate_flow()</a></code>); the canonical detector is named for the braided river it decomposes, a symmetric sibling of <code><a href="../reference/sniff_trajectory_channel.html">sniff_trajectory_channel()</a></code>. The object contract is unchanged.</li>
+<li>
+<code>sniff_citation_cycle_time()</code> is now <code><a href="../reference/sniff_cct.html">sniff_cct()</a></code> – the short name pairs the per-trajectory <code><a href="../reference/sniff_trajectory_cct.html">sniff_trajectory_cct()</a></code>, mirroring the <code><a href="../reference/sniff_entropy.html">sniff_entropy()</a></code> / <code><a href="../reference/sniff_trajectory_entropy.html">sniff_trajectory_entropy()</a></code> pattern.</li>
+<li>
+<code>sniff_trajectory_prestige()</code> is now <code><a href="../reference/sniff_trajectory_hubs.html">sniff_trajectory_hubs()</a></code>, pairing <code><a href="../reference/sniff_groups_hubs.html">sniff_groups_hubs()</a></code>; the <code><a href="../reference/sniff_trajectory_dynamics.html">sniff_trajectory_dynamics()</a></code> argument <code>prestige</code> is likewise renamed <code>hubs</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="removed-migration-table-2-0-0">Removed (migration table)<a class="anchor" aria-label="anchor" href="#removed-migration-table-2-0-0"></a></h3>
+<table class="table"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th>birddog 1.x (removed)</th>
+<th>birddog 2.0</th>
+</tr></thead><tbody><tr><td><code>detect_main_trajectories(gct, group)</code></td>
+<td><code>sniff_trajectory_braid(gct)</code></td>
+</tr><tr><td><code>filter_trajectories(tr_tbl, top_n)</code></td>
+<td>
+<code>subset(flow, ...)</code> (object) or dplyr on <code>flow$trajectories</code> (table)</td>
+</tr><tr><td><code>sniff_trajectory_formations(all_detected, dpg)</code></td>
+<td><code>sniff_trajectory_formation(flow, target)</code></td>
+</tr><tr><td><code>sniff_trajectory_destinations(all_detected, dpg)</code></td>
+<td><code>sniff_trajectory_destination(flow, source)</code></td>
+</tr><tr><td><code>sniff_groups_trajectories(gc)</code></td>
+<td><code>sniff_groups_lineage(gc)</code></td>
+</tr><tr><td><code>sniff_citations_cycle_time(...)</code></td>
+<td><code>sniff_cct(...)</code></td>
+</tr><tr><td><code>plot_group_trajectories_2d(gct, group)</code></td>
+<td><code>plot_groups_lineage_2d(gct, group)</code></td>
+</tr><tr><td><code>plot_group_trajectories_3d(gct, group)</code></td>
+<td><code>plot_groups_lineage_3d(gct, group)</code></td>
+</tr><tr><td><code>plot_group_trajectories_lines_2d(traj, tf)</code></td>
+<td><code>plot_trajectory_lines_2d(flow, target)</code></td>
+</tr><tr><td><code>plot_group_trajectories_lines_3d(traj, tf)</code></td>
+<td><code>plot_trajectory_lines_3d(flow, target)</code></td>
+</tr><tr><td><code>plot_trajectory_destination(d)</code></td>
+<td>
+<code>plot_trajectory_dispersion(d)</code> with <code>d &lt;- sniff_trajectory_destination(flow, source)</code>
+</td>
+</tr><tr><td><code>attach_docs_to_vertices(g, docs)</code></td>
+<td>none (internal helper)</td>
+</tr><tr><td>legacy (DP-object) input to <code>sniff_trajectory_formation/destination/self_sufficiency()</code>
+</td>
+<td>pass a flow object</td>
+</tr></tbody></table></div>
+<div class="section level3">
+<h3 id="breaking-changes-2-0-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-2-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/sniff_trajectory_dag.html">sniff_trajectory_dag()</a></code>: first argument renamed <code>docs_per_group</code> -&gt; <code>x</code>; it now also accepts the <code><a href="../reference/sniff_groups_lineage.html">sniff_groups_lineage()</a></code> object directly.</li>
+<li>
+<code><a href="../reference/sniff_trajectory_dag.html">sniff_trajectory_dag()</a></code> and <code><a href="../reference/sniff_trajectory_braid.html">sniff_trajectory_braid()</a></code> return classed objects (<code>birddog_dag</code>, <code>birddog_flow</code>) with print methods. Objects saved by 1.x (RDS) are still accepted everywhere.</li>
+<li>
+<code>plot_trajectory_formation_linear()</code> renamed to <code><a href="../reference/plot_trajectory_formation.html">plot_trajectory_formation()</a></code>: with the 3D view gone it is the single formation plot, mirroring <code><a href="../reference/sniff_trajectory_formation.html">sniff_trajectory_formation()</a></code>.</li>
+<li>
+<code>plot_trajectory_formation_3d()</code> removed; the 3D view is covered by <code><a href="../reference/plot_trajectory_lines_3d.html">plot_trajectory_lines_3d()</a></code> and the per-target river by <code>plot_trajectory_confluence(conf, target = ...)</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-2-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-2-0-0"></a></h3>
+<ul><li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> method for flow objects: contract-preserving filtering by predicate (<code>subset(flow, size &gt;= 50)</code>) or watershed (<code>subset(flow, target = "tr::c1g1")</code> keeps the central and its whole tributary subtree). The result is still a valid flow; orphaned tributaries reattach to their nearest kept ancestor, and the pruning call is shown by <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>. Works for any detector whose result inherits from <code>birddog_flow</code>.</li>
+<li>Per-trajectory emergence indicators in <code><a href="../reference/sniff_trajectory_dynamics.html">sniff_trajectory_dynamics()</a></code>: <code>emergence_index_intensive</code> (a rate-only ranking that drops the size-carrying <code>recruitment</code> pillar), <code>emergence_density</code> (staying power – the share of a lineage’s years still growing at the emergence rate, after Carley et al. 2017), and <code>reach_ratio</code> (downstream propagation in the DAG, after Marino &amp; Silva 2023).</li>
+<li>
+<code><a href="../reference/sniff_trajectory_community.html">sniff_trajectory_community()</a></code> and <code><a href="../reference/sniff_trajectory_emergence_owners.html">sniff_trajectory_emergence_owners()</a></code>: the FUSE community pillar – distinct-author breadth per trajectory, and the authors who own each living trajectory’s emergence (Total / sqrt-normalized, after Garner et al. 2017).</li>
+<li>
+<code><a href="../reference/sniff_trajectory_entropy.html">sniff_trajectory_entropy()</a></code> and a rewritten <code><a href="../reference/sniff_trajectory_cct.html">sniff_trajectory_cct()</a></code>: per-year keyword diversity (Pielou’s J’) and citation cycle time, recomputed from each trajectory’s own node documents and returned as <code>tibble(year, value)</code> list-columns. They join into <code><a href="../reference/sniff_trajectory_dynamics.html">sniff_trajectory_dynamics()</a></code> via the new <code>cct</code>, <code>entropy</code> and <code>hubs</code> arguments.</li>
+<li>
+<code>sniff_trajectory_dag(similarity = "coupling")</code>: route the soft DAG by bibliographic coupling (shared references) instead of document overlap; <code><a href="../reference/sniff_trajectory_coherence.html">sniff_trajectory_coherence()</a></code> warns when scored on the same references.</li>
+<li>
+<code><a href="../reference/plot_trajectory_dynamics.html">plot_trajectory_dynamics()</a></code> and <code><a href="../reference/plot_trajectory_dynamics_interactive.html">plot_trajectory_dynamics_interactive()</a></code>: every state region stays in view even when the points cluster, region names sit on legible boxes clear of the nodes, and each point-label leader starts at the bubble’s outer edge.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.7" id="birddog-107">birddog 1.0.7<a class="anchor" aria-label="anchor" href="#birddog-107"></a></h2>
 <div class="section level3">
 <h3 id="new-features-1-0-7">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-7"></a></h3>
 <ul><li>
-<code><a href="../reference/sniff_trajectory_formation.html">sniff_trajectory_formation()</a></code> and <code><a href="../reference/sniff_trajectory_formations.html">sniff_trajectory_formations()</a></code>: the inverse of <code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code>. Given a living target trajectory, find every other trajectory whose terminal cohort was absorbed into it (its feeders), for one target or all targets at once. Each feeder carries the documents transferred, its cohort size and handoff year, plus measured <code>size_curve</code> and <code>inflow_curve</code> series; <code>target_info</code> also reports the target’s own document count.</li>
+<code><a href="../reference/sniff_trajectory_formation.html">sniff_trajectory_formation()</a></code> and <code>sniff_trajectory_formations()</code>: the inverse of <code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code>. Given a living target trajectory, find every other trajectory whose terminal cohort was absorbed into it (its feeders), for one target or all targets at once. Each feeder carries the documents transferred, its cohort size and handoff year, plus two measured growth series: <code>size_curve</code> (its cluster size per year) and <code>inflow_curve</code> (the contributed papers accumulating within the feeder’s own year-nodes, so the curve stays inside the feeder’s lifespan instead of reaching back to a paper’s corpus first-appearance year); <code>target_info</code> also reports the target’s own document count.</li>
 <li>
-<code><a href="../reference/plot_trajectory_formation_2d.html">plot_trajectory_formation_2d()</a></code> and <code><a href="../reference/plot_trajectory_formation_3d.html">plot_trajectory_formation_3d()</a></code>: draw the confluence of feeders into a target trajectory – a 2D cumulative-river timeline or an interactive 3D plotly view (X = year, Y = feeder lane, Z = documents), with terminal-node markers and optional manual hover descriptions.</li>
+<code>plot_trajectory_formation_linear()</code> and <code>plot_trajectory_formation_3d()</code>: draw the confluence of feeders into a target trajectory – a 2D cumulative-river timeline or an interactive 3D plotly view (X = year, Y = feeder lane, Z = documents). Each feeder grows along its length on the same proportional scale as the target, set by a <code>feeder_curve</code> argument (<code>"inflow"</code>, the papers that entered the target, or <code>"size"</code>, the feeder’s whole community); the 2D feeders are labelled on the right in the target’s two-line style. Both include terminal-node markers and optional manual hover descriptions.</li>
 <li>
 <code><a href="../reference/sniff_trajectory_self_sufficiency.html">sniff_trajectory_self_sufficiency()</a></code>: per-trajectory endogenous-growth index, <code>1 - imported / size</code>, distinguishing lineages that grew on their own from confluences of other communities.</li>
 <li>
-<code><a href="../reference/plot_group_trajectories_2d.html">plot_group_trajectories_2d()</a></code>: new <code>color_by</code> argument with <code>"final_group_share"</code>, colouring each node by the share of its documents that belong to the group’s last-year cluster (plasma palette), with white-haloed labels for readability over dark nodes.</li>
+<code>plot_group_trajectories_2d()</code>: new <code>color_by</code> argument with <code>"final_group_share"</code>, colouring each node by the share of its documents that belong to the group’s last-year cluster (plasma palette), with white-haloed labels for readability over dark nodes.</li>
 <li>
-<code><a href="../reference/plot_group_trajectories_lines_3d.html">plot_group_trajectories_lines_3d()</a></code>: new <code>descriptions</code> argument for manual per-trajectory hover text, plus terminal-node markers sized by document count.</li>
+<code>plot_group_trajectories_lines_3d()</code>: new <code>descriptions</code> argument for manual per-trajectory hover text, plus terminal-node markers sized by document count.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -59,17 +132,17 @@
 <div class="section level3">
 <h3 id="new-features-1-0-6">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-6"></a></h3>
 <ul><li>
-<code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code>: track where the papers of an incomplete trajectory (one that stops before the last year) end up. Takes a <code><a href="../reference/detect_main_trajectories.html">detect_main_trajectories()</a></code> result and a <code>traj_id</code>, follows the terminal node’s documents forward, and returns the final-year destiny vector, the dormant share, the dominant continuation group, and a per-year flow table. With the optional <code>all_detected</code> argument (all groups’ <code><a href="../reference/detect_main_trajectories.html">detect_main_trajectories()</a></code> outputs) it also resolves the destination at the trajectory level, identifying which living trajectory absorbed the stagnant one (<code>destination_traj</code>, <code>continuation_traj</code>).</li>
+<code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code>: track where the papers of an incomplete trajectory (one that stops before the last year) end up. Takes a <code>detect_main_trajectories()</code> result and a <code>traj_id</code>, follows the terminal node’s documents forward, and returns the final-year destiny vector, the dormant share, the dominant continuation group, and a per-year flow table. With the optional <code>all_detected</code> argument (all groups’ <code>detect_main_trajectories()</code> outputs) it also resolves the destination at the trajectory level, identifying which living trajectory absorbed the stagnant one (<code>destination_traj</code>, <code>continuation_traj</code>).</li>
 <li>
-<code><a href="../reference/plot_trajectory_destination.html">plot_trajectory_destination()</a></code>: render the destinations from <code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code> as variable-width lines on a Sugiyama time layout, matching <code><a href="../reference/plot_group_trajectories_lines_2d.html">plot_group_trajectories_lines_2d()</a></code>. Each destination is one line whose width tracks the papers carried; <code>color_by</code> switches between destination group and destination trajectory, and <code>min_prop</code> folds minor destinations into a grey <code>(other)</code> line.</li>
+<code>plot_trajectory_destination()</code>: render the destinations from <code><a href="../reference/sniff_trajectory_destination.html">sniff_trajectory_destination()</a></code> as variable-width lines on a Sugiyama time layout, matching <code>plot_group_trajectories_lines_2d()</code>. Each destination is one line whose width tracks the papers carried; <code>color_by</code> switches between destination group and destination trajectory, and <code>min_prop</code> folds minor destinations into a grey <code>(other)</code> line.</li>
 <li>
-<code><a href="../reference/plot_trajectory_handoff.html">plot_trajectory_handoff()</a></code>: draw the stagnant trajectory and the trajectory that absorbed it as two timelines on a shared year axis, with an arrow at the handoff year.</li>
+<code><a href="../reference/plot_trajectory_dispersion.html">plot_trajectory_dispersion()</a></code>: draw the stagnant trajectory and the trajectory that absorbed it as two timelines on a shared year axis, with an arrow at the handoff year.</li>
 <li>
-<code><a href="../reference/sniff_citations_cycle_time.html">sniff_citations_cycle_time()</a></code>: new <code>normalize</code> argument (<code>"none"</code> | <code>"domain"</code>) to divide each group’s annual CCT by the per-year network median, enabling within-domain comparability following Lee (2024).</li>
+<code>sniff_citations_cycle_time()</code>: new <code>normalize</code> argument (<code>"none"</code> | <code>"domain"</code>) to divide each group’s annual CCT by the per-year network median, enabling within-domain comparability following Lee (2024).</li>
 <li>
-<code><a href="../reference/sniff_citations_cycle_time.html">sniff_citations_cycle_time()</a></code>: new <code>dispersion</code> argument (logical) that adds <code>p25</code> and <code>p75</code> columns to the returned data tibble, useful for detecting bimodal citation-age distributions.</li>
+<code>sniff_citations_cycle_time()</code>: new <code>dispersion</code> argument (logical) that adds <code>p25</code> and <code>p75</code> columns to the returned data tibble, useful for detecting bimodal citation-age distributions.</li>
 <li>
-<code><a href="../reference/sniff_citations_cycle_time.html">sniff_citations_cycle_time()</a></code>: new <code>citation_scope</code> argument (<code>"global"</code> | <code>"local"</code>) to restrict CCT to intra-corpus citations. Currently supported for OpenAlex data; Web of Science data falls back to <code>"global"</code> with a warning.</li>
+<code>sniff_citations_cycle_time()</code>: new <code>citation_scope</code> argument (<code>"global"</code> | <code>"local"</code>) to restrict CCT to intra-corpus citations. Currently supported for OpenAlex data; Web of Science data falls back to <code>"global"</code> with a warning.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -89,9 +162,9 @@
 <ul><li>
 <code><a href="../reference/mixed_sort.html">mixed_sort()</a></code>: exported for external use, with improved documentation.</li>
 <li>
-<code><a href="../reference/plot_group_trajectories_lines_2d.html">plot_group_trajectories_lines_2d()</a></code>: new <code>width_by_traj_size</code> parameter to scale line width by trajectory size (default TRUE).</li>
+<code>plot_group_trajectories_lines_2d()</code>: new <code>width_by_traj_size</code> parameter to scale line width by trajectory size (default TRUE).</li>
 <li>
-<code><a href="../reference/plot_group_trajectories_lines_3d.html">plot_group_trajectories_lines_3d()</a></code>: new <code>width_by_traj_size</code> parameter to scale line width by trajectory size (default TRUE).</li>
+<code>plot_group_trajectories_lines_3d()</code>: new <code>width_by_traj_size</code> parameter to scale line width by trajectory size (default TRUE).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-1-0-4">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-0-4"></a></h3>
@@ -133,7 +206,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="birddog-100">birddog 1.0.0<a class="anchor" aria-label="anchor" href="#birddog-100"></a></h2><p class="text-muted">CRAN release: 2026-02-19</p>
 <ul><li>Initial CRAN release.</li>
-<li>Rewrite of <code><a href="../reference/sniff_key_route.html">sniff_key_route()</a></code>, <code><a href="../reference/sniff_citations_cycle_time.html">sniff_citations_cycle_time()</a></code>, and <code><a href="../reference/sniff_entropy.html">sniff_entropy()</a></code>.</li>
+<li>Rewrite of <code><a href="../reference/sniff_key_route.html">sniff_key_route()</a></code>, <code>sniff_citations_cycle_time()</code>, and <code><a href="../reference/sniff_entropy.html">sniff_entropy()</a></code>.</li>
 <li>Added <code>testthat</code> test suite with 102 tests across 16 files.</li>
 <li>Fix BibTeX parser for Windows CRLF line endings.</li>
 <li>Fix CRAN check issues: Unicode chars, <code>\dontrun</code> examples, DOI URLs.</li>
@@ -156,7 +229,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

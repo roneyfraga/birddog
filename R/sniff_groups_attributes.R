@@ -45,6 +45,7 @@
 #' @importFrom tibble rownames_to_column as_tibble
 #' @importFrom ggplot2 ggplot aes scale_x_continuous scale_y_continuous
 #' @importFrom stats lm nls coef
+#' @family groups (stock)
 #' @export
 sniff_groups_attributes <- function(groups,
                                     growth_rate_period = 2010:2022,

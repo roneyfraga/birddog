@@ -2,94 +2,37 @@
 % Please edit documentation in R/sniff_trajectory_destination.R
 \name{sniff_trajectory_destination}
 \alias{sniff_trajectory_destination}
-\title{Track where an incomplete trajectory's papers end up}
+\title{Where a trajectory's terminal cohort goes}
 \usage{
-sniff_trajectory_destination(
-  detected,
-  traj_id,
-  docs_per_group,
-  last_year = NULL,
-  all_detected = NULL,
-  group = NULL
-)
+sniff_trajectory_destination(x, ...)
 }
 \arguments{
-\item{detected}{The output of \code{\link[=detect_main_trajectories]{detect_main_trajectories()}} for one group.
-Only its \code{trajectories} tibble (\code{traj_id} and \code{nodes} columns) is used.}
+\item{x}{A \code{\link[=sniff_trajectory_braid]{sniff_trajectory_braid()}} object.}
 
-\item{traj_id}{Character identifier of the trajectory to track (e.g.
-\code{"tr3"}).}
-
-\item{docs_per_group}{A tibble mapping documents to group-year nodes, as in
-\code{groups_cumulative_trajectories$docs_per_group} (columns \code{group_id},
-\code{document_id}, \code{network_until}, \code{group}). Holds the full per-year
-membership, which is required to follow papers that leave the anchor group.}
-
-\item{last_year}{Final year to resolve destinations against (default: the
-maximum \code{network_until} in \code{docs_per_group}).}
-
-\item{all_detected}{Optional named list of \code{\link[=detect_main_trajectories]{detect_main_trajectories()}}
-outputs, one per group (i.e. the object you build for every group, keyed by
-group id). When supplied, the cohort is also resolved at the \emph{trajectory}
-level: each paper is attributed to the trajectory (in any group) that
-carries it across the most years after the death year. This identifies
-which living trajectory absorbed the stagnant one.}
-
-\item{group}{Optional source group id (e.g. \code{"c1g10"}), used only to label the
-source trajectory in \code{source_info}.}
+\item{...}{\code{source}, the trajectory whose terminal cohort to follow.}
 }
 \value{
-A list with:
-\describe{
-\item{terminal_node}{The trajectory's last node (e.g. \code{"y2018c1g16"}).}
-\item{cohort_size}{Number of documents in the terminal node.}
-\item{destination}{Tibble \code{g_final}, \code{n}, \code{prop} of where the cohort lands
-in \code{last_year}. Papers below the minimum group size in the final year
-(absent from \code{docs_per_group}) are grouped as \code{"(dropped)"}.}
-\item{dormant_share}{Fraction of the cohort that ends up \code{"(dropped)"}.}
-\item{continuation}{Dominant non-dropped destination group, i.e. the group
-whose own trajectory continues the cohort. \code{NA} if all dropped.}
-\item{flow}{Long tibble of consecutive-year transitions
-(\code{from_id}, \code{to_id}, \code{from_year}, \code{to_year}, \code{from_group}, \code{to_group},
-\code{final_group}, \code{n}, plus \code{dest_traj} when \code{all_detected} is given), one
-row per (transition x eventual destination). Ready for an alluvial /
-Sankey via \code{\link[=plot_trajectory_destination]{plot_trajectory_destination()}}.}
-\item{destination_traj}{(only with \code{all_detected}) Tibble \code{traj_key},
-\code{group}, \code{traj_id}, \code{n}, \code{prop}: the cohort split across the trajectories
-that absorbed it. Papers with no post-death carrier are \code{"(none)"}.}
-\item{continuation_traj}{(only with \code{all_detected}) Dominant absorbing
-trajectory key, e.g. \code{"c1g16::tr1"}.}
-\item{continuation_info, source_info}{(only with \code{all_detected}) Small
-lists describing the absorbing and source trajectories (group, traj_id,
-start, end), used by \code{\link[=plot_trajectory_handoff]{plot_trajectory_handoff()}}.}
-}
+A list (\code{target}, \code{target_info}, \code{destination}, \code{cohort_size},
+\code{dormant_share}, \code{continuation_traj}, \code{last_year}).
 }
 \description{
-In cumulative clustering a paper is never removed from the network, so a
-trajectory that stops before the last year (a "dying" trajectory detected by
-\code{\link[=detect_main_trajectories]{detect_main_trajectories()}}) does not mean its papers died. They are
-re-clustered and, by the final year, land in some group. This function takes
-the documents at a trajectory's terminal (last) node and tracks them forward
-to the final year, reporting where they went.
-}
-\details{
-Group labels (\code{c1g1}, \code{c1g2}, ...) are size ranks recomputed independently
-every cumulative year, so the same community drifts across labels over time.
-Destinations are therefore resolved by document identity, never by label.
-}
-\examples{
-\dontrun{
-detected <- detect_main_trajectories(groups_cumulative_trajectories, "c1g10")
-dest <- sniff_trajectory_destination(
-  detected,
-  traj_id = "tr3",
-  docs_per_group = groups_cumulative_trajectories$docs_per_group
-)
-dest$destination
-plot_trajectory_destination(dest)
-}
-
+Returns the destination of \code{source}'s terminal cohort: its per-final-group
+split and dormant share, plus its immediate absorber and ultimate
+destination.
 }
 \seealso{
-\code{\link[=detect_main_trajectories]{detect_main_trajectories()}}, \code{\link[=plot_trajectory_destination]{plot_trajectory_destination()}}
+\code{\link[=sniff_trajectory_braid]{sniff_trajectory_braid()}}, \code{\link[=sniff_trajectory_self_sufficiency]{sniff_trajectory_self_sufficiency()}}
+
+Other trajectory analysis: 
+\code{\link{sniff_trajectory_cct}()},
+\code{\link{sniff_trajectory_community}()},
+\code{\link{sniff_trajectory_confluence}()},
+\code{\link{sniff_trajectory_contribution}()},
+\code{\link{sniff_trajectory_dynamics}()},
+\code{\link{sniff_trajectory_emergence_owners}()},
+\code{\link{sniff_trajectory_entropy}()},
+\code{\link{sniff_trajectory_formation}()},
+\code{\link{sniff_trajectory_hubs}()},
+\code{\link{sniff_trajectory_self_sufficiency}()}
 }
+\concept{trajectory analysis}

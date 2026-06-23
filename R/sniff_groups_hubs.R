@@ -50,6 +50,7 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats sd
 #' @importFrom stringr str_count
+#' @family groups (stock)
 #' @export
 sniff_groups_hubs <- function(groups, min_citations = 1) {
   # Input validation

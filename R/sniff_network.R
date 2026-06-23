@@ -13,6 +13,7 @@
 #' @return A `tbl_graph` object from the tidygraph package representing the citation network.
 #'   Node attributes include bibliographic information from the input data.
 #'
+#' @family groups (stock)
 #' @export
 #'
 #' @examples

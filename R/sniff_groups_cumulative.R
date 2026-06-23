@@ -55,6 +55,7 @@
 #' @importFrom dplyr filter group_by summarise arrange mutate n desc select relocate left_join tally slice_head
 #' @importFrom tidyr separate_rows
 #' @importFrom stringr str_trim
+#' @family groups (stock)
 #' @export
 sniff_groups_cumulative <- function(
   comps,

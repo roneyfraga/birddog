@@ -23,6 +23,7 @@
 #' @importFrom igraph V vertex_attr_names components
 #' @importFrom dplyr n desc
 #' @importFrom tidygraph activate as_tbl_graph
+#' @family groups (stock)
 #' @export
 #'
 #' @examples
